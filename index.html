@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klass - Mise en relation professeurs particuliers & élèves</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --primary-light: #EEF2FF;
+            --accent: #10B981;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --bg-body: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --border: #E5E7EB;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        /* Accueil / Choix rôle */
+        .role-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .role-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            background-color: var(--primary-light);
+        }
+
+        .role-card i {
+            font-size: 3rem;
+            color: var(--primary);
+        }
+
+        .role-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .role-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Formulaires & Éléments UI */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #FAFAFA;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            background: white;
+            transition: 0.2s;
+        }
+
+        .checkbox-card:hover {
+            border-color: var(--primary);
+        }
+
+        .checkbox-card input {
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Curseur de niveau dynamique */
+        .level-slider-container {
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .level-slider-container h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .level-display {
+            font-weight: 700;
+            color: var(--text-dark);
+            min-width: 110px;
+            text-align: right;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #E5E7EB;
+            color: var(--text-dark);
+            margin-top: 0.75rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #D1D5DB;
+        }
+
+        /* Grille des annonces (Élèves) */
+        .annonces-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .annonce-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+
+        .annonce-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .annonce-info {
+            flex: 1;
+        }
+
+        .annonce-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .annonce-header h3 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .annonce-price {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .badge-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 0.75rem 0;
+        }
+
+        .tag {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tag-matiere {
+            background: #ECFDF5;
+            color: #059669;
+        }
+
+        .annonce-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .contact-box {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 768px) {
+            .role-selection { grid-template-columns: 1fr; }
+            .annonce-card { flex-direction: column; align-items: center; text-align: center; }
+            .annonce-header { flex-direction: column; gap: 5px; }
+            .contact-box { flex-direction: column; gap: 5px; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="goToHome()"><i class="fa-solid fa-graduation-cap"></i> Klass<span>.</span></div>
+    </header>
+
+    <main>
+        <!-- ÉTAPE 1 : CHOIX DU RÔLE -->
+        <div id="view-home" class="card">
+            <h1>Trouvez ou donnez des cours particuliers</h1>
+            <p class="subtitle">La plateforme simple et rapide pour connecter élèves et professeurs.</p>
+            
+            <div class="role-selection">
+                <div class="role-card" onclick="startProfFlow()">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <h3>Je veux donner des cours</h3>
+                    <p>Partagez vos compétences, fixez vos tarifs et trouvez des élèves facilement.</p>
+                </div>
+                <div class="role-card" onclick="startStudentFlow()">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <h3>Je cherche un professeur</h3>
+                    <p>Trouvez le professeur idéal selon votre matière, votre niveau et votre budget.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 2A : PROFESSEUR - CHOIX MATIERES & NIVEAUX -->
+        <div id="view-prof-step1" class="card hidden">
+            <h2>Espace Professeur : Matières & Niveaux</h2>
+            <p class="subtitle">Sélectionnez les matières que vous enseignez et définissez votre plage de niveaux.</p>
+            
+            <form id="form-prof-matiere" onsubmit="event.preventDefault(); goToProfForm();">
+                <label>Quelles matières enseignez-vous ? (plusieurs choix possibles)</label>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Français"> Français</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="SVT"> SVT</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="SES"> SES</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Histoire-Géo"> Histoire-Géo</label>
+                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Philosophie"> Philosophie</label>
+                </div>
+
+                <div id="sliders-container"></div>
+
+                <button type="submit" class="btn">Continuer vers mon annonce <i class="fa-solid fa-arrow-right"></i></button>
+                <button type="button" class="btn btn-secondary" onclick="goToHome()">Retour</button>
+            </form>
+        </div>
+
+        <!-- ÉTAPE 2B : PROFESSEUR - FORMULAIRE ANNONCE -->
+        <div id="view-prof-step2" class="card hidden">
+            <h2>Création de votre annonce</h2>
+            <p class="subtitle">Remplissez les détails pour publier votre profil professeur.</p>
+
+            <form id="form-prof-details" onsubmit="submitAnnonce(event)">
+                <div class="form-group">
+                    <label>Prénom et Nom</label>
+                    <input type="text" id="prof-nom" required placeholder="Ex: Marie Dupont">
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Email de contact</label>
+                        <input type="email" id="prof-email" required placeholder="marie.dupont@email.com">
+                    </div>
+                    <div>
+                        <label>Numéro de téléphone</label>
+                        <input type="tel" id="prof-tel" required placeholder="06 12 34 56 78">
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Tarif horaire (€ / heure)</label>
+                        <input type="number" id="prof-tarif" required placeholder="Ex: 25">
+                    </div>
+                    <div>
+                        <label>Format des cours</label>
+                        <select id="prof-format" required>
+                            <option value="Présentiel et Visio">Présentiel et Visio</option>
+                            <option value="Présentiel uniquement">Présentiel uniquement</option>
+                            <option value="Visio uniquement">Visio uniquement</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Lieu d'activité (Ville / Quartier)</label>
+                        <input type="text" id="prof-lieu" required placeholder="Ex: Lyon 6ème">
+                    </div>
+                    <div>
+                        <label>Votre niveau d'études</label>
+                        <input type="text" id="prof-niveau-etudes" required placeholder="Ex: Master 2 Mathématiques">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Lien de votre photo de profil (URL)</label>
+                    <input type="text" id="prof-photo" required placeholder="Ex: https://images.unsplash.com/... (ou lien d'une image en ligne)">
+                </div>
+
+                <div class="form-group">
+                    <label>Courte description de votre pédagogie / parcours</label>
+                    <textarea id="prof-desc" rows="4" required placeholder="Présentez-vous en quelques lignes pour rassurer les élèves et parents..."></textarea>
+                </div>
+
+                <button type="submit" class="btn">Publier mon annonce <i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-secondary" onclick="showView('view-prof-step1')">Retour</button>
+            </form>
+        </div>
+
+        <!-- ÉTAPE 3 : CONFIRMATION ANNONCE EN LIGNE -->
+        <div id="view-prof-success" class="card hidden" style="text-align: center;">
+            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: var(--accent); margin-bottom: 1rem;"></i>
+            <h2>Félicitations !</h2>
+            <p class="subtitle">Votre annonce est désormais en ligne et consultable par tous les élèves et parents à la recherche d'un professeur.</p>
+            <button class="btn" onclick="goToHome()">Retour à l'accueil</button>
+        </div>
+
+        <!-- ÉTAPE 4 : ÉLÈVE - RECHERCHE DE COURS -->
+        <div id="view-student-search" class="card hidden">
+            <h2>Trouver un professeur particulier</h2>
+            <p class="subtitle">Indiquez vos critères pour trouver l'intervenant idéal.</p>
+
+            <form onsubmit="searchAnnonces(event)">
+                <div class="form-group">
+                    <label>Matière recherchée</label>
+                    <select id="search-matiere" required>
+                        <option value="">-- Choisissez une matière --</option>
+                        <option value="Mathématiques">Mathématiques</option>
+                        <option value="Physique-Chimie">Physique-Chimie</option>
+                        <option value="Français">Français</option>
+                        <option value="Anglais">Anglais</option>
+                        <option value="SVT">SVT</option>
+                        <option value="SES">SES</option>
+                        <option value="Histoire-Géo">Histoire-Géo</option>
+                        <option value="Philosophie">Philosophie</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>Niveau de l'élève</label>
+                        <select id="search-niveau" required>
+                            <option value="6ème">6ème</option>
+                            <option value="5ème">5ème</option>
+                            <option value="4ème">4ème</option>
+                            <option value="3ème">3ème</option>
+                            <option value="2nde">2nde</option>
+                            <option value="1ère">1ère</option>
+                            <option value="Terminale">Terminale</option>
+                            <option value="Post-bac">Post-bac / Supérieur</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Budget maximum (€ / heure)</label>
+                        <input type="number" id="search-budget" placeholder="Ex: 35 (laisser vide si sans filtre)">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Rechercher les professeurs <i class="fa-solid fa-magnifying-glass"></i></button>
+                <button type="button" class="btn btn-secondary" onclick="goToHome()">Retour</button>
+            </form>
+        </div>
+
+        <!-- ÉTAPE 5 : RÉSULTATS DE RECHERCHE ÉLÈVE -->
+        <div id="view-student-results" class="card hidden">
+            <h2>Résultats de votre recherche</h2>
+            <p id="search-summary" class="subtitle"></p>
+
+            <div id="annonces-container" class="annonces-grid">
+                <!-- Les annonces injectées ici dynamiquement -->
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top: 2rem;" onclick="showView('view-student-search')">Modifier ma recherche</button>
+        </div>
+    </main>
+
+    <script>
+        // Niveaux disponibles pour le curseur
+        const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
+
+        // Gestion de la navigation entre les vues
+        function showView(viewId) {
+            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToHome() {
+            showView('view-home');
+        }
+
+        function startProfFlow() {
+            showView('view-prof-step1');
+        }
+
+        function startStudentFlow() {
+            showView('view-student-search');
+        }
+
+        // Écouteur sur les cases à cocher des matières pour générer dynamiquement les curseurs de niveau
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'matieres') {
+                updateSliders();
+            }
+        });
+
+        function updateSliders() {
+            const container = document.getElementById('sliders-container');
+            const selectedCheckboxes = document.querySelectorAll('input[name="matieres"]:checked');
+            
+            // Sauvegarder les valeurs existantes si possible
+            const existingValues = {};
+            container.querySelectorAll('.level-slider-container').forEach(block => {
+                const mat = block.dataset.matiere;
+                const minRange = block.querySelector('.min-range').value;
+                const maxRange = block.querySelector('.max-range').value;
+                const postBacInput = block.querySelector('.postbac-input') ? block.querySelector('.postbac-input').value : '';
+                existingValues[mat] = { min: minRange, max: maxRange, postBacText: postBacInput };
+            });
+
+            container.innerHTML = '';
+
+            if (selectedCheckboxes.length > 0) {
+                const title = document.createElement('h3');
+                title.innerText = "Précisez vos plages de niveaux par matière :";
+                title.style.margin = "1.5rem 0 1rem 0";
+                title.style.fontSize = "1.1rem";
+                container.appendChild(title);
+            }
+
+            selectedCheckboxes.forEach(cb => {
+                const matiere = cb.value;
+                const saved = existingValues[matiere] || { min: 0, max: 6, postBacText: '' };
+
+                const block = document.createElement('div');
+                block.className = 'level-slider-container';
+                block.dataset.matiere = matiere;
+
+                block.innerHTML = `
+                    <h4>${matiere}</h4>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-light);">Niveau minimum :</label>
+                        <div class="slider-wrapper">
+                            <input type="range" class="min-range" min="0" max="7" value="${saved.min}" oninput="updateSliderLabel(this)">
+                            <span class="level-display min-label">${niveauxLabels[saved.min]}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.9rem; color: var(--text-light);">Niveau maximum :</label>
+                        <div class="slider-wrapper">
+                            <input type="range" class="max-range" min="0" max="7" value="${saved.max}" oninput="updateSliderLabel(this)">
+                            <span class="level-display max-label">${niveauxLabels[saved.max]}</span>
+                        </div>
+                    </div>
+                    <div class="postbac-container ${saved.max == 7 ? '' : 'hidden'}" style="margin-top: 1rem;">
+                        <label style="font-size: 0.9rem; color: var(--primary);">Précisez le niveau Post-bac (ex: Bac+3, Prépa, Licence...)</label>
+                        <input type="text" class="postbac-input" value="${saved.postBacText}" placeholder="Ex: Jusqu'en Licence 3">
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function updateSliderLabel(slider) {
+            const wrapper = slider.closest('.level-slider-container');
+            const minSlider = wrapper.querySelector('.min-range');
+            const maxSlider = wrapper.querySelector('.max-range');
+            const minLabel = wrapper.querySelector('.min-label');
+            const maxLabel = wrapper.querySelector('.max-label');
+            const postBacContainer = wrapper.querySelector('.postbac-container');
+
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+
+            // S'assurer que min ne dépasse pas max
+            if (minVal > maxVal) {
+                if (slider.classList.contains('min-range')) {
+                    maxSlider.value = minVal;
+                    maxVal = minVal;
+                } else {
+                    minSlider.value = maxVal;
+                    minVal = maxVal;
+                }
+            }
+
+            minLabel.innerText = niveauxLabels[minVal];
+            maxLabel.innerText = niveauxLabels[maxVal];
+
+            // Afficher ou masquer le champ personnalisé post-bac si le max est sur "Post-bac" (index 7)
+            if (maxVal === 7) {
+                postBacContainer.classList.remove('hidden');
+            } else {
+                postBacContainer.classList.add('hidden');
+            }
+        }
+
+        function goToProfForm() {
+            const selected = document.querySelectorAll('input[name="matieres"]:checked');
+            if (selected.length === 0) {
+                alert("Veuillez sélectionner au moins une matière.");
+                return;
+            }
+            showView('view-prof-step2');
+        }
+
+        // Enregistrement d'une annonce
+        function submitAnnonce(e) {
+            e.preventDefault();
+
+            // Collecter les matières et leurs niveaux
+            const matieresData = [];
+            document.querySelectorAll('.level-slider-container').forEach(block => {
+                const matiere = block.dataset.matiere;
+                const minIdx = parseInt(block.querySelector('.min-range').value);
+                const maxIdx = parseInt(block.querySelector('.max-range').value);
+                let maxText = niveauxLabels[maxIdx];
+                if (maxIdx === 7) {
+                    const customText = block.querySelector('.postbac-input').value.trim();
+                    if (customText) maxText = customText;
+                }
+                matieresData.push({
+                    matiere: matiere,
+                    plage: `De ${niveauxLabels[minIdx]} à ${maxText}`,
+                    minIdx: minIdx,
+                    maxIdx: maxIdx
+                });
+            });
+
+            const nouvelleAnnonce = {
+                id: Date.now(),
+                nom: document.getElementById('prof-nom').value,
+                email: document.getElementById('prof-email').value,
+                tel: document.getElementById('prof-tel').value,
+                tarif: document.getElementById('prof-tarif').value,
+                format: document.getElementById('prof-format').value,
+                lieu: document.getElementById('prof-lieu').value,
+                niveauEtudes: document.getElementById('prof-niveau-etudes').value,
+                photo: document.getElementById('prof-photo').value,
+                desc: document.getElementById('prof-desc').value,
+                matieres: matieresData,
+                date: new Date().toLocaleDateString()
+            };
+
+            // Sauvegarde dans le LocalStorage du navigateur
+            let annonces = JSON.parse(localStorage.getItem('klass_annonces')) || [];
+            annonces.push(nouvelleAnnonce);
+            localStorage.setItem('klass_annonces', JSON.stringify(annonces));
+
+            // Réinitialiser les formulaires
+            document.getElementById('form-prof-matiere').reset();
+            document.getElementById('form-prof-details').reset();
+            document.getElementById('sliders-container').innerHTML = '';
+
+            // Afficher le message de succès
+            showView('view-prof-success');
+        }
+
+        // Recherche des annonces par l'élève
+        function searchAnnonces(e) {
+            e.preventDefault();
+
+            const matiereRecherchee = document.getElementById('search-matiere').value;
+            const niveauEleveStr = document.getElementById('search-niveau').value;
+            const budgetMax = parseFloat(document.getElementById('search-budget').value) || Infinity;
+
+            // Convertir le niveau élève en index pour comparer avec la plage du prof
+            const niveauMapping = {
+                "6ème": 0, "5ème": 1, "4ème": 2, "3ème": 3, 
+                "2nde": 4, "1ère": 5, "Terminale": 6, "Post-bac": 7
+            };
+            const eleveIdx = niveauMapping[niveauEleveStr] !== undefined ? niveauMapping[niveauEleveStr] : 0;
+
+            let annonces = JSON.parse(localStorage.getItem('klass_annonces')) || [];
+
+            // Données de test par défaut si aucune annonce n'a encore été créée
+            if (annonces.length === 0) {
+                annonces = [
+                    {
+                        id: 1,
+                        nom: "Thomas Laurent",
+                        email: "thomas.laurent@prof.fr",
+                        tel: "06 98 76 54 32",
+                        tarif: "22",
+                        format: "Présentiel et Visio",
+                        lieu: "Paris 15ème",
+                        niveauEtudes: "Master en Ingénierie",
+                        photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+                        desc: "Professeur passionné avec 4 ans d'expérience dans l'accompagnement d'élèves du collège au lycée. Pédagogie axée sur la confiance et la méthodologie.",
+                        matieres: [
+                            { matiere: "Mathématiques", plage: "De 6ème à Terminale", minIdx: 0, maxIdx: 6 },
+                            { matiere: "Physique-Chimie", plage: "De 4ème à Terminale", minIdx: 2, maxIdx: 6 }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        nom: "Claire Bernard",
+                        email: "claire.b@outlook.com",
+                        tel: "07 45 12 33 22",
+                        tarif: "28",
+                        format: "Visio uniquement",
+                        lieu: "Nantes",
+                        niveauEtudes: "École Normale Supérieure (ENS)",
+                        photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
+                        desc: "Diplômée de l'ENS, je propose des cours rigoureux en français et littérature pour préparer sereinement le brevet et le baccalauréat.",
+                        matieres: [
+                            { matiere: "Français", plage: "De 6ème à Post-bac", minIdx: 0, maxIdx: 7 }
+                        ]
+                    }
+                ];
+                localStorage.setItem('klass_annonces', JSON.stringify(annonces));
+            }
+
+            // Filtrer les annonces
+            const results = annonces.filter(a => {
+                // Vérifier si le prof enseigne la matière
+                const matiereObj = a.matieres.find(m => m.matiere === matiereRecherchee);
+                if (!matiereObj) return false;
+
+                // Vérifier si le niveau de l'élève est dans la plage du prof [minIdx, maxIdx]
+                if (eleveIdx < matiereObj.minIdx || eleveIdx > matiereObj.maxIdx) return false;
+
+                // Vérifier le budget
+                if (parseFloat(a.tarif) > budgetMax) return false;
+
+                return true;
+            });
+
+            // Afficher les résultats
+            const container = document.getElementById('annonces-container');
+            const summary = document.getElementById('search-summary');
+            container.innerHTML = '';
+
+            summary.innerText = `${results.length} professeur(s) trouvé(s) en ${matiereRecherchee} pour le niveau ${niveauEleveStr}.`;
+
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; margin-bottom: 1rem; color: #F59E0B;"></i>
+                        <p>Aucun professeur ne correspond exactement à vos critères pour le moment. Essayez d'élargir votre budget ou de changer de niveau !</p>
+                    </div>
+                `;
+            } else {
+                results.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = 'annonce-card';
+
+                    // Créer les badges de matières
+                    let badgesHtml = `<span class="tag tag-matiere">${matiereRecherchee}</span>`;
+                    a.matieres.forEach(m => {
+                        if (m.matiere !== matiereRecherchee) {
+                            badgesHtml += `<span class="tag">${m.matiere}</span>`;
+                        }
+                    });
+
+                    card.innerHTML = `
+                        <img src="${a.photo}" alt="${a.nom}" class="annonce-avatar" onerror="this.src='https://via.placeholder.com/80?text=Prof'">
+                        <div class="annonce-info">
+                            <div class="annonce-header">
+                                <div>
+                                    <h3>${a.nom}</h3>
+                                    <span style="font-size: 0.85rem; color: var(--text-light);"><i class="fa-solid fa-graduation-cap"></i> ${a.niveauEtudes}</span>
+                                </div>
+                                <div class="annonce-price">${a.tarif} € / heure</div>
+                            </div>
+                            
+                            <div class="badge-tags">
+                                ${badgesHtml}
+                                <span class="tag" style="background: #F3F4F6; color: var(--text-dark);"><i class="fa-solid fa-location-dot"></i> ${a.lieu} (${a.format})</span>
+                            </div>
+
+                            <p class="annonce-desc">${a.desc}</p>
+
+                            <div class="contact-box">
+                                <div><i class="fa-solid fa-envelope"></i> <strong>Email :</strong> ${a.email}</div>
+                                <div><i class="fa-solid fa-phone"></i> <strong>Tél :</strong> ${a.tel}</div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            showView('view-student-results');
+        }
+    </script>
+</body>
+</html>
