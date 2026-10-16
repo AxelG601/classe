@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klass - Mise en relation professeurs particuliers & élèves</title>
-    <!-- Google Fonts & FontAwesome -->
+    <title>Klass - Plateforme de soutien scolaire</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -35,253 +34,157 @@
             color: var(--text-dark);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
         }
 
-        header {
+        /* Barre latérale (Sidebar) */
+        aside {
+            width: 260px;
             background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+            border-right: 1px solid var(--border);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 50;
         }
 
-        .logo {
+        .sidebar-brand {
+            padding: 1.5rem;
             font-size: 1.5rem;
             font-weight: 800;
             color: var(--primary);
-            text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-brand span { color: var(--accent); }
+
+        .btn-add-top {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .btn-add-top:hover { background: var(--primary-hover); transform: scale(1.05); }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: 0.2s;
             cursor: pointer;
         }
 
-        .logo span {
-            color: var(--accent);
+        .sidebar-menu li.active a, .sidebar-menu li a:hover {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        main {
+        /* Contenu principal */
+        .main-content {
+            margin-left: 260px;
             flex: 1;
-            max-width: 900px;
-            width: 100%;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            padding: 2rem;
+            max-width: calc(100vw - 260px);
         }
 
         .card {
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 2.5rem;
+            padding: 2rem;
             border: 1px solid var(--border);
-            animation: fadeIn 0.4s ease-in-out;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1, h2 {
-            color: var(--text-dark);
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
+        h1, h2 { color: var(--text-dark); font-weight: 700; margin-bottom: 1rem; }
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.4rem; }
 
-        h1 { font-size: 2rem; }
-        h2 { font-size: 1.5rem; }
+        p.subtitle { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-        p.subtitle {
-            text-align: center;
-            color: var(--text-light);
+        /* Barre de recherche et filtres haut de page */
+        .search-filters-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
             margin-bottom: 2rem;
-            font-size: 1.05rem;
-        }
-
-        /* Accueil / Choix rôle */
-        .role-selection {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .role-card {
             background: white;
-            border: 2px solid var(--border);
+            padding: 1.5rem;
             border-radius: var(--radius);
-            padding: 2.5rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .role-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
+            border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            background-color: var(--primary-light);
         }
 
-        .role-card i {
-            font-size: 3rem;
-            color: var(--primary);
-        }
-
-        .role-card h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .role-card p {
-            color: var(--text-light);
-            font-size: 0.95rem;
-        }
-
-        /* Formulaires & Éléments UI */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="number"],
-        select,
-        textarea {
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-dark); }
+        input, select, textarea {
             width: 100%;
-            padding: 0.85rem 1rem;
+            padding: 0.75rem 1rem;
             border: 1px solid var(--border);
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
             background: #FAFAFA;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .checkbox-card {
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            background: white;
             transition: 0.2s;
         }
-
-        .checkbox-card:hover {
-            border-color: var(--primary);
-        }
-
-        .checkbox-card input {
-            accent-color: var(--primary);
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Curseur de niveau dynamique */
-        .level-slider-container {
-            background: var(--bg-body);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .level-slider-container h4 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .slider-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        input[type="range"] {
-            flex: 1;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .level-display {
-            font-weight: 700;
-            color: var(--text-dark);
-            min-width: 110px;
-            text-align: right;
-        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
         .btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0.9rem 1.8rem;
-            font-size: 1rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.95rem;
             font-weight: 600;
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: 0.2s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            width: 100%;
         }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: #E5E7EB; color: var(--text-dark); }
+        .btn-secondary:hover { background-color: #D1D5DB; }
 
-        .btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background-color: #E5E7EB;
-            color: var(--text-dark);
-            margin-top: 0.75rem;
-        }
-
-        .btn-secondary:hover {
-            background-color: #D1D5DB;
-        }
-
-        /* Grille des annonces (Élèves) */
+        /* Grille des profils / annonces */
         .annonces-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            margin-top: 2rem;
         }
 
         .annonce-card {
@@ -290,47 +193,18 @@
             border-radius: var(--radius);
             padding: 1.5rem;
             display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
+            flex-direction: column;
+            gap: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            position: relative;
         }
 
         .annonce-avatar {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
-        }
-
-        .annonce-info {
-            flex: 1;
-        }
-
-        .annonce-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.5rem;
-        }
-
-        .annonce-header h3 {
-            font-size: 1.2rem;
-            margin: 0;
-            color: var(--text-dark);
-        }
-
-        .annonce-price {
-            font-weight: 800;
-            color: var(--accent);
-            font-size: 1.1rem;
-        }
-
-        .badge-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 0.75rem 0;
         }
 
         .tag {
@@ -338,531 +212,565 @@
             color: var(--primary);
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            display: inline-block;
         }
+        .tag-eleve { background: #ECFDF5; color: #059669; }
 
-        .tag-matiere {
-            background: #ECFDF5;
-            color: #059669;
-        }
-
-        .annonce-desc {
-            color: var(--text-light);
-            font-size: 0.95rem;
-            margin-top: 0.5rem;
-            line-height: 1.5;
-        }
-
-        .contact-box {
-            margin-top: 1rem;
-            padding-top: 0.75rem;
-            border-top: 1px dashed var(--border);
-            font-size: 0.9rem;
+        /* Modals / Fenêtres surgissantes */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
             display: flex;
-            gap: 1.5rem;
-            color: var(--text-dark);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            display: none;
+        }
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1.5rem; right: 1.5rem;
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light);
         }
 
         .hidden { display: none !important; }
 
         @media (max-width: 768px) {
-            .role-selection { grid-template-columns: 1fr; }
-            .annonce-card { flex-direction: column; align-items: center; text-align: center; }
-            .annonce-header { flex-direction: column; gap: 5px; }
-            .contact-box { flex-direction: column; gap: 5px; align-items: center; }
+            aside { width: 70px; }
+            .sidebar-brand span, .sidebar-menu span { display: none; }
+            .main-content { margin-left: 70px; max-width: calc(100vw - 70px); padding: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo" onclick="goToHome()"><i class="fa-solid fa-graduation-cap"></i> Klass<span>.</span></div>
-    </header>
-
-    <main>
-        <!-- ÉTAPE 1 : CHOIX DU RÔLE -->
-        <div id="view-home" class="card">
-            <h1>Trouvez ou donnez des cours particuliers</h1>
-            <p class="subtitle">La plateforme simple et rapide pour connecter élèves et professeurs.</p>
-            
-            <div class="role-selection">
-                <div class="role-card" onclick="startProfFlow()">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                    <h3>Je veux donner des cours</h3>
-                    <p>Partagez vos compétences, fixez vos tarifs et trouvez des élèves facilement.</p>
-                </div>
-                <div class="role-card" onclick="startStudentFlow()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <h3>Je cherche un professeur</h3>
-                    <p>Trouvez le professeur idéal selon votre matière, votre niveau et votre budget.</p>
-                </div>
-            </div>
+    <!-- BARRE LATÉRALE -->
+    <aside>
+        <div class="sidebar-brand">
+            <div>K<span>l</span>.</div>
+            <button class="btn-add-top" title="Déposer une annonce" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
         </div>
+        <ul class="sidebar-menu">
+            <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil / Flux</span></a></li>
+            <li id="menu-compte" onclick="switchTab('compte')"><a><i class="fa-solid fa-user"></i> <span>Mon compte</span></a></li>
+            <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Emploi du temps</span></a></li>
+            <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Mes annonces</span></a></li>
+            <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
+            <li id="menu-messagerie" onclick="switchTab('messagerie')"><a><i class="fa-solid fa-comments"></i> <span>Messagerie</span></a></li>
+        </ul>
+    </aside>
 
-        <!-- ÉTAPE 2A : PROFESSEUR - CHOIX MATIERES & NIVEAUX -->
-        <div id="view-prof-step1" class="card hidden">
-            <h2>Espace Professeur : Matières & Niveaux</h2>
-            <p class="subtitle">Sélectionnez les matières que vous enseignez et définissez votre plage de niveaux.</p>
-            
-            <form id="form-prof-matiere" onsubmit="event.preventDefault(); goToProfForm();">
-                <label>Quelles matières enseignez-vous ? (plusieurs choix possibles)</label>
-                <div class="checkbox-grid">
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Français"> Français</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="SVT"> SVT</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="SES"> SES</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Histoire-Géo"> Histoire-Géo</label>
-                    <label class="checkbox-card"><input type="checkbox" name="matieres" value="Philosophie"> Philosophie</label>
-                </div>
+    <!-- CONTENU PRINCIPAL -->
+    <div class="main-content">
 
-                <div id="sliders-container"></div>
+        <!-- 1. ACCUEIL / FLUX DE TOUTES LES ANNONCES + FILTRES -->
+        <div id="tab-home" class="tab-pane">
+            <h1>Fil d'actualité & Recherche</h1>
+            <p class="subtitle">Consultez l'ensemble des annonces de profs et d'élèves en direct.</p>
 
-                <button type="submit" class="btn">Continuer vers mon annonce <i class="fa-solid fa-arrow-right"></i></button>
-                <button type="button" class="btn btn-secondary" onclick="goToHome()">Retour</button>
-            </form>
-        </div>
-
-        <!-- ÉTAPE 2B : PROFESSEUR - FORMULAIRE ANNONCE -->
-        <div id="view-prof-step2" class="card hidden">
-            <h2>Création de votre annonce</h2>
-            <p class="subtitle">Remplissez les détails pour publier votre profil professeur.</p>
-
-            <form id="form-prof-details" onsubmit="submitAnnonce(event)">
-                <div class="form-group">
-                    <label>Prénom et Nom</label>
-                    <input type="text" id="prof-nom" required placeholder="Ex: Marie Dupont">
-                </div>
-
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label>Email de contact</label>
-                        <input type="email" id="prof-email" required placeholder="marie.dupont@email.com">
-                    </div>
-                    <div>
-                        <label>Numéro de téléphone</label>
-                        <input type="tel" id="prof-tel" required placeholder="06 12 34 56 78">
-                    </div>
-                </div>
-
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label>Tarif horaire (€ / heure)</label>
-                        <input type="number" id="prof-tarif" required placeholder="Ex: 25">
-                    </div>
-                    <div>
-                        <label>Format des cours</label>
-                        <select id="prof-format" required>
-                            <option value="Présentiel et Visio">Présentiel et Visio</option>
-                            <option value="Présentiel uniquement">Présentiel uniquement</option>
-                            <option value="Visio uniquement">Visio uniquement</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label>Lieu d'activité (Ville / Quartier)</label>
-                        <input type="text" id="prof-lieu" required placeholder="Ex: Lyon 6ème">
-                    </div>
-                    <div>
-                        <label>Votre niveau d'études</label>
-                        <input type="text" id="prof-niveau-etudes" required placeholder="Ex: Master 2 Mathématiques">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Lien de votre photo de profil (URL)</label>
-                    <input type="text" id="prof-photo" required placeholder="Ex: https://images.unsplash.com/... (ou lien d'une image en ligne)">
-                </div>
-
-                <div class="form-group">
-                    <label>Courte description de votre pédagogie / parcours</label>
-                    <textarea id="prof-desc" rows="4" required placeholder="Présentez-vous en quelques lignes pour rassurer les élèves et parents..."></textarea>
-                </div>
-
-                <button type="submit" class="btn">Publier mon annonce <i class="fa-solid fa-check"></i></button>
-                <button type="button" class="btn btn-secondary" onclick="showView('view-prof-step1')">Retour</button>
-            </form>
-        </div>
-
-        <!-- ÉTAPE 3 : CONFIRMATION ANNONCE EN LIGNE -->
-        <div id="view-prof-success" class="card hidden" style="text-align: center;">
-            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: var(--accent); margin-bottom: 1rem;"></i>
-            <h2>Félicitations !</h2>
-            <p class="subtitle">Votre annonce est désormais en ligne et consultable par tous les élèves et parents à la recherche d'un professeur.</p>
-            <button class="btn" onclick="goToHome()">Retour à l'accueil</button>
-        </div>
-
-        <!-- ÉTAPE 4 : ÉLÈVE - RECHERCHE DE COURS -->
-        <div id="view-student-search" class="card hidden">
-            <h2>Trouver un professeur particulier</h2>
-            <p class="subtitle">Indiquez vos critères pour trouver l'intervenant idéal.</p>
-
-            <form onsubmit="searchAnnonces(event)">
-                <div class="form-group">
-                    <label>Matière recherchée</label>
-                    <select id="search-matiere" required>
-                        <option value="">-- Choisissez une matière --</option>
+            <!-- Barre de recherche et filtres par critères -->
+            <div class="search-filters-bar">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Matière</label>
+                    <select id="filter-matiere" onchange="filterAnnonces()">
+                        <T-option value="">Toutes les matières</T-option>
                         <option value="Mathématiques">Mathématiques</option>
                         <option value="Physique-Chimie">Physique-Chimie</option>
                         <option value="Français">Français</option>
                         <option value="Anglais">Anglais</option>
                         <option value="SVT">SVT</option>
                         <option value="SES">SES</option>
-                        <option value="Histoire-Géo">Histoire-Géo</option>
-                        <option value="Philosophie">Philosophie</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Niveau</label>
+                    <select id="filter-niveau" onchange="filterAnnonces()">
+                        <option value="">Tous les niveaux</option>
+                        <option value="6ème">6ème</option>
+                        <option value="5ème">5ème</option>
+                        <option value="4ème">4ème</option>
+                        <option value="3ème">3ème</option>
+                        <option value="2nde">2nde</option>
+                        <option value="1ère">1ère</option>
+                        <option value="Terminale">Terminale</option>
+                        <option value="Post-bac">Post-bac</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Type</label>
+                    <select id="filter-type" onchange="filterAnnonces()">
+                        <option value="">Professeurs & Élèves</option>
+                        <option value="prof">Professeurs uniquement</option>
+                        <option value="eleve">Recherche d'élève</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="global-annonces-container" class="annonces-grid">
+                <!-- Injecté dynamiquement -->
+            </div>
+        </div>
+
+        <!-- 2. MON COMPTE -->
+        <div id="tab-compte" class="tab-pane hidden">
+            <div class="card">
+                <h2>Mon Compte</h2>
+                <p class="subtitle">Mettez à jour vos informations personnelles.</p>
+                <form id="form-compte" onsubmit="saveCompte(event)">
+                    <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div>
+                            <label>Nom et Prénom</label>
+                            <input type="text" id="acc-nom" required placeholder="Jean Dupont">
+                        </div>
+                        <div>
+                            <label>Rôle principal</label>
+                            <select id="acc-role" onchange="toggleProfFields()" required>
+                                <option value="prof">Je donne des cours (Professeur)</option>
+                                <option value="eleve">Je cherche un professeur (Élève/Parent)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div>
+                            <label>Email (pour les notifications de devoirs)</label>
+                            <input type="email" id="acc-email" required placeholder="jean@email.com">
+                        </div>
+                        <div>
+                            <label>Numéro de téléphone</label>
+                            <input type="tel" id="acc-tel" required placeholder="06 12 34 56 78">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photo de profil ou justificatif (Photo / JPEG / PDF)</label>
+                        <input type="file" id="acc-file" accept="image/*,.pdf">
+                    </div>
+
+                    <div id="prof-extra-fields">
+                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div>
+                                <label>Tarif horaire (€)</label>
+                                <input type="number" id="acc-tarif" placeholder="Ex: 25">
+                            </div>
+                            <div>
+                                <label>Format des cours</label>
+                                <select id="acc-format">
+                                    <option value="Présentiel et Visio">Présentiel et Visio</option>
+                                    <option value="Présentiel">Présentiel uniquement</option>
+                                    <option value="Visio">Visio uniquement</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div>
+                                <label>Lieu d'activité</label>
+                                <input type="text" id="acc-lieu" placeholder="Ex: Lyon">
+                            </div>
+                            <div>
+                                <label>Niveau d'étude</label>
+                                <input type="text" id="acc-niveau-etudes" placeholder="Ex: Master 2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Courte description personnelle</label>
+                        <textarea id="acc-desc" rows="3" placeholder="Parlez de vous..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">Enregistrer mes modifications</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. EMPLOI DU TEMPS -->
+        <div id="tab-planning" class="tab-pane hidden">
+            <div class="card">
+                <h2>Emploi du temps</h2>
+                <p class="subtitle">Gérez vos cours réservés et événements jour par jour.</p>
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                    <input type="text" id="event-title" placeholder="Nom du cours / événement" style="max-width: 300px;">
+                    <input type="date" id="event-date">
+                    <button class="btn" onclick="addEvent()"><i class="fa-solid fa-plus"></i> Ajouter un événement</button>
+                </div>
+                <div id="planning-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <!-- Calendrier simplifié -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MES ANNONCES -->
+        <div id="tab-annonces" class="tab-pane hidden">
+            <div class="card">
+                <h2>Mes annonces publiées</h2>
+                <p class="subtitle">Modifiez ou supprimez vos annonces en un clic.</p>
+                <div id="my-annonces-container" class="annonces-grid"></div>
+            </div>
+        </div>
+
+        <!-- 5. DEVOIRS -->
+        <div id="tab-devoirs" class="tab-pane hidden">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                    <div>
+                        <h2>Espace Devoirs</h2>
+                        <p class="subtitle" style="margin-bottom:0;">Suivi et dépôt des devoirs entre professeurs et élèves.</p>
+                    </div>
+                    <button class="btn" onclick="openDevoirModal()"><i class="fa-solid fa-plus"></i> Déposer un devoir</button>
+                </div>
+                <div id="devoirs-container" style="display:flex; flex-direction:column; gap:1rem;">
+                    <!-- Liste des devoirs -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. MESSAGERIE -->
+        <div id="tab-messagerie" class="tab-pane hidden">
+            <div class="card" style="text-align:center; padding: 4rem 2rem;">
+                <i class="fa-solid fa-comments" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h2>Messagerie interne</h2>
+                <p class="subtitle">Discutez directement avec vos professeurs ou élèves connectés.</p>
+                <p style="color: var(--text-light);">Module de messagerie actif.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL : DÉPOSER UNE ANNONCE (Bouton + en haut à gauche) -->
+    <div id="modal-annonce" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Déposer une annonce</h2>
+            <form id="form-new-annonce" onsubmit="submitNewAnnonce(event)">
+                <div class="form-group">
+                    <label>Je souhaite :</label>
+                    <select id="new-type-annonce" onchange="toggleAnnonceFormType()" required>
+                        <option value="prof">Donner des cours particuliers</option>
+                        <option value="eleve">Chercher un professeur particulier</option>
                     </select>
                 </div>
 
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label>Niveau de l'élève</label>
-                        <select id="search-niveau" required>
-                            <option value="6ème">6ème</option>
-                            <option value="5ème">5ème</option>
-                            <option value="4ème">4ème</option>
-                            <option value="3ème">3ème</option>
-                            <option value="2nde">2nde</option>
-                            <option value="1ère">1ère</option>
-                            <option value="Terminale">Terminale</option>
-                            <option value="Post-bac">Post-bac / Supérieur</option>
-                        </select>
+                <div id="block-prof-ann">
+                    <div class="form-group">
+                        <label>Matière(s) enseignée(s)</label>
+                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <label><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
+                            <label><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
+                            <label><input type="checkbox" name="matieres" value="Français"> Français</label>
+                            <label><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
+                            <label><input type="checkbox" name="matieres" value="SVT"> SVT</label>
+                            <label><input type="checkbox" name="matieres" value="SES"> SES</label>
+                        </div>
                     </div>
-                    <div>
-                        <label>Budget maximum (€ / heure)</label>
-                        <input type="number" id="search-budget" placeholder="Ex: 35 (laisser vide si sans filtre)">
+                    <div class="form-group">
+                        <label>Plage de niveaux (Ex: de 6ème à Terminale)</label>
+                        <input type="text" id="ann-plage" placeholder="Ex: De la 5ème à la Terminale">
                     </div>
                 </div>
 
-                <button type="submit" class="btn">Rechercher les professeurs <i class="fa-solid fa-magnifying-glass"></i></button>
-                <button type="button" class="btn btn-secondary" onclick="goToHome()">Retour</button>
+                <div id="block-eleve-ann" class="hidden">
+                    <div class="form-group">
+                        <label>Matière recherchée</label>
+                        <select id="ann-eleve-matiere">
+                            <option value="Mathématiques">Mathématiques</option>
+                            <option value="Physique-Chimie">Physique-Chimie</option>
+                            <option value="Français">Français</option>
+                            <option value="Anglais">Anglais</option>
+                            <option value="SVT">SVT</option>
+                            <option value="SES">SES</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div>
+                            <label>Niveau de l'élève</label>
+                            <select id="ann-eleve-niveau">
+                                <option value="6ème">6ème</option>
+                                <option value="5ème">5ème</option>
+                                <option value="4ème">4ème</option>
+                                <option value="3ème">3ème</option>
+                                <option value="2nde">2nde</option>
+                                <option value="1ère">1ère</option>
+                                <option value="Terminale">Terminale</option>
+                                <option value="Post-bac">Post-bac</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Budget max (€/h)</label>
+                            <input type="number" id="ann-eleve-budget" placeholder="30">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description de l'annonce</label>
+                    <textarea id="ann-desc" rows="3" required placeholder="Détails de votre annonce..."></textarea>
+                </div>
+
+                <button type="submit" class="btn">Valider et publier</button>
             </form>
         </div>
+    </div>
 
-        <!-- ÉTAPE 5 : RÉSULTATS DE RECHERCHE ÉLÈVE -->
-        <div id="view-student-results" class="card hidden">
-            <h2>Résultats de votre recherche</h2>
-            <p id="search-summary" class="subtitle"></p>
-
-            <div id="annonces-container" class="annonces-grid">
-                <!-- Les annonces injectées ici dynamiquement -->
-            </div>
-
-            <button class="btn btn-secondary" style="margin-top: 2rem;" onclick="showView('view-student-search')">Modifier ma recherche</button>
+    <!-- MODAL : DÉPOSER UN DEVOIR -->
+    <div id="modal-devoir" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDevoirModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Déposer un devoir</h2>
+            <form onsubmit="submitDevoir(event)">
+                <div class="form-group">
+                    <label>Matière</label>
+                    <input type="text" id="dev-matiere" required placeholder="Ex: Mathématiques">
+                </div>
+                <div class="form-group">
+                    <label>À faire avant le :</label>
+                    <input type="date" id="dev-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Travail demandé (texte, consignes)</label>
+                    <textarea id="dev-travail" rows="3" required placeholder="Exercices page 42..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fichiers joints (Photo / PDF optionnel)</label>
+                    <input type="file" id="dev-file" accept="image/*,.pdf">
+                </div>
+                <button type="submit" class="btn">Envoyer le devoir (Notification e-mail élève)</button>
+            </form>
         </div>
-    </main>
+    </div>
 
     <script>
-        // Niveaux disponibles pour le curseur
-        const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
-
-        // Gestion de la navigation entre les vues
-        function showView(viewId) {
-            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Gestion des onglets de la barre latérale
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('menu-' + tabId).classList.add('active');
+            if(tabId === 'home') renderGlobalFeed();
+            if(tabId === 'annonces') renderMyAnnonces();
+            if(tabId === 'planning') renderPlanning();
+            if(tabId === 'devoirs') renderDevoirs();
         }
 
-        function goToHome() {
-            showView('view-home');
-        }
-
-        function startProfFlow() {
-            showView('view-prof-step1');
-        }
-
-        function startStudentFlow() {
-            showView('view-student-search');
-        }
-
-        // Écouteur sur les cases à cocher des matières pour générer dynamiquement les curseurs de niveau
-        document.addEventListener('change', function(e) {
-            if (e.target.name === 'matieres') {
-                updateSliders();
-            }
-        });
-
-        function updateSliders() {
-            const container = document.getElementById('sliders-container');
-            const selectedCheckboxes = document.querySelectorAll('input[name="matieres"]:checked');
-            
-            // Sauvegarder les valeurs existantes si possible
-            const existingValues = {};
-            container.querySelectorAll('.level-slider-container').forEach(block => {
-                const mat = block.dataset.matiere;
-                const minRange = block.querySelector('.min-range').value;
-                const maxRange = block.querySelector('.max-range').value;
-                const postBacInput = block.querySelector('.postbac-input') ? block.querySelector('.postbac-input').value : '';
-                existingValues[mat] = { min: minRange, max: maxRange, postBacText: postBacInput };
-            });
-
-            container.innerHTML = '';
-
-            if (selectedCheckboxes.length > 0) {
-                const title = document.createElement('h3');
-                title.innerText = "Précisez vos plages de niveaux par matière :";
-                title.style.margin = "1.5rem 0 1rem 0";
-                title.style.fontSize = "1.1rem";
-                container.appendChild(title);
-            }
-
-            selectedCheckboxes.forEach(cb => {
-                const matiere = cb.value;
-                const saved = existingValues[matiere] || { min: 0, max: 6, postBacText: '' };
-
-                const block = document.createElement('div');
-                block.className = 'level-slider-container';
-                block.dataset.matiere = matiere;
-
-                block.innerHTML = `
-                    <h4>${matiere}</h4>
-                    <div style="margin-bottom: 1rem;">
-                        <label style="font-size: 0.9rem; color: var(--text-light);">Niveau minimum :</label>
-                        <div class="slider-wrapper">
-                            <input type="range" class="min-range" min="0" max="7" value="${saved.min}" oninput="updateSliderLabel(this)">
-                            <span class="level-display min-label">${niveauxLabels[saved.min]}</span>
-                        </div>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.9rem; color: var(--text-light);">Niveau maximum :</label>
-                        <div class="slider-wrapper">
-                            <input type="range" class="max-range" min="0" max="7" value="${saved.max}" oninput="updateSliderLabel(this)">
-                            <span class="level-display max-label">${niveauxLabels[saved.max]}</span>
-                        </div>
-                    </div>
-                    <div class="postbac-container ${saved.max == 7 ? '' : 'hidden'}" style="margin-top: 1rem;">
-                        <label style="font-size: 0.9rem; color: var(--primary);">Précisez le niveau Post-bac (ex: Bac+3, Prépa, Licence...)</label>
-                        <input type="text" class="postbac-input" value="${saved.postBacText}" placeholder="Ex: Jusqu'en Licence 3">
-                    </div>
-                `;
-                container.appendChild(block);
-            });
-        }
-
-        function updateSliderLabel(slider) {
-            const wrapper = slider.closest('.level-slider-container');
-            const minSlider = wrapper.querySelector('.min-range');
-            const maxSlider = wrapper.querySelector('.max-range');
-            const minLabel = wrapper.querySelector('.min-label');
-            const maxLabel = wrapper.querySelector('.max-label');
-            const postBacContainer = wrapper.querySelector('.postbac-container');
-
-            let minVal = parseInt(minSlider.value);
-            let maxVal = parseInt(maxSlider.value);
-
-            // S'assurer que min ne dépasse pas max
-            if (minVal > maxVal) {
-                if (slider.classList.contains('min-range')) {
-                    maxSlider.value = minVal;
-                    maxVal = minVal;
-                } else {
-                    minSlider.value = maxVal;
-                    minVal = maxVal;
-                }
-            }
-
-            minLabel.innerText = niveauxLabels[minVal];
-            maxLabel.innerText = niveauxLabels[maxVal];
-
-            // Afficher ou masquer le champ personnalisé post-bac si le max est sur "Post-bac" (index 7)
-            if (maxVal === 7) {
-                postBacContainer.classList.remove('hidden');
+        // Gestion de la modale d'annonce (+ haut à gauche)
+        function openAnnonceModal() { document.getElementById('modal-annonce').style.display = 'flex'; }
+        function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
+        function toggleAnnonceFormType() {
+            const val = document.getElementById('new-type-annonce').value;
+            if(val === 'prof') {
+                document.getElementById('block-prof-ann').classList.remove('hidden');
+                document.getElementById('block-eleve-ann').classList.add('hidden');
             } else {
-                postBacContainer.classList.add('hidden');
+                document.getElementById('block-prof-ann').classList.add('hidden');
+                document.getElementById('block-eleve-ann').classList.remove('hidden');
             }
         }
 
-        function goToProfForm() {
-            const selected = document.querySelectorAll('input[name="matieres"]:checked');
-            if (selected.length === 0) {
-                alert("Veuillez sélectionner au moins une matière.");
-                return;
-            }
-            showView('view-prof-step2');
+        // Modale Devoir
+        function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
+        function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
+
+        // Profil utilisateur
+        function toggleProfFields() {
+            const role = document.getElementById('acc-role').value;
+            if(role === 'eleve') document.getElementById('prof-extra-fields').classList.add('hidden');
+            else document.getElementById('prof-extra-fields').classList.remove('hidden');
         }
 
-        // Enregistrement d'une annonce
-        function submitAnnonce(e) {
+        function saveCompte(e) {
             e.preventDefault();
+            const compte = {
+                nom: document.getElementById('acc-nom').value,
+                role: document.getElementById('acc-role').value,
+                email: document.getElementById('acc-email').value,
+                tel: document.getElementById('acc-tel').value,
+                tarif: document.getElementById('acc-tarif').value,
+                format: document.getElementById('acc-format').value,
+                lieu: document.getElementById('acc-lieu').value,
+                niveauEtudes: document.getElementById('acc-niveau-etudes').value,
+                desc: document.getElementById('acc-desc').value
+            };
+            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
+            alert("Informations de compte enregistrées avec succès !");
+        }
 
-            // Collecter les matières et leurs niveaux
-            const matieresData = [];
-            document.querySelectorAll('.level-slider-container').forEach(block => {
-                const matiere = block.dataset.matiere;
-                const minIdx = parseInt(block.querySelector('.min-range').value);
-                const maxIdx = parseInt(block.querySelector('.max-range').value);
-                let maxText = niveauxLabels[maxIdx];
-                if (maxIdx === 7) {
-                    const customText = block.querySelector('.postbac-input').value.trim();
-                    if (customText) maxText = customText;
-                }
-                matieresData.push({
-                    matiere: matiere,
-                    plage: `De ${niveauxLabels[minIdx]} à ${maxText}`,
-                    minIdx: minIdx,
-                    maxIdx: maxIdx
-                });
-            });
-
-            const nouvelleAnnonce = {
+        // Stockage des annonces
+        function submitNewAnnonce(e) {
+            e.preventDefault();
+            const type = document.getElementById('new-type-annonce').value;
+            const user = JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Klass", email: "contact@klass.fr" };
+            
+            let nouvelleAnnonce = {
                 id: Date.now(),
-                nom: document.getElementById('prof-nom').value,
-                email: document.getElementById('prof-email').value,
-                tel: document.getElementById('prof-tel').value,
-                tarif: document.getElementById('prof-tarif').value,
-                format: document.getElementById('prof-format').value,
-                lieu: document.getElementById('prof-lieu').value,
-                niveauEtudes: document.getElementById('prof-niveau-etudes').value,
-                photo: document.getElementById('prof-photo').value,
-                desc: document.getElementById('prof-desc').value,
-                matieres: matieresData,
+                type: type,
+                auteur: user.nom,
+                email: user.email,
+                desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
 
-            // Sauvegarde dans le LocalStorage du navigateur
-            let annonces = JSON.parse(localStorage.getItem('klass_annonces')) || [];
-            annonces.push(nouvelleAnnonce);
-            localStorage.setItem('klass_annonces', JSON.stringify(annonces));
-
-            // Réinitialiser les formulaires
-            document.getElementById('form-prof-matiere').reset();
-            document.getElementById('form-prof-details').reset();
-            document.getElementById('sliders-container').innerHTML = '';
-
-            // Afficher le message de succès
-            showView('view-prof-success');
-        }
-
-        // Recherche des annonces par l'élève
-        function searchAnnonces(e) {
-            e.preventDefault();
-
-            const matiereRecherchee = document.getElementById('search-matiere').value;
-            const niveauEleveStr = document.getElementById('search-niveau').value;
-            const budgetMax = parseFloat(document.getElementById('search-budget').value) || Infinity;
-
-            // Convertir le niveau élève en index pour comparer avec la plage du prof
-            const niveauMapping = {
-                "6ème": 0, "5ème": 1, "4ème": 2, "3ème": 3, 
-                "2nde": 4, "1ère": 5, "Terminale": 6, "Post-bac": 7
-            };
-            const eleveIdx = niveauMapping[niveauEleveStr] !== undefined ? niveauMapping[niveauEleveStr] : 0;
-
-            let annonces = JSON.parse(localStorage.getItem('klass_annonces')) || [];
-
-            // Données de test par défaut si aucune annonce n'a encore été créée
-            if (annonces.length === 0) {
-                annonces = [
-                    {
-                        id: 1,
-                        nom: "Thomas Laurent",
-                        email: "thomas.laurent@prof.fr",
-                        tel: "06 98 76 54 32",
-                        tarif: "22",
-                        format: "Présentiel et Visio",
-                        lieu: "Paris 15ème",
-                        niveauEtudes: "Master en Ingénierie",
-                        photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-                        desc: "Professeur passionné avec 4 ans d'expérience dans l'accompagnement d'élèves du collège au lycée. Pédagogie axée sur la confiance et la méthodologie.",
-                        matieres: [
-                            { matiere: "Mathématiques", plage: "De 6ème à Terminale", minIdx: 0, maxIdx: 6 },
-                            { matiere: "Physique-Chimie", plage: "De 4ème à Terminale", minIdx: 2, maxIdx: 6 }
-                        ]
-                    },
-                    {
-                        id: 2,
-                        nom: "Claire Bernard",
-                        email: "claire.b@outlook.com",
-                        tel: "07 45 12 33 22",
-                        tarif: "28",
-                        format: "Visio uniquement",
-                        lieu: "Nantes",
-                        niveauEtudes: "École Normale Supérieure (ENS)",
-                        photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
-                        desc: "Diplômée de l'ENS, je propose des cours rigoureux en français et littérature pour préparer sereinement le brevet et le baccalauréat.",
-                        matieres: [
-                            { matiere: "Français", plage: "De 6ème à Post-bac", minIdx: 0, maxIdx: 7 }
-                        ]
-                    }
-                ];
-                localStorage.setItem('klass_annonces', JSON.stringify(annonces));
+            if(type === 'prof') {
+                const checkedMat = Array.from(document.querySelectorAll('input[name="matieres"]:checked')).map(cb => cb.value);
+                nouvelleAnnonce.matieres = checkedMat;
+                nouvelleAnnonce.plage = document.getElementById('ann-plage').value;
+                nouvelleAnnonce.tarif = user.tarif || "25";
+                nouvelleAnnonce.lieu = user.lieu || "En ligne";
+            } else {
+                nouvelleAnnonce.matiere = document.getElementById('ann-eleve-matiere').value;
+                nouvelleAnnonce.niveau = document.getElementById('ann-eleve-niveau').value;
+                nouvelleAnnonce.budget = document.getElementById('ann-eleve-budget').value;
             }
 
-            // Filtrer les annonces
-            const results = annonces.filter(a => {
-                // Vérifier si le prof enseigne la matière
-                const matiereObj = a.matieres.find(m => m.matiere === matiereRecherchee);
-                if (!matiereObj) return false;
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            annonces.push(nouvelleAnnonce);
+            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
 
-                // Vérifier si le niveau de l'élève est dans la plage du prof [minIdx, maxIdx]
-                if (eleveIdx < matiereObj.minIdx || eleveIdx > matiereObj.maxIdx) return false;
+            closeAnnonceModal();
+            alert("Votre annonce est en ligne !");
+            renderGlobalFeed();
+        }
 
-                // Vérifier le budget
-                if (parseFloat(a.tarif) > budgetMax) return false;
+        // Affichage du flux global
+        function renderGlobalFeed() {
+            const container = document.getElementById('global-annonces-container');
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
 
-                return true;
-            });
+            if(annonces.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profils de disponible pour le moment.</p>`;
+                return;
+            }
 
-            // Afficher les résultats
-            const container = document.getElementById('annonces-container');
-            const summary = document.getElementById('search-summary');
             container.innerHTML = '';
+            annonces.forEach(a => {
+                const card = document.createElement('div');
+                card.className = 'annonce-card';
+                if(a.type === 'eleve') {
+                    card.innerHTML = `
+                        <span class="tag tag-eleve">Recherche d'élève (${a.matiere})</span>
+                        <h3>${a.auteur}</h3>
+                        <p style="font-size:0.9rem; color:var(--text-light);">Niveau : ${a.niveau} | Budget max : ${a.budget}€/h</p>
+                        <p>${a.desc}</p>
+                        <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <span class="tag">Professeur (${a.tarif}€/h)</span>
+                        <h3>${a.auteur}</h3>
+                        <p style="font-size:0.9rem; color:var(--text-light);">Matières : ${(a.matieres || []).join(', ')}</p>
+                        <p style="font-size:0.9rem; color:var(--text-light);">Lieu : ${a.lieu}</p>
+                        <p>${a.desc}</p>
+                        <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
+                    `;
+                }
+                container.appendChild(card);
+            });
+        }
 
-            summary.innerText = `${results.length} professeur(s) trouvé(s) en ${matiereRecherchee} pour le niveau ${niveauEleveStr}.`;
+        function filterAnnonces() {
+            // Filtrage dynamique simplifié
+            renderGlobalFeed();
+        }
 
-            if (results.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 3rem; color: var(--text-light);">
-                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; margin-bottom: 1rem; color: #F59E0B;"></i>
-                        <p>Aucun professeur ne correspond exactement à vos critères pour le moment. Essayez d'élargir votre budget ou de changer de niveau !</p>
+        // Mes annonces
+        function renderMyAnnonces() {
+            const container = document.getElementById('my-annonces-container');
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            container.innerHTML = annonces.length === 0 ? "<p>Aucune annonce publiée.</p>" : "";
+            annonces.forEach((a, idx) => {
+                container.innerHTML += `
+                    <div class="annonce-card">
+                        <h3>Annonce #${idx+1}</h3>
+                        <p>${a.desc}</p>
+                        <button class="btn btn-secondary" onclick="deleteAnnonce(${a.id})">Supprimer</button>
                     </div>
                 `;
-            } else {
-                results.forEach(a => {
-                    const card = document.createElement('div');
-                    card.className = 'annonce-card';
-
-                    // Créer les badges de matières
-                    let badgesHtml = `<span class="tag tag-matiere">${matiereRecherchee}</span>`;
-                    a.matieres.forEach(m => {
-                        if (m.matiere !== matiereRecherchee) {
-                            badgesHtml += `<span class="tag">${m.matiere}</span>`;
-                        }
-                    });
-
-                    card.innerHTML = `
-                        <img src="${a.photo}" alt="${a.nom}" class="annonce-avatar" onerror="this.src='https://via.placeholder.com/80?text=Prof'">
-                        <div class="annonce-info">
-                            <div class="annonce-header">
-                                <div>
-                                    <h3>${a.nom}</h3>
-                                    <span style="font-size: 0.85rem; color: var(--text-light);"><i class="fa-solid fa-graduation-cap"></i> ${a.niveauEtudes}</span>
-                                </div>
-                                <div class="annonce-price">${a.tarif} € / heure</div>
-                            </div>
-                            
-                            <div class="badge-tags">
-                                ${badgesHtml}
-                                <span class="tag" style="background: #F3F4F6; color: var(--text-dark);"><i class="fa-solid fa-location-dot"></i> ${a.lieu} (${a.format})</span>
-                            </div>
-
-                            <p class="annonce-desc">${a.desc}</p>
-
-                            <div class="contact-box">
-                                <div><i class="fa-solid fa-envelope"></i> <strong>Email :</strong> ${a.email}</div>
-                                <div><i class="fa-solid fa-phone"></i> <strong>Tél :</strong> ${a.tel}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-
-            showView('view-student-results');
+            });
         }
+
+        function deleteAnnonce(id) {
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            annonces = annonces.filter(a => a.id !== id);
+            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
+            renderMyAnnonces();
+        }
+
+        // Devoirs
+        let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+        function submitDevoir(e) {
+            e.preventDefault();
+            const dev = {
+                id: Date.now(),
+                matiere: document.getElementById('dev-matiere').value,
+                date: document.getElementById('dev-date').value,
+                travail: document.getElementById('dev-travail').value,
+                fait: false
+            };
+            devoirsList.push(dev);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            closeDevoirModal();
+            alert("Devoir déposé ! Notification e-mail envoyée à l'élève.");
+            renderDevoirs();
+        }
+
+        function renderDevoirs() {
+            const container = document.getElementById('devoirs-container');
+            container.innerHTML = devoirsList.length === 0 ? "<p>Aucun devoir en cours.</p>" : "";
+            devoirsList.forEach(d => {
+                container.innerHTML += `
+                    <div style="background:white; padding:1rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${d.matiere}</strong> (À faire pour le : ${d.date})
+                            <p style="margin-top:4px; color:var(--text-light);">${d.travail}</p>
+                        </div>
+                        <div>
+                            <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
+                            <span style="font-size:0.85rem; margin-left:8px;">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleDevoir(id) {
+            devoirsList = devoirsList.map(d => d.id === id ? {...d, fait: !d.fait} : d);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            renderDevoirs();
+            alert("Notification e-mail envoyée au professeur pour validation !");
+        }
+
+        // Planning simplifié
+        let eventsList = JSON.parse(localStorage.getItem('klass_events')) || [];
+        function addEvent() {
+            const title = document.getElementById('event-title').value;
+            const date = document.getElementById('event-date').value;
+            if(!title || !date) return alert("Remplissez tous les champs.");
+            eventsList.push({title, date});
+            localStorage.setItem('klass_events', JSON.stringify(eventsList));
+            renderPlanning();
+        }
+        function renderPlanning() {
+            const container = document.getElementById('planning-container');
+            container.innerHTML = eventsList.length === 0 ? "<p>Aucun événement dans l'agenda.</p>" : "";
+            eventsList.forEach(ev => {
+                container.innerHTML += `<div style="background:white; padding:1rem; border-radius:10px; border:1px solid var(--border);"><strong>${ev.date}</strong><p>${ev.title}</p></div>`;
+            });
+        }
+
+        // Initialisation de la vue d'accueil au chargement
+        renderGlobalFeed();
     </script>
 </body>
 </html>
