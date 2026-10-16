@@ -199,14 +199,6 @@
             position: relative;
         }
 
-        .annonce-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-        }
-
         .tag {
             background: var(--primary-light);
             color: var(--primary);
@@ -217,6 +209,72 @@
             display: inline-block;
         }
         .tag-eleve { background: #ECFDF5; color: #059669; }
+
+        /* Curseur de niveau */
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-body);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
+        .level-display { font-weight: 700; color: var(--text-dark); min-width: 90px; text-align: right; }
+
+        /* Emploi du temps (Heure par heure & semaine) */
+        .edt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .edt-grid-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: white;
+        }
+        .edt-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, minmax(130px, 1fr));
+            min-width: 900px;
+        }
+        .edt-cell {
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem;
+            min-height: 50px;
+            font-size: 0.85rem;
+            position: relative;
+        }
+        .edt-header-cell {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+        }
+        .edt-time-cell {
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+            background: #FAFAFA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .edt-event-item {
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
         /* Modals / Fenêtres surgissantes */
         .modal-overlay {
@@ -281,12 +339,11 @@
             <h1>Fil d'actualité & Recherche</h1>
             <p class="subtitle">Consultez l'ensemble des annonces de profs et d'élèves en direct.</p>
 
-            <!-- Barre de recherche et filtres par critères -->
             <div class="search-filters-bar">
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Matière</label>
-                    <select id="filter-matiere" onchange="filterAnnonces()">
-                        <T-option value="">Toutes les matières</T-option>
+                    <select id="filter-matiere" onchange="renderGlobalFeed()">
+                        <option value="">Toutes les matières</option>
                         <option value="Mathématiques">Mathématiques</option>
                         <option value="Physique-Chimie">Physique-Chimie</option>
                         <option value="Français">Français</option>
@@ -297,7 +354,7 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Niveau</label>
-                    <select id="filter-niveau" onchange="filterAnnonces()">
+                    <select id="filter-niveau" onchange="renderGlobalFeed()">
                         <option value="">Tous les niveaux</option>
                         <option value="6ème">6ème</option>
                         <option value="5ème">5ème</option>
@@ -311,7 +368,7 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Type</label>
-                    <select id="filter-type" onchange="filterAnnonces()">
+                    <select id="filter-type" onchange="renderGlobalFeed()">
                         <option value="">Professeurs & Élèves</option>
                         <option value="prof">Professeurs uniquement</option>
                         <option value="eleve">Recherche d'élève</option>
@@ -397,18 +454,47 @@
             </div>
         </div>
 
-        <!-- 3. EMPLOI DU TEMPS -->
+        <!-- 3. EMPLOI DU TEMPS (DÉTAILLÉ HEURE PAR HEURE / SEMAINE) -->
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
-                <h2>Emploi du temps</h2>
-                <p class="subtitle">Gérez vos cours réservés et événements jour par jour.</p>
-                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-                    <input type="text" id="event-title" placeholder="Nom du cours / événement" style="max-width: 300px;">
-                    <input type="date" id="event-date">
-                    <button class="btn" onclick="addEvent()"><i class="fa-solid fa-plus"></i> Ajouter un événement</button>
+                <h2>Emploi du temps hebdomadaire</h2>
+                <p class="subtitle">Affichez et gérez vos cours réservés heure par heure.</p>
+
+                <!-- Formulaire d'ajout d'événement -->
+                <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                        <div>
+                            <label>Titre / Cours</label>
+                            <input type="text" id="event-title" required placeholder="Ex: Cours Maths - Lucas">
+                        </div>
+                        <div>
+                            <label>Date</label>
+                            <input type="date" id="event-date" required>
+                        </div>
+                        <div>
+                            <label>Heure début</label>
+                            <select id="event-time-start" required></select>
+                        </div>
+                        <div>
+                            <label>Heure fin</label>
+                            <select id="event-time-end" required></select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Ajouter au planning</button>
+                </form>
+
+                <!-- Header navigation semaines -->
+                <div class="edt-header">
+                    <button class="btn btn-secondary" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i> Semaine précédente</button>
+                    <h3 id="edt-week-label" style="font-size:1.1rem; font-weight:700;"></h3>
+                    <button class="btn btn-secondary" onclick="changeWeek(1)">Semaine suivante <i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-                <div id="planning-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <!-- Calendrier simplifié -->
+
+                <!-- Grille EDT -->
+                <div class="edt-grid-wrapper">
+                    <div id="edt-grid" class="edt-grid">
+                        <!-- Généré dynamiquement -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -422,7 +508,7 @@
             </div>
         </div>
 
-        <!-- 5. DEVOIRS -->
+        <!-- 5. DEVOIRS (AVEC DESTINATAIRE MANDATAIRE) -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -450,7 +536,46 @@
 
     </div>
 
-    <!-- MODAL : DÉPOSER UNE ANNONCE (Bouton + en haut à gauche) -->
+    <!-- MODAL POPUP : CRÉATION DU COMPTE PREMIÈRE VISITE -->
+    <div id="modal-first-visit" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeFirstVisitModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <i class="fa-solid fa-graduation-cap" style="font-size:2.5rem; color:var(--primary);"></i>
+                <h2 style="margin-top:0.5rem;">Bienvenue sur Klass !</h2>
+                <p class="subtitle" style="margin-bottom:0;">Créez votre compte en quelques secondes (optionnel).</p>
+            </div>
+            <form onsubmit="submitFirstVisitAccount(event)">
+                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div>
+                        <label>Nom & Prénom</label>
+                        <input type="text" id="pop-nom" required placeholder="Jean Dupont">
+                    </div>
+                    <div>
+                        <label>Rôle</label>
+                        <select id="pop-role" required>
+                            <option value="prof">Je donne des cours</option>
+                            <option value="eleve">Je cherche un prof</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div>
+                        <label>Email</label>
+                        <input type="email" id="pop-email" required placeholder="jean@email.com">
+                    </div>
+                    <div>
+                        <label>Téléphone</label>
+                        <input type="tel" id="pop-tel" required placeholder="06 12 34 56 78">
+                    </div>
+                </div>
+                <button type="submit" class="btn" style="width:100%;">Créer mon compte</button>
+                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0.5rem;" onclick="closeFirstVisitModal()">Continuer sans compte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL : DÉPOSER UNE ANNONCE (+ HAUT À GAUCHE AVEC CURSEURS DE NIVEAUX) -->
     <div id="modal-annonce" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -476,9 +601,29 @@
                             <label><input type="checkbox" name="matieres" value="SES"> SES</label>
                         </div>
                     </div>
+
+                    <!-- Curseurs pour la plage de niveaux -->
                     <div class="form-group">
-                        <label>Plage de niveaux (Ex: de 6ème à Terminale)</label>
-                        <input type="text" id="ann-plage" placeholder="Ex: De la 5ème à la Terminale">
+                        <label>Plage de niveaux d'enseignement</label>
+                        <div style="margin-bottom:0.75rem;">
+                            <label style="font-size:0.85rem; color:var(--text-light);">Niveau minimum :</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="min-level-slider" min="0" max="7" value="0" oninput="updateLevelSliderDisplay()">
+                                <span class="level-display" id="min-level-label">6ème</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.85rem; color:var(--text-light);">Niveau maximum :</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="max-level-slider" min="0" max="7" value="6" oninput="updateLevelSliderDisplay()">
+                                <span class="level-display" id="max-level-label">Terminale</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="postbac-custom-container" class="form-group hidden">
+                        <label style="color:var(--primary);">Précisez jusqu'à quel niveau d'étude vous enseignez (Post-bac)</label>
+                        <input type="text" id="postbac-custom-text" placeholder="Ex: Licence 3 / Prépa / Bac+3">
                     </div>
                 </div>
 
@@ -520,17 +665,21 @@
                     <textarea id="ann-desc" rows="3" required placeholder="Détails de votre annonce..."></textarea>
                 </div>
 
-                <button type="submit" class="btn">Valider et publier</button>
+                <button type="submit" class="btn" style="width:100%;">Valider mon annonce</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UN DEVOIR -->
+    <!-- MODAL : DÉPOSER UN DEVOIR (AVEC DESTINATAIRE) -->
     <div id="modal-devoir" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeDevoirModal()"><i class="fa-solid fa-xmark"></i></button>
             <h2>Déposer un devoir</h2>
             <form onsubmit="submitDevoir(event)">
+                <div class="form-group">
+                    <label>Destinataire (Nom, Prénom ou Email de l'élève/prof)</label>
+                    <input type="text" id="dev-destinataire" required placeholder="Ex: Lucas Bernard ou lucas@email.com">
+                </div>
                 <div class="form-group">
                     <label>Matière</label>
                     <input type="text" id="dev-matiere" required placeholder="Ex: Mathématiques">
@@ -547,27 +696,101 @@
                     <label>Fichiers joints (Photo / PDF optionnel)</label>
                     <input type="file" id="dev-file" accept="image/*,.pdf">
                 </div>
-                <button type="submit" class="btn">Envoyer le devoir (Notification e-mail élève)</button>
+                <button type="submit" class="btn" style="width:100%;">Envoyer le devoir</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Gestion des onglets de la barre latérale
+        const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
+        let currentWeekOffset = 0; // Offset pour la semaine dans l'EDT
+
+        // Au chargement de la page
+        window.addEventListener('DOMContentLoaded', () => {
+            initTimeSelects();
+            loadUserData();
+            
+            // Pop-up première visite
+            if (!localStorage.getItem('klass_visited')) {
+                document.getElementById('modal-first-visit').style.display = 'flex';
+            }
+        });
+
+        function closeFirstVisitModal() {
+            localStorage.setItem('klass_visited', 'true');
+            document.getElementById('modal-first-visit').style.display = 'none';
+        }
+
+        function submitFirstVisitAccount(e) {
+            e.preventDefault();
+            const compte = {
+                nom: document.getElementById('pop-nom').value,
+                role: document.getElementById('pop-role').value,
+                email: document.getElementById('pop-email').value,
+                tel: document.getElementById('pop-tel').value,
+                tarif: "25", format: "Présentiel et Visio", lieu: "", niveauEtudes: "", desc: ""
+            };
+            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
+            closeFirstVisitModal();
+            loadUserData();
+            alert("Votre compte a été créé avec succès !");
+        }
+
+        function loadUserData() {
+            const data = JSON.parse(localStorage.getItem('klass_user_compte'));
+            if (data) {
+                document.getElementById('acc-nom').value = data.nom || '';
+                document.getElementById('acc-role').value = data.role || 'prof';
+                document.getElementById('acc-email').value = data.email || '';
+                document.getElementById('acc-tel').value = data.tel || '';
+                document.getElementById('acc-tarif').value = data.tarif || '';
+                document.getElementById('acc-format').value = data.format || 'Présentiel et Visio';
+                document.getElementById('acc-lieu').value = data.lieu || '';
+                document.getElementById('acc-niveau-etudes').value = data.niveauEtudes || '';
+                document.getElementById('acc-desc').value = data.desc || '';
+                toggleProfFields();
+            }
+        }
+
+        // Navigation entre onglets
         function switchTab(tabId) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('menu-' + tabId).classList.add('active');
+            
             if(tabId === 'home') renderGlobalFeed();
             if(tabId === 'annonces') renderMyAnnonces();
             if(tabId === 'planning') renderPlanning();
             if(tabId === 'devoirs') renderDevoirs();
         }
 
-        // Gestion de la modale d'annonce (+ haut à gauche)
+        // Curseur de niveau dans la modal d'annonce
+        function updateLevelSliderDisplay() {
+            const minSlider = document.getElementById('min-level-slider');
+            const maxSlider = document.getElementById('max-level-slider');
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+
+            if (minVal > maxVal) {
+                maxSlider.value = minVal;
+                maxVal = minVal;
+            }
+
+            document.getElementById('min-level-label').innerText = niveauxLabels[minVal];
+            document.getElementById('max-level-label').innerText = niveauxLabels[maxVal];
+
+            const postbacContainer = document.getElementById('postbac-custom-container');
+            if (maxVal === 7) postbacContainer.classList.remove('hidden');
+            else postbacContainer.classList.add('hidden');
+        }
+
+        // Gestion Modals
         function openAnnonceModal() { document.getElementById('modal-annonce').style.display = 'flex'; }
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
+        function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
+        function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
+
         function toggleAnnonceFormType() {
             const val = document.getElementById('new-type-annonce').value;
             if(val === 'prof') {
@@ -579,11 +802,6 @@
             }
         }
 
-        // Modale Devoir
-        function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
-        function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
-
-        // Profil utilisateur
         function toggleProfFields() {
             const role = document.getElementById('acc-role').value;
             if(role === 'eleve') document.getElementById('prof-extra-fields').classList.add('hidden');
@@ -604,15 +822,15 @@
                 desc: document.getElementById('acc-desc').value
             };
             localStorage.setItem('klass_user_compte', JSON.stringify(compte));
-            alert("Informations de compte enregistrées avec succès !");
+            alert("Informations de compte enregistrées !");
         }
 
-        // Stockage des annonces
+        // Soumission Annonce
         function submitNewAnnonce(e) {
             e.preventDefault();
             const type = document.getElementById('new-type-annonce').value;
             const user = JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Klass", email: "contact@klass.fr" };
-            
+
             let nouvelleAnnonce = {
                 id: Date.now(),
                 type: type,
@@ -624,8 +842,15 @@
 
             if(type === 'prof') {
                 const checkedMat = Array.from(document.querySelectorAll('input[name="matieres"]:checked')).map(cb => cb.value);
+                let maxText = niveauxLabels[parseInt(document.getElementById('max-level-slider').value)];
+                if (maxText === "Post-bac") {
+                    const custom = document.getElementById('postbac-custom-text').value;
+                    if(custom) maxText = custom;
+                }
+                const minText = niveauxLabels[parseInt(document.getElementById('min-level-slider').value)];
+
                 nouvelleAnnonce.matieres = checkedMat;
-                nouvelleAnnonce.plage = document.getElementById('ann-plage').value;
+                nouvelleAnnonce.plage = `De ${minText} à ${maxText}`;
                 nouvelleAnnonce.tarif = user.tarif || "25";
                 nouvelleAnnonce.lieu = user.lieu || "En ligne";
             } else {
@@ -643,13 +868,189 @@
             renderGlobalFeed();
         }
 
-        // Affichage du flux global
+        // Devoirs avec Destinataire
+        function submitDevoir(e) {
+            e.preventDefault();
+            const dest = document.getElementById('dev-destinataire').value.trim();
+
+            if (!dest) {
+                alert("Veuillez indiquer un destinataire pour ce devoir.");
+                return;
+            }
+
+            const dev = {
+                id: Date.now(),
+                destinataire: dest,
+                matiere: document.getElementById('dev-matiere').value,
+                date: document.getElementById('dev-date').value,
+                travail: document.getElementById('dev-travail').value,
+                fait: false
+            };
+
+            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            devoirsList.push(dev);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            
+            closeDevoirModal();
+            alert(`Devoir envoyé à ${dest} ! Un e-mail de notification a été simuler.`);
+            renderDevoirs();
+        }
+
+        function renderDevoirs() {
+            const container = document.getElementById('devoirs-container');
+            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            
+            container.innerHTML = devoirsList.length === 0 ? "<p style='color:var(--text-light); text-align:center;'>Aucun devoir enregistré pour le moment.</p>" : "";
+            
+            devoirsList.forEach(d => {
+                container.innerHTML += `
+                    <div style="background:white; padding:1.2rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span class="tag" style="margin-bottom:6px;">Destinataire : ${d.destinataire}</span>
+                            <div style="font-weight:700; font-size:1.05rem; margin-top:4px;">${d.matiere} (À faire pour : ${d.date})</div>
+                            <p style="margin-top:4px; color:var(--text-light);">${d.travail}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
+                            <div style="font-size:0.8rem; margin-top:4px; color:var(--text-light);">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleDevoir(id) {
+            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            devoirsList = devoirsList.map(d => d.id === id ? {...d, fait: !d.fait} : d);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            renderDevoirs();
+        }
+
+        // EMPLOI DU TEMPS DÉTAILLÉ
+        function initTimeSelects() {
+            const startSel = document.getElementById('event-time-start');
+            const endSel = document.getElementById('event-time-end');
+            startSel.innerHTML = ''; endSel.innerHTML = '';
+            for(let h = 8; h <= 20; h++) {
+                const timeStr = (h < 10 ? '0' + h : h) + ':00';
+                startSel.innerHTML += `<option value="${h}">${timeStr}</option>`;
+                endSel.innerHTML += `<option value="${h+1}">${(h+1 < 10 ? '0' + (h+1) : h+1)}:00</option>`;
+            }
+        }
+
+        function changeWeek(direction) {
+            currentWeekOffset += direction;
+            renderPlanning();
+        }
+
+        function addEvent(e) {
+            e.preventDefault();
+            const title = document.getElementById('event-title').value;
+            const date = document.getElementById('event-date').value;
+            const start = parseInt(document.getElementById('event-time-start').value);
+            const end = parseInt(document.getElementById('event-time-end').value);
+
+            if(start >= end) {
+                alert("L'heure de fin doit être supérieure à l'heure de début.");
+                return;
+            }
+
+            let events = JSON.parse(localStorage.getItem('klass_events')) || [];
+            events.push({ id: Date.now(), title, date, start, end });
+            localStorage.setItem('klass_events', JSON.stringify(events));
+
+            document.getElementById('event-title').value = '';
+            renderPlanning();
+        }
+
+        function getWeekDates(offset = 0) {
+            const curr = new Date();
+            const first = curr.getDate() - curr.getDay() + 1 + (offset * 7); // Lundi
+            const monday = new Date(curr.setDate(first));
+            
+            const days = [];
+            for (let i = 0; i < 7; i++) {
+                const nextDay = new Date(monday);
+                nextDay.setDate(monday.getDate() + i);
+                days.push(nextDay);
+            }
+            return days;
+        }
+
+        function renderPlanning() {
+            const grid = document.getElementById('edt-grid');
+            grid.innerHTML = '';
+
+            const weekDays = getWeekDates(currentWeekOffset);
+            const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+            
+            // Titre de la semaine
+            const startStr = weekDays[0].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            const endStr = weekDays[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+            document.getElementById('edt-week-label').innerText = `Semaine du ${startStr} au ${endStr}`;
+
+            // 1. En-têtes (Heures / Jours)
+            grid.appendChild(createEdtCell('Heure', 'edt-header-cell'));
+            weekDays.forEach((d, idx) => {
+                const dateNum = d.getDate();
+                grid.appendChild(createEdtCell(`${dayNames[idx]} ${dateNum}`, 'edt-header-cell'));
+            });
+
+            // Récupérer tous les événements
+            const events = JSON.parse(localStorage.getItem('klass_events')) || [];
+
+            // 2. Lignes heure par heure (8h - 20h)
+            for (let h = 8; h <= 20; h++) {
+                // Cellule heure
+                grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell'));
+
+                // 7 cellules de jours
+                weekDays.forEach(dayDate => {
+                    const cell = createEdtCell('', 'edt-cell');
+                    const dateISO = dayDate.toISOString().split('T')[0];
+
+                    // Filtrer événements correspondants
+                    const dayEvents = events.filter(ev => ev.date === dateISO && ev.start <= h && ev.end > h);
+                    dayEvents.forEach(ev => {
+                        const evDiv = document.createElement('div');
+                        evDiv.className = 'edt-event-item';
+                        evDiv.innerText = `${ev.title} (${ev.start}h-${ev.end}h)`;
+                        cell.appendChild(evDiv);
+                    });
+
+                    grid.appendChild(cell);
+                });
+            }
+        }
+
+        function createEdtCell(text, className) {
+            const div = document.createElement('div');
+            div.className = className;
+            div.innerText = text;
+            return div;
+        }
+
         function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
 
+            const matFilter = document.getElementById('filter-matiere').value;
+            const nivFilter = document.getElementById('filter-niveau').value;
+            const typeFilter = document.getElementById('filter-type').value;
+
+            // Filtrage
+            if (matFilter) {
+                annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
+            }
+            if (nivFilter) {
+                annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
+            }
+            if (typeFilter) {
+                annonces = annonces.filter(a => a.type === typeFilter);
+            }
+
             if(annonces.length === 0) {
-                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profils de disponible pour le moment.</p>`;
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profil de disponible pour le moment.</p>`;
                 return;
             }
 
@@ -670,7 +1071,7 @@
                         <span class="tag">Professeur (${a.tarif}€/h)</span>
                         <h3>${a.auteur}</h3>
                         <p style="font-size:0.9rem; color:var(--text-light);">Matières : ${(a.matieres || []).join(', ')}</p>
-                        <p style="font-size:0.9rem; color:var(--text-light);">Lieu : ${a.lieu}</p>
+                        <p style="font-size:0.9rem; color:var(--text-light);">Plage : ${a.plage || 'Non spécifiée'}</p>
                         <p>${a.desc}</p>
                         <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
                     `;
@@ -679,20 +1080,14 @@
             });
         }
 
-        function filterAnnonces() {
-            // Filtrage dynamique simplifié
-            renderGlobalFeed();
-        }
-
-        // Mes annonces
         function renderMyAnnonces() {
             const container = document.getElementById('my-annonces-container');
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            container.innerHTML = annonces.length === 0 ? "<p>Aucune annonce publiée.</p>" : "";
-            annonces.forEach((a, idx) => {
+            container.innerHTML = annonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée pour le moment.</p>" : "";
+            annonces.forEach((a) => {
                 container.innerHTML += `
                     <div class="annonce-card">
-                        <h3>Annonce #${idx+1}</h3>
+                        <h3>Annonce (${a.type === 'prof' ? 'Professeur' : 'Élève'})</h3>
                         <p>${a.desc}</p>
                         <button class="btn btn-secondary" onclick="deleteAnnonce(${a.id})">Supprimer</button>
                     </div>
@@ -707,69 +1102,7 @@
             renderMyAnnonces();
         }
 
-        // Devoirs
-        let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-        function submitDevoir(e) {
-            e.preventDefault();
-            const dev = {
-                id: Date.now(),
-                matiere: document.getElementById('dev-matiere').value,
-                date: document.getElementById('dev-date').value,
-                travail: document.getElementById('dev-travail').value,
-                fait: false
-            };
-            devoirsList.push(dev);
-            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
-            closeDevoirModal();
-            alert("Devoir déposé ! Notification e-mail envoyée à l'élève.");
-            renderDevoirs();
-        }
-
-        function renderDevoirs() {
-            const container = document.getElementById('devoirs-container');
-            container.innerHTML = devoirsList.length === 0 ? "<p>Aucun devoir en cours.</p>" : "";
-            devoirsList.forEach(d => {
-                container.innerHTML += `
-                    <div style="background:white; padding:1rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong>${d.matiere}</strong> (À faire pour le : ${d.date})
-                            <p style="margin-top:4px; color:var(--text-light);">${d.travail}</p>
-                        </div>
-                        <div>
-                            <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
-                            <span style="font-size:0.85rem; margin-left:8px;">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function toggleDevoir(id) {
-            devoirsList = devoirsList.map(d => d.id === id ? {...d, fait: !d.fait} : d);
-            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
-            renderDevoirs();
-            alert("Notification e-mail envoyée au professeur pour validation !");
-        }
-
-        // Planning simplifié
-        let eventsList = JSON.parse(localStorage.getItem('klass_events')) || [];
-        function addEvent() {
-            const title = document.getElementById('event-title').value;
-            const date = document.getElementById('event-date').value;
-            if(!title || !date) return alert("Remplissez tous les champs.");
-            eventsList.push({title, date});
-            localStorage.setItem('klass_events', JSON.stringify(eventsList));
-            renderPlanning();
-        }
-        function renderPlanning() {
-            const container = document.getElementById('planning-container');
-            container.innerHTML = eventsList.length === 0 ? "<p>Aucun événement dans l'agenda.</p>" : "";
-            eventsList.forEach(ev => {
-                container.innerHTML += `<div style="background:white; padding:1rem; border-radius:10px; border:1px solid var(--border);"><strong>${ev.date}</strong><p>${ev.title}</p></div>`;
-            });
-        }
-
-        // Initialisation de la vue d'accueil au chargement
+        // Chargement initial
         renderGlobalFeed();
     </script>
 </body>
