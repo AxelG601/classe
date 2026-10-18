@@ -36,7 +36,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.2s, color 0.2s; }
         body { background-color: var(--bg-body); color: var(--text-dark); min-height: 100vh; display: flex; }
 
-        /* Sidebar */
+        /* Sidebar - Ordinateur */
         aside {
             width: 260px; background: var(--card-bg); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 50;
@@ -92,7 +92,7 @@
         .btn-success { background-color: #D1FAE5; color: var(--accent); }
 
         /* Annonces */
-        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
         .tag { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
         .tag-eleve { background: #ECFDF5; color: #059669; }
@@ -113,27 +113,46 @@
 
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
-        .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: var(--radius); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-content { background: var(--card-bg); padding: 2rem; border-radius: var(--radius); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; }
         .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
         .hidden { display: none !important; }
+
+        /* RESPONSIVE DESIGN (TELEPHONE / PETITS ECRANS) */
+        @media (max-width: 768px) {
+            body { flex-direction: column; padding-bottom: 75px; }
+            aside {
+                width: 100%; height: 65px; position: fixed; bottom: 0; top: auto; border-right: none; border-top: 1px solid var(--border);
+                flex-direction: row; align-items: center; justify-content: space-around; padding: 0 0.5rem;
+            }
+            .sidebar-brand, .dark-mode-toggle { display: none; }
+            .sidebar-menu { flex-direction: row; padding: 0; gap: 0; width: 100%; justify-content: space-around; }
+            .sidebar-menu li a { flex-direction: column; gap: 2px; padding: 0.5rem; font-size: 0.65rem; text-align: center; }
+            .sidebar-menu li a i { font-size: 1.2rem; }
+            .sidebar-menu li a span { display: block; }
+            .main-content { margin-left: 0; max-width: 100%; padding: 1rem; }
+            .card { padding: 1.25rem; }
+            .annonces-grid { grid-template-columns: 1fr; }
+            .search-filters-bar { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; padding: 1.25rem; max-height: 85vh; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- BARRE LATÉRALE -->
+    <!-- BARRE LATÉRALE (OU BARRE MOBILE EN BAS) -->
     <aside>
         <div class="sidebar-brand">
             <div>K<span>l</span>.</div>
             <button class="btn-add-top" title="Déposer une annonce" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
         </div>
         <ul class="sidebar-menu">
-            <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil / Flux</span></a></li>
-            <li id="menu-compte" onclick="switchTab('compte')"><a><i class="fa-solid fa-user"></i> <span>Mon compte</span></a></li>
-            <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Emploi du temps</span></a></li>
-            <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Mes annonces</span></a></li>
+            <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil</span></a></li>
+            <li id="menu-compte" onclick="switchTab('compte')"><a><i class="fa-solid fa-user"></i> <span>Compte</span></a></li>
+            <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Planning</span></a></li>
+            <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Annonces</span></a></li>
             <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
             <li id="menu-messagerie" onclick="switchTab('messagerie')">
-                <a><i class="fa-solid fa-comments"></i> <span>Messagerie</span><span id="msg-notif-dot" class="notification-dot hidden"></span></a>
+                <a><i class="fa-solid fa-comments"></i> <span>Messages</span><span id="msg-notif-dot" class="notification-dot hidden"></span></a>
             </li>
         </ul>
 
@@ -231,7 +250,6 @@
                         <input type="file" id="acc-file" accept="image/*,.pdf">
                     </div>
 
-                    <!-- Champs conditionnels Professeur -->
                     <div id="prof-extra-fields">
                         <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                             <div>
@@ -269,17 +287,17 @@
             </div>
         </div>
 
-        <!-- 3. EMPLOI DU TEMPS HEDDOMADAIRE -->
+        <!-- 3. EMPLOI DU TEMPS -->
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
                 <h2>Emploi du temps & Visio MS Teams</h2>
                 <p class="subtitle">Gérez vos séances heure par heure et leur règlement.</p>
 
                 <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:1rem;">
                         <div>
                             <label>Titre / Cours</label>
-                            <input type="text" id="event-title" required placeholder="Ex: Cours Maths - Lucas">
+                            <input type="text" id="event-title" required placeholder="Ex: Cours Maths">
                         </div>
                         <div>
                             <label>Date</label>
@@ -349,7 +367,7 @@
 
     </div>
 
-    <!-- POPUP PREMIÈRE VISITE (OPTIONNELLE) -->
+    <!-- POPUP PREMIÈRE VISITE -->
     <div id="modal-first-visit" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeFirstVisitModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -388,7 +406,7 @@
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UNE ANNONCE (BOUTON + HAUT GAUCHE) -->
+    <!-- MODAL : DÉPOSER UNE ANNONCE -->
     <div id="modal-annonce" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
