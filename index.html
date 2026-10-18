@@ -36,7 +36,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.2s, color 0.2s; }
         body { background-color: var(--bg-body); color: var(--text-dark); min-height: 100vh; display: flex; }
 
-        /* Sidebar - Ordinateur */
+        /* Sidebar */
         aside {
             width: 260px; background: var(--card-bg); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 50;
@@ -57,6 +57,11 @@
         }
         .sidebar-menu li.active a, .sidebar-menu li a:hover { background: var(--primary-light); color: var(--primary); }
         .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
+
+        /* Avatar Sidebar */
+        .sidebar-avatar {
+            width: 24px; height: 24px; border-radius: 50%; object-fit: cover; display: inline-block;
+        }
 
         .dark-mode-toggle {
             padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
@@ -88,14 +93,25 @@
         .btn:hover { background-color: var(--primary-hover); }
         .btn-teams { background-color: #464EB8; color: white; }
         .btn-secondary { background-color: #E5E7EB; color: var(--text-dark); }
+        body.dark-mode .btn-secondary { background-color: #334155; color: #FFFFFF; }
         .btn-danger { background-color: #FEE2E2; color: var(--danger); }
+        body.dark-mode .btn-danger { background-color: #7F1D1D; color: #FEE2E2; }
         .btn-success { background-color: #D1FAE5; color: var(--accent); }
 
-        /* Annonces */
-        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        /* Annonces & Avatar */
+        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; position: relative; }
+        .annonce-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .annonce-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .annonce-avatar-placeholder { width: 45px; height: 45px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid var(--primary); }
+        
         .tag { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
         .tag-eleve { background: #ECFDF5; color: #059669; }
+
+        /* Alignement parfait des cases à cocher matières */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
+        .checkbox-label input[type="checkbox"] { width: auto; cursor: pointer; }
 
         /* Curseur */
         .slider-wrapper { display: flex; align-items: center; gap: 1rem; background: var(--bg-body); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
@@ -117,7 +133,7 @@
         .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
         .hidden { display: none !important; }
 
-        /* RESPONSIVE DESIGN (TELEPHONE / PETITS ECRANS) */
+        /* Responsive Mobile */
         @media (max-width: 768px) {
             body { flex-direction: column; padding-bottom: 75px; }
             aside {
@@ -139,7 +155,7 @@
 </head>
 <body>
 
-    <!-- BARRE LATÉRALE (OU BARRE MOBILE EN BAS) -->
+    <!-- BARRE LATÉRALE -->
     <aside>
         <div class="sidebar-brand">
             <div>K<span>l</span>.</div>
@@ -147,7 +163,12 @@
         </div>
         <ul class="sidebar-menu">
             <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil</span></a></li>
-            <li id="menu-compte" onclick="switchTab('compte')"><a><i class="fa-solid fa-user"></i> <span>Compte</span></a></li>
+            <li id="menu-compte" onclick="switchTab('compte')">
+                <a>
+                    <span id="sidebar-account-icon"><i class="fa-solid fa-user"></i></span> 
+                    <span>Compte</span>
+                </a>
+            </li>
             <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Planning</span></a></li>
             <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Annonces</span></a></li>
             <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
@@ -165,7 +186,7 @@
     <!-- CONTENU PRINCIPAL -->
     <div class="main-content">
 
-        <!-- 1. ACCUEIL / FLUX GLOBAL + FILTRES -->
+        <!-- 1. ACCUEIL / FLUX + FILTRES GÉOGRAPHIQUES ÉTENDUS -->
         <div id="tab-home" class="tab-pane">
             <h1>Fil d'actualité & Recherche</h1>
             <p class="subtitle">Consultez l'ensemble des annonces de profs et d'élèves en direct.</p>
@@ -198,15 +219,19 @@
                     </select>
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
-                    <label>Ville</label>
+                    <label>Ville / Quartier</label>
                     <input type="text" id="filter-ville" placeholder="Ex: Lyon" oninput="renderGlobalFeed()">
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
-                    <label>Rayon (km)</label>
+                    <label>Rayon</label>
                     <select id="filter-rayon" onchange="renderGlobalFeed()">
+                        <option value="toute">Toute la France</option>
+                        <option value="1">1 km</option>
+                        <option value="2">2 km</option>
+                        <option value="3.5">3.5 km</option>
+                        <option value="5">5 km</option>
                         <option value="10">10 km</option>
-                        <option value="25">25 km</option>
-                        <option value="50">50 km</option>
+                        <option value="20">20 km</option>
                     </select>
                 </div>
             </div>
@@ -214,11 +239,11 @@
             <div id="global-annonces-container" class="annonces-grid"></div>
         </div>
 
-        <!-- 2. MON COMPTE -->
+        <!-- 2. MON COMPTE (PHOTO DE PROFIL UNIQUE) -->
         <div id="tab-compte" class="tab-pane hidden">
             <div class="card">
                 <h2>Mon Compte</h2>
-                <p class="subtitle">Vos informations personnelles et votre statut.</p>
+                <p class="subtitle">Vos informations personnelles.</p>
                 <form id="form-compte" onsubmit="saveCompte(event)">
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
@@ -246,8 +271,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Photo de profil ou justificatif (Photo / JPEG / PDF)</label>
-                        <input type="file" id="acc-file" accept="image/*,.pdf">
+                        <label>Photo de profil</label>
+                        <input type="file" id="acc-file" accept="image/*">
+                        <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px;">Remplacez votre photo actuelle en en sélectionnant une nouvelle.</p>
                     </div>
 
                     <div id="prof-extra-fields">
@@ -255,20 +281,6 @@
                             <div>
                                 <label>Tarif horaire (€ / h)</label>
                                 <input type="number" id="acc-tarif" placeholder="Ex: 25">
-                            </div>
-                            <div>
-                                <label>Format des cours</label>
-                                <select id="acc-format">
-                                    <option value="Présentiel et Visio">Présentiel et Visio</option>
-                                    <option value="Présentiel uniquement">Présentiel uniquement</option>
-                                    <option value="Visio uniquement">Visio uniquement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                            <div>
-                                <label>Lieu d'activité (Ville)</label>
-                                <input type="text" id="acc-lieu" placeholder="Ex: Lyon">
                             </div>
                             <div>
                                 <label>Niveau d'étude</label>
@@ -291,7 +303,7 @@
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
                 <h2>Emploi du temps & Visio MS Teams</h2>
-                <p class="subtitle">Gérez vos séances heure par heure et leur règlement.</p>
+                <p class="subtitle">Gérez vos séances heure par heure.</p>
 
                 <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:1rem;">
@@ -334,16 +346,16 @@
             </div>
         </div>
 
-        <!-- 4. MES ANNONCES -->
+        <!-- 4. MES ANNONCES (AVEC MODIFICATION) -->
         <div id="tab-annonces" class="tab-pane hidden">
             <div class="card">
                 <h2>Mes annonces publiées</h2>
-                <p class="subtitle">Consultez et modifiez les annonces que vous avez mises en ligne.</p>
+                <p class="subtitle">Modifiez ou supprimez vos annonces en direct.</p>
                 <div id="my-annonces-container" class="annonces-grid"></div>
             </div>
         </div>
 
-        <!-- 5. DEVOIRS & CARNET DE SUIVI -->
+        <!-- 5. DEVOIRS -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -406,12 +418,14 @@
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UNE ANNONCE -->
+    <!-- MODAL : DÉPOSER / MODIFIER UNE ANNONCE -->
     <div id="modal-annonce" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
-            <h2>Déposer une annonce</h2>
+            <h2 id="annonce-modal-title">Déposer une annonce</h2>
             <form id="form-new-annonce" onsubmit="submitNewAnnonce(event)">
+                <input type="hidden" id="edit-annonce-id" value="">
+                
                 <div class="form-group">
                     <label>Je souhaite :</label>
                     <select id="new-type-annonce" onchange="toggleAnnonceFormType()" required>
@@ -423,14 +437,30 @@
                 <div id="block-prof-ann">
                     <div class="form-group">
                         <label>Matières enseignées</label>
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <label><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
-                            <label><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
-                            <label><input type="checkbox" name="matieres" value="Français"> Français</label>
-                            <label><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
-                            <label><input type="checkbox" name="matieres" value="SVT"> SVT</label>
-                            <label><input type="checkbox" name="matieres" value="SES"> SES</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="Français"> Français</label>
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="SVT"> SVT</label>
+                            <label class="checkbox-label"><input type="checkbox" name="matieres" value="SES"> SES</label>
                         </div>
+                    </div>
+
+                    <!-- Format des cours avec sélection multiple possible -->
+                    <div class="form-group">
+                        <label>Format des cours *</label>
+                        <select id="new-format-cours" onchange="togglePresentielField()" required>
+                            <option value="Présentiel et Visio">Présentiel et Visio</option>
+                            <option value="Présentiel uniquement">Présentiel uniquement</option>
+                            <option value="Visio uniquement">Visio uniquement</option>
+                        </select>
+                    </div>
+
+                    <!-- Précision Ville / Quartier (Visible uniquement si Présentiel uniquement) -->
+                    <div id="presentiel-ville-container" class="form-group hidden">
+                        <label style="color:var(--primary);">Ville / Quartier du cours en présentiel *</label>
+                        <input type="text" id="new-ville-cours" placeholder="Ex: Lyon 6ème / Part-Dieu">
                     </div>
 
                     <div class="form-group">
@@ -520,10 +550,6 @@
                     <label>Travail à effectuer *</label>
                     <textarea id="dev-travail" rows="3" required placeholder="Consignes de l'exercice..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Fichier joint (Photo / PDF optionnel)</label>
-                    <input type="file" id="dev-file" accept="image/*,.pdf">
-                </div>
                 <button type="submit" class="btn" style="width:100%;">Envoyer le devoir</button>
             </form>
         </div>
@@ -537,6 +563,7 @@
             initTimeSelects();
             loadUserData();
             checkNotificationStatus();
+            updateSidebarAvatar();
             
             if (!localStorage.getItem('klass_visited')) {
                 document.getElementById('modal-first-visit').style.display = 'flex';
@@ -552,7 +579,17 @@
         }
 
         function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr" };
+            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null };
+        }
+
+        function updateSidebarAvatar() {
+            const user = getCurrentUser();
+            const container = document.getElementById('sidebar-account-icon');
+            if (user.photo) {
+                container.innerHTML = `<img src="${user.photo}" class="sidebar-avatar" alt="Avatar">`;
+            } else {
+                container.innerHTML = `<i class="fa-solid fa-user"></i>`;
+            }
         }
 
         function closeFirstVisitModal() {
@@ -567,11 +604,12 @@
                 role: document.getElementById('pop-role').value,
                 email: document.getElementById('pop-email').value,
                 tel: document.getElementById('pop-tel').value,
-                tarif: "25", format: "Présentiel et Visio", lieu: "", niveauEtudes: "", desc: ""
+                tarif: "25", niveauEtudes: "", desc: "", photo: null
             };
             localStorage.setItem('klass_user_compte', JSON.stringify(compte));
             closeFirstVisitModal();
             loadUserData();
+            updateSidebarAvatar();
             alert("Compte créé avec succès !");
         }
 
@@ -583,8 +621,6 @@
                 document.getElementById('acc-email').value = data.email || '';
                 document.getElementById('acc-tel').value = data.tel || '';
                 document.getElementById('acc-tarif').value = data.tarif || '';
-                document.getElementById('acc-format').value = data.format || 'Présentiel et Visio';
-                document.getElementById('acc-lieu').value = data.lieu || '';
                 document.getElementById('acc-niveau-etudes').value = data.niveauEtudes || '';
                 document.getElementById('acc-desc').value = data.desc || '';
                 toggleProfFields();
@@ -630,7 +666,31 @@
             else document.getElementById('postbac-custom-container').classList.add('hidden');
         }
 
-        function openAnnonceModal() { document.getElementById('modal-annonce').style.display = 'flex'; }
+        function openAnnonceModal(editId = null) {
+            document.getElementById('annonce-modal-title').innerText = editId ? "Modifier l'annonce" : "Déposer une annonce";
+            document.getElementById('edit-annonce-id').value = editId || '';
+            
+            if (editId) {
+                let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+                const ann = annonces.find(a => a.id === editId);
+                if (ann) {
+                    document.getElementById('new-type-annonce').value = ann.type;
+                    toggleAnnonceFormType();
+                    document.getElementById('ann-desc').value = ann.desc;
+                    if(ann.type === 'prof') {
+                        document.getElementById('new-format-cours').value = ann.formatCours || 'Présentiel et Visio';
+                        togglePresentielField();
+                        if(ann.villeCours) document.getElementById('new-ville-cours').value = ann.villeCours;
+                    }
+                }
+            } else {
+                document.getElementById('form-new-annonce').reset();
+                document.getElementById('edit-annonce-id').value = '';
+                toggleAnnonceFormType();
+            }
+            document.getElementById('modal-annonce').style.display = 'flex';
+        }
+
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
         function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
         function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
@@ -640,9 +700,20 @@
             if(val === 'prof') {
                 document.getElementById('block-prof-ann').classList.remove('hidden');
                 document.getElementById('block-eleve-ann').classList.add('hidden');
+                togglePresentielField();
             } else {
                 document.getElementById('block-prof-ann').classList.add('hidden');
                 document.getElementById('block-eleve-ann').classList.remove('hidden');
+            }
+        }
+
+        function togglePresentielField() {
+            const format = document.getElementById('new-format-cours').value;
+            const container = document.getElementById('presentiel-ville-container');
+            if (format === 'Présentiel uniquement') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
             }
         }
 
@@ -654,31 +725,47 @@
 
         function saveCompte(e) {
             e.preventDefault();
-            const compte = {
-                nom: document.getElementById('acc-nom').value,
-                role: document.getElementById('acc-role').value,
-                email: document.getElementById('acc-email').value,
-                tel: document.getElementById('acc-tel').value,
-                tarif: document.getElementById('acc-tarif').value,
-                format: document.getElementById('acc-format').value,
-                lieu: document.getElementById('acc-lieu').value,
-                niveauEtudes: document.getElementById('acc-niveau-etudes').value,
-                desc: document.getElementById('acc-desc').value
-            };
-            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
-            alert("Compte sauvegardé !");
+            const fileInput = document.getElementById('acc-file');
+            
+            let user = getCurrentUser();
+            user.nom = document.getElementById('acc-nom').value;
+            user.role = document.getElementById('acc-role').value;
+            user.email = document.getElementById('acc-email').value;
+            user.tel = document.getElementById('acc-tel').value;
+            user.tarif = document.getElementById('acc-tarif').value;
+            user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
+            user.desc = document.getElementById('acc-desc').value;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    user.photo = e.target.result;
+                    localStorage.setItem('klass_user_compte', JSON.stringify(user));
+                    updateSidebarAvatar();
+                    alert("Compte et photo de profil enregistrés !");
+                    renderGlobalFeed();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                localStorage.setItem('klass_user_compte', JSON.stringify(user));
+                updateSidebarAvatar();
+                alert("Compte sauvegardé !");
+                renderGlobalFeed();
+            }
         }
 
         function submitNewAnnonce(e) {
             e.preventDefault();
             const type = document.getElementById('new-type-annonce').value;
             const user = getCurrentUser();
+            const editId = document.getElementById('edit-annonce-id').value;
 
             let nouvelleAnnonce = {
-                id: Date.now(),
+                id: editId ? parseInt(editId) : Date.now(),
                 type: type,
                 auteur: user.nom,
                 email: user.email,
+                photo: user.photo || null,
                 desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
@@ -695,7 +782,8 @@
                 nouvelleAnnonce.matieres = checkedMat;
                 nouvelleAnnonce.plage = `De ${minText} à ${maxText}`;
                 nouvelleAnnonce.tarif = user.tarif || "25";
-                nouvelleAnnonce.lieu = user.lieu || "En ligne";
+                nouvelleAnnonce.formatCours = document.getElementById('new-format-cours').value;
+                nouvelleAnnonce.villeCours = nouvelleAnnonce.formatCours === 'Présentiel uniquement' ? document.getElementById('new-ville-cours').value : '';
             } else {
                 nouvelleAnnonce.matiere = document.getElementById('ann-eleve-matiere').value;
                 nouvelleAnnonce.niveau = document.getElementById('ann-eleve-niveau').value;
@@ -703,11 +791,15 @@
             }
 
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            annonces.push(nouvelleAnnonce);
+            if (editId) {
+                annonces = annonces.map(a => a.id === parseInt(editId) ? nouvelleAnnonce : a);
+            } else {
+                annonces.push(nouvelleAnnonce);
+            }
             localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
 
             closeAnnonceModal();
-            alert("Votre annonce est en ligne !");
+            alert(editId ? "Annonce modifiée avec succès !" : "Votre annonce est en ligne !");
             renderGlobalFeed();
         }
 
@@ -738,7 +830,7 @@
             localStorage.setItem('klass_has_unread_msg', 'true');
             checkNotificationStatus();
 
-            alert(`Demande envoyée à ${annonce.auteur} ! Notification transmise.`);
+            alert(`Demande envoyée à ${annonce.auteur} !`);
             if(msgInput) msgInput.value = '';
         }
 
@@ -807,7 +899,7 @@
             localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
             
             closeDevoirModal();
-            alert(`Devoir déposé pour ${dest} ! Notification transmise.`);
+            alert(`Devoir déposé pour ${dest} !`);
             renderDevoirs();
         }
 
@@ -952,9 +1044,13 @@
 
             const matFilter = document.getElementById('filter-matiere').value;
             const nivFilter = document.getElementById('filter-niveau').value;
+            const villeFilter = document.getElementById('filter-ville').value.toLowerCase().trim();
 
             if (matFilter) annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
             if (nivFilter) annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
+            if (villeFilter) {
+                annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
+            }
 
             if(annonces.length === 0) {
                 container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profil de disponible pour le moment.</p>`;
@@ -968,6 +1064,10 @@
 
                 const isAuthor = (a.auteur === user.nom || a.email === user.email);
 
+                const avatarHtml = a.photo 
+                    ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar">` 
+                    : `<div class="annonce-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+
                 const relationBlockHtml = isAuthor ? '' : `
                     <div style="margin-top:0.5rem; padding-top:1rem; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:0.5rem;">
                         <textarea id="relation-msg-${a.id}" rows="2" placeholder="Message d'accompagnement..."></textarea>
@@ -976,9 +1076,14 @@
                 `;
 
                 card.innerHTML = `
-                    <span class="tag ${a.type === 'eleve' ? 'tag-eleve' : ''}">${a.type === 'prof' ? 'Professeur' : 'Recherche d\'élève'}</span>
-                    <h3>${a.auteur}</h3>
-                    <p style="font-size:0.9rem; color:var(--text-light);">${a.type === 'prof' ? 'Plage : ' + (a.plage || 'S.O.') : 'Niveau : ' + a.niveau}</p>
+                    <div class="annonce-header">
+                        <div>
+                            <span class="tag ${a.type === 'eleve' ? 'tag-eleve' : ''}">${a.type === 'prof' ? 'Professeur' : 'Recherche d\'élève'}</span>
+                            <h3 style="margin-top:4px;">${a.auteur}</h3>
+                        </div>
+                        ${avatarHtml}
+                    </div>
+                    <p style="font-size:0.9rem; color:var(--text-light);">${a.type === 'prof' ? 'Plage : ' + (a.plage || 'S.O.') + (a.villeCours ? ' | Lieu : ' + a.villeCours : '') : 'Niveau : ' + a.niveau}</p>
                     <p>${a.desc}</p>
                     <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
                     ${relationBlockHtml}
@@ -990,13 +1095,21 @@
         function renderMyAnnonces() {
             const container = document.getElementById('my-annonces-container');
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            container.innerHTML = annonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée.</p>" : "";
-            annonces.forEach((a) => {
+            const user = getCurrentUser();
+            
+            // Filtrer les annonces de l'utilisateur connecté
+            const myAnnonces = annonces.filter(a => a.auteur === user.nom || a.email === user.email);
+
+            container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée.</p>" : "";
+            myAnnonces.forEach((a) => {
                 container.innerHTML += `
                     <div class="annonce-card">
                         <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
                         <p>${a.desc}</p>
-                        <button class="btn btn-secondary" onclick="deleteAnnonce(${a.id})">Supprimer</button>
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <button class="btn" style="padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="openAnnonceModal(${a.id})">Modifier</button>
+                            <button class="btn btn-secondary" style="padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="deleteAnnonce(${a.id})">Supprimer</button>
+                        </div>
                     </div>
                 `;
             });
