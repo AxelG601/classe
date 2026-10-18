@@ -59,9 +59,7 @@
         .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
 
         /* Avatar Sidebar */
-        .sidebar-avatar {
-            width: 24px; height: 24px; border-radius: 50%; object-fit: cover; display: inline-block;
-        }
+        .sidebar-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; display: inline-block; }
 
         .dark-mode-toggle {
             padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
@@ -98,17 +96,30 @@
         body.dark-mode .btn-danger { background-color: #7F1D1D; color: #FEE2E2; }
         .btn-success { background-color: #D1FAE5; color: var(--accent); }
 
-        /* Annonces & Avatar */
-        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; position: relative; }
-        .annonce-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .annonce-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
-        .annonce-avatar-placeholder { width: 45px; height: 45px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid var(--primary); }
+        /* Annonces & Badges par Matières */
+        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; position: relative; }
+        .annonce-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem; }
+        .annonce-header { display: flex; justify-content: space-between; align-items: center; }
         
-        .tag { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .tag-eleve { background: #ECFDF5; color: #059669; }
+        .annonce-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer; transition: transform 0.2s; }
+        .annonce-avatar:hover { transform: scale(1.08); }
+        .annonce-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid var(--primary); cursor: pointer; transition: transform 0.2s; }
+        .annonce-avatar-placeholder:hover { transform: scale(1.08); }
 
-        /* Alignement parfait des cases à cocher matières */
+        /* Badges de matières avec couleurs personnalisées */
+        .badge-matiere { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-maths { background: #EEF2FF; color: #4F46E5; }
+        .badge-physique { background: #E0F2FE; color: #0284C7; }
+        .badge-francais { background: #FCE7F3; color: #DB2777; }
+        .badge-anglais { background: #FEF3C7; color: #D97706; }
+        .badge-svt { background: #DCFCE7; color: #16A34A; }
+        .badge-ses { background: #F3E8FF; color: #9333EA; }
+        .badge-default { background: #E5E7EB; color: #374151; }
+
+        .tag-format { font-size: 0.8rem; font-weight: 600; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+
+        /* Alignement cases à cocher */
         .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
         .checkbox-label input[type="checkbox"] { width: auto; cursor: pointer; }
@@ -132,6 +143,11 @@
         .modal-content { background: var(--card-bg); padding: 2rem; border-radius: var(--radius); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; }
         .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
         .hidden { display: none !important; }
+
+        /* Style Modal Profil Public */
+        .profile-modal-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+        .profile-modal-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        .profile-modal-avatar-placeholder { width: 90px; height: 90px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 3px solid var(--primary); }
 
         /* Responsive Mobile */
         @media (max-width: 768px) {
@@ -239,7 +255,7 @@
             <div id="global-annonces-container" class="annonces-grid"></div>
         </div>
 
-        <!-- 2. MON COMPTE (PHOTO DE PROFIL UNIQUE) -->
+        <!-- 2. MON COMPTE -->
         <div id="tab-compte" class="tab-pane hidden">
             <div class="card">
                 <h2>Mon Compte</h2>
@@ -346,7 +362,7 @@
             </div>
         </div>
 
-        <!-- 4. MES ANNONCES (AVEC MODIFICATION) -->
+        <!-- 4. MES ANNONCES -->
         <div id="tab-annonces" class="tab-pane hidden">
             <div class="card">
                 <h2>Mes annonces publiées</h2>
@@ -447,20 +463,29 @@
                         </div>
                     </div>
 
-                    <!-- Format des cours avec sélection multiple possible -->
+                    <!-- Format des cours -->
                     <div class="form-group">
                         <label>Format des cours *</label>
-                        <select id="new-format-cours" onchange="togglePresentielField()" required>
+                        <select id="new-format-cours" onchange="togglePresentielFields()" required>
                             <option value="Présentiel et Visio">Présentiel et Visio</option>
                             <option value="Présentiel uniquement">Présentiel uniquement</option>
                             <option value="Visio uniquement">Visio uniquement</option>
                         </select>
                     </div>
 
-                    <!-- Précision Ville / Quartier (Visible uniquement si Présentiel uniquement) -->
-                    <div id="presentiel-ville-container" class="form-group hidden">
-                        <label style="color:var(--primary);">Ville / Quartier du cours en présentiel *</label>
-                        <input type="text" id="new-ville-cours" placeholder="Ex: Lyon 6ème / Part-Dieu">
+                    <!-- Précision Ville / Quartier & Rayon (si Présentiel inclus) -->
+                    <div id="presentiel-extra-container">
+                        <div class="form-group">
+                            <label style="color:var(--primary);">Ville / Quartier d'enseignement *</label>
+                            <input type="text" id="new-ville-cours" placeholder="Ex: Lyon 6ème / Part-Dieu">
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color:var(--primary);">Rayon de déplacement max (km) : <span id="rayon-val-display" style="font-weight:700;">10 km</span></label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="new-rayon-cours" min="0" max="50" value="10" oninput="document.getElementById('rayon-val-display').innerText = this.value + ' km'">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -495,6 +520,8 @@
                             <option value="Physique-Chimie">Physique-Chimie</option>
                             <option value="Français">Français</option>
                             <option value="Anglais">Anglais</option>
+                            <option value="SVT">SVT</option>
+                            <option value="SES">SES</option>
                         </select>
                     </div>
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
@@ -552,6 +579,41 @@
                 </div>
                 <button type="submit" class="btn" style="width:100%;">Envoyer le devoir</button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL : PROFIL PUBLIC D'UN UTILISATEUR -->
+    <div id="modal-profile" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="profile-modal-header">
+                <div id="profile-modal-avatar-container"></div>
+                <div>
+                    <h2 id="profile-modal-name" style="margin-bottom:0.2rem;"></h2>
+                    <p id="profile-modal-role" style="color:var(--primary); font-weight:700; font-size:0.9rem;"></p>
+                    <p id="profile-modal-niveau" style="color:var(--text-light); font-size:0.85rem;"></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>À propos</label>
+                <p id="profile-modal-desc" style="background:var(--bg-body); padding:0.8rem; border-radius:10px; color:var(--text-dark); font-size:0.95rem;"></p>
+            </div>
+
+            <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div style="background:var(--bg-body); padding:0.8rem; border-radius:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-light);"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <span id="profile-modal-email" style="font-weight:600; font-size:0.9rem; display:block; word-break:break-all;"></span>
+                </div>
+                <div style="background:var(--bg-body); padding:0.8rem; border-radius:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-light);"><i class="fa-solid fa-phone"></i> Téléphone</label>
+                    <span id="profile-modal-tel" style="font-weight:600; font-size:0.9rem; display:block;"></span>
+                </div>
+            </div>
+
+            <h3 style="font-size:1.1rem; margin-top:1.5rem; margin-bottom:1rem;">Annonces publiées par ce membre</h3>
+            <div id="profile-modal-annonces-list" style="display:flex; flex-direction:column; gap:0.8rem;"></div>
         </div>
     </div>
 
@@ -679,8 +741,12 @@
                     document.getElementById('ann-desc').value = ann.desc;
                     if(ann.type === 'prof') {
                         document.getElementById('new-format-cours').value = ann.formatCours || 'Présentiel et Visio';
-                        togglePresentielField();
+                        togglePresentielFields();
                         if(ann.villeCours) document.getElementById('new-ville-cours').value = ann.villeCours;
+                        if(ann.rayonCours !== undefined) {
+                            document.getElementById('new-rayon-cours').value = ann.rayonCours;
+                            document.getElementById('rayon-val-display').innerText = ann.rayonCours + " km";
+                        }
                     }
                 }
             } else {
@@ -694,26 +760,27 @@
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
         function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
         function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
+        function closeProfileModal() { document.getElementById('modal-profile').style.display = 'none'; }
 
         function toggleAnnonceFormType() {
             const val = document.getElementById('new-type-annonce').value;
             if(val === 'prof') {
                 document.getElementById('block-prof-ann').classList.remove('hidden');
                 document.getElementById('block-eleve-ann').classList.add('hidden');
-                togglePresentielField();
+                togglePresentielFields();
             } else {
                 document.getElementById('block-prof-ann').classList.add('hidden');
                 document.getElementById('block-eleve-ann').classList.remove('hidden');
             }
         }
 
-        function togglePresentielField() {
+        function togglePresentielFields() {
             const format = document.getElementById('new-format-cours').value;
-            const container = document.getElementById('presentiel-ville-container');
-            if (format === 'Présentiel uniquement') {
-                container.classList.remove('hidden');
-            } else {
+            const container = document.getElementById('presentiel-extra-container');
+            if (format === 'Visio uniquement') {
                 container.classList.add('hidden');
+            } else {
+                container.classList.remove('hidden');
             }
         }
 
@@ -783,7 +850,14 @@
                 nouvelleAnnonce.plage = `De ${minText} à ${maxText}`;
                 nouvelleAnnonce.tarif = user.tarif || "25";
                 nouvelleAnnonce.formatCours = document.getElementById('new-format-cours').value;
-                nouvelleAnnonce.villeCours = nouvelleAnnonce.formatCours === 'Présentiel uniquement' ? document.getElementById('new-ville-cours').value : '';
+                
+                if (nouvelleAnnonce.formatCours !== 'Visio uniquement') {
+                    nouvelleAnnonce.villeCours = document.getElementById('new-ville-cours').value;
+                    nouvelleAnnonce.rayonCours = document.getElementById('new-rayon-cours').value;
+                } else {
+                    nouvelleAnnonce.villeCours = '';
+                    nouvelleAnnonce.rayonCours = 0;
+                }
             } else {
                 nouvelleAnnonce.matiere = document.getElementById('ann-eleve-matiere').value;
                 nouvelleAnnonce.niveau = document.getElementById('ann-eleve-niveau').value;
@@ -801,6 +875,66 @@
             closeAnnonceModal();
             alert(editId ? "Annonce modifiée avec succès !" : "Votre annonce est en ligne !");
             renderGlobalFeed();
+        }
+
+        // OUVERTURE DE LA MODAL DE PROFIL PUBLIC
+        function openUserProfile(auteurName, auteurEmail) {
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            const userCompte = JSON.parse(localStorage.getItem('klass_user_compte')) || {};
+
+            let targetPhoto = null;
+            let targetDesc = "Aucune description renseignée.";
+            let targetNiveau = "Non renseigné";
+            let targetTel = "Non renseigné";
+            let targetRole = "Membre Klass";
+
+            // Si c'est l'utilisateur courant
+            if (userCompte.nom === auteurName || userCompte.email === auteurEmail) {
+                targetPhoto = userCompte.photo;
+                targetDesc = userCompte.desc || targetDesc;
+                targetNiveau = userCompte.niveauEtudes || targetNiveau;
+                targetTel = userCompte.tel || targetTel;
+                targetRole = userCompte.role === 'prof' ? 'Professeur' : 'Élève / Parent';
+            } else {
+                // Essayer de retrouver depuis une annonce
+                const foundAnn = annonces.find(a => a.auteur === auteurName || a.email === auteurEmail);
+                if (foundAnn) targetPhoto = foundAnn.photo;
+            }
+
+            document.getElementById('profile-modal-name').innerText = auteurName;
+            document.getElementById('profile-modal-role').innerText = targetRole;
+            document.getElementById('profile-modal-niveau').innerText = "Niveau d'étude : " + targetNiveau;
+            document.getElementById('profile-modal-desc').innerText = targetDesc;
+            document.getElementById('profile-modal-email').innerText = auteurEmail;
+            document.getElementById('profile-modal-tel').innerText = targetTel;
+
+            const avatarContainer = document.getElementById('profile-modal-avatar-container');
+            if (targetPhoto) {
+                avatarContainer.innerHTML = `<img src="${targetPhoto}" class="profile-modal-avatar" alt="Photo">`;
+            } else {
+                avatarContainer.innerHTML = `<div class="profile-modal-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+            }
+
+            // Lister toutes les annonces publiées par ce membre
+            const userAnnonces = annonces.filter(a => a.auteur === auteurName || a.email === auteurEmail);
+            const annoncesListContainer = document.getElementById('profile-modal-annonces-list');
+            
+            if (userAnnonces.length === 0) {
+                annoncesListContainer.innerHTML = `<p style="color:var(--text-light); font-size:0.9rem;">Aucune autre annonce publiée.</p>`;
+            } else {
+                annoncesListContainer.innerHTML = '';
+                userAnnonces.forEach(a => {
+                    const item = document.createElement('div');
+                    item.style.cssText = "background:var(--bg-body); padding:0.8rem; border-radius:8px; border:1px solid var(--border);";
+                    item.innerHTML = `
+                        <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'} - ${a.matiere || (a.matieres ? a.matieres.join(', ') : 'Général')}</div>
+                        <p style="font-size:0.85rem; color:var(--text-dark); margin-top:2px;">${a.desc}</p>
+                    `;
+                    annoncesListContainer.appendChild(item);
+                });
+            }
+
+            document.getElementById('modal-profile').style.display = 'flex';
         }
 
         function etablirRelation(annonceId) {
@@ -1037,6 +1171,18 @@
             return div;
         }
 
+        function getMatiereBadgeClass(matName) {
+            if (!matName) return 'badge-default';
+            const m = matName.toLowerCase();
+            if (m.includes('math')) return 'badge-maths';
+            if (m.includes('physique')) return 'badge-physique';
+            if (m.includes('francais') || m.includes('français')) return 'badge-francais';
+            if (m.includes('anglais')) return 'badge-anglais';
+            if (m.includes('svt')) return 'badge-svt';
+            if (m.includes('ses')) return 'badge-ses';
+            return 'badge-default';
+        }
+
         function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
             const user = getCurrentUser();
@@ -1065,8 +1211,26 @@
                 const isAuthor = (a.auteur === user.nom || a.email === user.email);
 
                 const avatarHtml = a.photo 
-                    ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar">` 
-                    : `<div class="annonce-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+                    ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar" title="Voir le profil de ${a.auteur}" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">` 
+                    : `<div class="annonce-avatar-placeholder" title="Voir le profil de ${a.auteur}" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')"><i class="fa-solid fa-user"></i></div>`;
+
+                const mainMatiere = a.type === 'prof' 
+                    ? (a.matieres && a.matieres.length > 0 ? a.matieres.join(', ') : 'Toutes Matières') 
+                    : (a.matiere || 'Matière recherchée');
+                
+                const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
+
+                let formatLocHtml = '';
+                if (a.type === 'prof') {
+                    const formatText = a.formatCours || 'Présentiel et Visio';
+                    let locDetails = '';
+                    if (formatText !== 'Visio uniquement' && a.villeCours) {
+                        locDetails = ` (${a.villeCours}${a.rayonCours ? ' - Rayon ' + a.rayonCours + 'km' : ''})`;
+                    }
+                    formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Format : ${formatText}${locDetails}</div>`;
+                } else {
+                    formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-wallet"></i> Budget max : ${a.budget ? a.budget + '€/h' : 'Non précisé'}</div>`;
+                }
 
                 const relationBlockHtml = isAuthor ? '' : `
                     <div style="margin-top:0.5rem; padding-top:1rem; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:0.5rem;">
@@ -1076,16 +1240,20 @@
                 `;
 
                 card.innerHTML = `
-                    <div class="annonce-header">
-                        <div>
-                            <span class="tag ${a.type === 'eleve' ? 'tag-eleve' : ''}">${a.type === 'prof' ? 'Professeur' : 'Recherche d\'élève'}</span>
-                            <h3 style="margin-top:4px;">${a.auteur}</h3>
-                        </div>
+                    <div class="annonce-top-bar">
+                        <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
                         ${avatarHtml}
                     </div>
-                    <p style="font-size:0.9rem; color:var(--text-light);">${a.type === 'prof' ? 'Plage : ' + (a.plage || 'S.O.') + (a.villeCours ? ' | Lieu : ' + a.villeCours : '') : 'Niveau : ' + a.niveau}</p>
-                    <p>${a.desc}</p>
-                    <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
+                    <div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:var(--text-dark);">${a.auteur}</h3>
+                        <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">${a.type === 'prof' ? 'Plage de niveau : ' + (a.plage || 'S.O.') : 'Niveau de l\'élève : ' + a.niveau}</p>
+                    </div>
+                    ${formatLocHtml}
+                    <p style="font-size:0.95rem; color:var(--text-dark); flex:1;">${a.desc}</p>
+                    <div style="font-size:0.8rem; color:var(--text-light); border-top:1px solid var(--border); padding-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fa-solid fa-envelope"></i> ${a.email}</span>
+                        <span>${a.date || ''}</span>
+                    </div>
                     ${relationBlockHtml}
                 `;
                 container.appendChild(card);
@@ -1097,7 +1265,6 @@
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
             const user = getCurrentUser();
             
-            // Filtrer les annonces de l'utilisateur connecté
             const myAnnonces = annonces.filter(a => a.auteur === user.nom || a.email === user.email);
 
             container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée.</p>" : "";
