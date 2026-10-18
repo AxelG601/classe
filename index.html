@@ -14,6 +14,7 @@
             --primary-light: #EEF2FF;
             --accent: #10B981;
             --danger: #EF4444;
+            --warning: #F59E0B;
             --text-dark: #1F2937;
             --text-light: #6B7280;
             --bg-body: #F9FAFB;
@@ -23,319 +24,85 @@
             --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        /* Thème Sombre (Dark Mode) */
+        body.dark-mode {
+            --bg-body: #0F172A;
+            --card-bg: #1E293B;
+            --text-dark: #F8FAFC;
+            --text-light: #94A3B8;
+            --border: #334155;
+            --primary-light: #312E81;
         }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.2s, color 0.2s; }
+        body { background-color: var(--bg-body); color: var(--text-dark); min-height: 100vh; display: flex; }
 
-        /* Barre latérale (Sidebar) */
+        /* Sidebar */
         aside {
-            width: 260px;
-            background: white;
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 50;
+            width: 260px; background: var(--card-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 50;
         }
-
         .sidebar-brand {
-            padding: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
+            padding: 1.5rem; font-size: 1.5rem; font-weight: 800; color: var(--primary);
+            display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border);
         }
-
         .sidebar-brand span { color: var(--accent); }
-
         .btn-add-top {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
+            background: var(--primary); color: white; border: none; width: 36px; height: 36px;
+            border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
         }
-
-        .btn-add-top:hover { background: var(--primary-hover); transform: scale(1.05); }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-        }
-
+        .sidebar-menu { list-style: none; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
         .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0.85rem 1rem;
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: 0.2s;
-            cursor: pointer;
-            position: relative;
+            display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem; color: var(--text-light);
+            text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer;
         }
+        .sidebar-menu li.active a, .sidebar-menu li a:hover { background: var(--primary-light); color: var(--primary); }
+        .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
 
-        .sidebar-menu li.active a, .sidebar-menu li a:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        /* Pastille rouge de notification */
-        .notification-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--danger);
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: auto;
-            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+        /* Mode Switcher Button */
+        .dark-mode-toggle {
+            padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--text-light);
         }
 
         /* Contenu principal */
-        .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 2rem;
-            max-width: calc(100vw - 260px);
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            border: 1px solid var(--border);
-            margin-bottom: 2rem;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .main-content { margin-left: 260px; flex: 1; padding: 2rem; max-width: calc(100vw - 260px); }
+        .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; border: 1px solid var(--border); margin-bottom: 2rem; }
         h1, h2 { color: var(--text-dark); font-weight: 700; margin-bottom: 1rem; }
-        h1 { font-size: 1.8rem; }
-        h2 { font-size: 1.4rem; }
-
         p.subtitle { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-        /* Barre de recherche et filtres */
+        /* Filtres & Recherche avec géolocalisation */
         .search-filters-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;
+            background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);
         }
-
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-dark); }
         input, select, textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            outline: none;
-            background: #FAFAFA;
-            transition: 0.2s;
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.95rem; outline: none; background: var(--bg-body); color: var(--text-dark);
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
         .btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            background-color: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; font-size: 0.95rem;
+            font-weight: 600; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn:hover { background-color: var(--primary-hover); }
+        .btn-teams { background-color: #464EB8; color: white; }
         .btn-secondary { background-color: #E5E7EB; color: var(--text-dark); }
-        .btn-secondary:hover { background-color: #D1D5DB; }
         .btn-danger { background-color: #FEE2E2; color: var(--danger); }
-        .btn-danger:hover { background-color: #FCA5A5; }
         .btn-success { background-color: #D1FAE5; color: var(--accent); }
-        .btn-success:hover { background-color: #A7F3D0; }
 
-        /* Grille des profils / annonces */
-        .annonces-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .annonce-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-            position: relative;
-        }
-
-        .relation-box {
-            margin-top: 0.5rem;
-            padding-top: 1rem;
-            border-top: 1px dashed var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        .tag-eleve { background: #ECFDF5; color: #059669; }
-
-        /* Curseur de niveau */
-        .slider-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--bg-body);
-            padding: 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-        }
-        input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
-        .level-display { font-weight: 700; color: var(--text-dark); min-width: 90px; text-align: right; }
-
-        /* Emploi du temps */
-        .edt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .edt-grid-wrapper {
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: white;
-        }
-        .edt-grid {
-            display: grid;
-            grid-template-columns: 80px repeat(7, minmax(130px, 1fr));
-            min-width: 900px;
-        }
-        .edt-cell {
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            padding: 0.5rem;
-            min-height: 50px;
-            font-size: 0.85rem;
-            position: relative;
-        }
-        .edt-header-cell {
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 700;
-            text-align: center;
-            padding: 0.75rem 0.5rem;
-        }
-        .edt-time-cell {
-            font-weight: 600;
-            color: var(--text-light);
-            text-align: center;
-            background: #FAFAFA;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .edt-event-item {
-            background: var(--primary);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+        /* Badges & Annonces */
+        .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .tag { background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .tag-verified { background: #D1FAE5; color: #059669; }
 
         /* Modals */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            display: none;
-        }
-        .modal-content {
-            background: white;
-            padding: 2.5rem;
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 650px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: var(--shadow);
-        }
-        .modal-close {
-            position: absolute;
-            top: 1.5rem; right: 1.5rem;
-            background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light);
-        }
-
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
+        .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: var(--radius); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
         .hidden { display: none !important; }
-
-        @media (max-width: 768px) {
-            aside { width: 70px; }
-            .sidebar-brand span, .sidebar-menu span { display: none; }
-            .main-content { margin-left: 70px; max-width: calc(100vw - 70px); padding: 1rem; }
-        }
     </style>
 </head>
 <body>
@@ -344,31 +111,32 @@
     <aside>
         <div class="sidebar-brand">
             <div>K<span>l</span>.</div>
-            <button class="btn-add-top" title="Déposer une annonce" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
+            <button class="btn-add-top" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
         </div>
         <ul class="sidebar-menu">
             <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil / Flux</span></a></li>
             <li id="menu-compte" onclick="switchTab('compte')"><a><i class="fa-solid fa-user"></i> <span>Mon compte</span></a></li>
-            <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Emploi du temps</span></a></li>
+            <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Planning & Teams</span></a></li>
             <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Mes annonces</span></a></li>
-            <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
+            <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs & Suivi</span></a></li>
             <li id="menu-messagerie" onclick="switchTab('messagerie')">
-                <a>
-                    <i class="fa-solid fa-comments"></i> 
-                    <span>Messagerie</span>
-                    <span id="msg-notif-dot" class="notification-dot hidden"></span>
-                </a>
+                <a><i class="fa-solid fa-comments"></i> <span>Messagerie</span><span id="msg-notif-dot" class="notification-dot hidden"></span></a>
             </li>
         </ul>
+
+        <div class="dark-mode-toggle" onclick="toggleDarkMode()">
+            <span><i class="fa-solid fa-moon"></i> Mode Sombre</span>
+            <input type="checkbox" id="dark-switch" style="width: auto;">
+        </div>
     </aside>
 
     <!-- CONTENU PRINCIPAL -->
     <div class="main-content">
 
-        <!-- 1. ACCUEIL / FLUX DE TOUTES LES ANNONCES + FILTRES -->
+        <!-- 1. ACCUEIL / FLUX + RECHERCHE & GÉOLOCALISATION -->
         <div id="tab-home" class="tab-pane">
-            <h1>Fil d'actualité & Recherche</h1>
-            <p class="subtitle">Consultez l'ensemble des annonces de profs et d'élèves en direct.</p>
+            <h1>Fil d'actualité & Recherche Géolocalisée</h1>
+            <p class="subtitle">Trouvez des professeurs ou élèves près de chez vous.</p>
 
             <div class="search-filters-bar">
                 <div class="form-group" style="margin-bottom:0;">
@@ -379,44 +147,30 @@
                         <option value="Physique-Chimie">Physique-Chimie</option>
                         <option value="Français">Français</option>
                         <option value="Anglais">Anglais</option>
-                        <option value="SVT">SVT</option>
-                        <option value="SES">SES</option>
                     </select>
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
-                    <label>Niveau</label>
-                    <select id="filter-niveau" onchange="renderGlobalFeed()">
-                        <option value="">Tous les niveaux</option>
-                        <option value="6ème">6ème</option>
-                        <option value="5ème">5ème</option>
-                        <option value="4ème">4ème</option>
-                        <option value="3ème">3ème</option>
-                        <option value="2nde">2nde</option>
-                        <option value="1ère">1ère</option>
-                        <option value="Terminale">Terminale</option>
-                        <option value="Post-bac">Post-bac</option>
-                    </select>
+                    <label>Ville / Adresse</label>
+                    <input type="text" id="filter-ville" placeholder="Ex: Lyon" oninput="renderGlobalFeed()">
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
-                    <label>Type</label>
-                    <select id="filter-type" onchange="renderGlobalFeed()">
-                        <option value="">Professeurs & Élèves</option>
-                        <option value="prof">Professeurs uniquement</option>
-                        <option value="eleve">Recherche d'élève</option>
+                    <label>Rayon (km)</label>
+                    <select id="filter-rayon" onchange="renderGlobalFeed()">
+                        <option value="10">10 km autour</option>
+                        <option value="25">25 km autour</option>
+                        <option value="50">50 km autour</option>
                     </select>
                 </div>
             </div>
 
-            <div id="global-annonces-container" class="annonces-grid">
-                <!-- Injecté dynamiquement -->
-            </div>
+            <div id="global-annonces-container" class="annonces-grid"></div>
         </div>
 
-        <!-- 2. MON COMPTE -->
+        <!-- 2. MON COMPTE & PROFILE VÉRIFIÉ -->
         <div id="tab-compte" class="tab-pane hidden">
             <div class="card">
-                <h2>Mon Compte</h2>
-                <p class="subtitle">Mettez à jour vos informations personnelles.</p>
+                <h2>Mon Compte & Sécurité</h2>
+                <p class="subtitle">Gérez vos identifiants et votre statut de vérification.</p>
                 <form id="form-compte" onsubmit="saveCompte(event)">
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
@@ -425,59 +179,17 @@
                         </div>
                         <div>
                             <label>Rôle principal</label>
-                            <select id="acc-role" onchange="toggleProfFields()" required>
-                                <option value="prof">Je donne des cours (Professeur)</option>
-                                <option value="eleve">Je cherche un professeur (Élève/Parent)</option>
+                            <select id="acc-role" required>
+                                <option value="prof">Professeur</option>
+                                <option value="eleve">Élève/Parent</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div>
-                            <label>Email (pour les notifications)</label>
-                            <input type="email" id="acc-email" required placeholder="jean@email.com">
-                        </div>
-                        <div>
-                            <label>Numéro de téléphone</label>
-                            <input type="tel" id="acc-tel" required placeholder="06 12 34 56 78">
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label>Photo de profil ou justificatif (Photo / JPEG / PDF)</label>
-                        <input type="file" id="acc-file" accept="image/*,.pdf">
-                    </div>
-
-                    <div id="prof-extra-fields">
-                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                            <div>
-                                <label>Tarif horaire (€)</label>
-                                <input type="number" id="acc-tarif" placeholder="Ex: 25">
-                            </div>
-                            <div>
-                                <label>Format des cours</label>
-                                <select id="acc-format">
-                                    <option value="Présentiel et Visio">Présentiel et Visio</option>
-                                    <option value="Présentiel">Présentiel uniquement</option>
-                                    <option value="Visio">Visio uniquement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                            <div>
-                                <label>Lieu d'activité</label>
-                                <input type="text" id="acc-lieu" placeholder="Ex: Lyon">
-                            </div>
-                            <div>
-                                <label>Niveau d'étude</label>
-                                <input type="text" id="acc-niveau-etudes" placeholder="Ex: Master 2">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Courte description personnelle</label>
-                        <textarea id="acc-desc" rows="3" placeholder="Parlez de vous..."></textarea>
+                        <label>Demande de Badge "Profil Vérifié" (Carte d'identité / Diplôme)</label>
+                        <input type="file" id="acc-document" accept="image/*,.pdf">
+                        <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px;">Un badge vérifié augmente votre visibilité.</p>
                     </div>
 
                     <button type="submit" class="btn">Enregistrer mes modifications</button>
@@ -485,16 +197,16 @@
             </div>
         </div>
 
-        <!-- 3. EMPLOI DU TEMPS -->
+        <!-- 3. EMPLOI DU TEMPS + MS TEAMS & SUIVI FINANCIER -->
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
-                <h2>Emploi du temps hebdomadaire</h2>
-                <p class="subtitle">Affichez et gérez vos cours réservés heure par heure.</p>
+                <h2>Planning, Visio MS Teams & Paiements</h2>
+                <p class="subtitle">Programmez vos cours et générez des réunions Teams en un clic.</p>
 
                 <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1rem;">
                         <div>
-                            <label>Titre / Cours</label>
+                            <label>Titre / Élève</label>
                             <input type="text" id="event-title" required placeholder="Ex: Cours Maths - Lucas">
                         </div>
                         <div>
@@ -502,26 +214,17 @@
                             <input type="date" id="event-date" required>
                         </div>
                         <div>
-                            <label>Heure début</label>
-                            <select id="event-time-start" required></select>
-                        </div>
-                        <div>
-                            <label>Heure fin</label>
-                            <select id="event-time-end" required></select>
+                            <label>Statut Règlement</label>
+                            <select id="event-paiement">
+                                <option value="paye">Payé 💳</option>
+                                <option value="attente">En attente de paiement ⏳</option>
+                            </select>
                         </div>
                     </div>
                     <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Ajouter au planning</button>
                 </form>
 
-                <div class="edt-header">
-                    <button class="btn btn-secondary" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i> Semaine précédente</button>
-                    <h3 id="edt-week-label" style="font-size:1.1rem; font-weight:700;"></h3>
-                    <button class="btn btn-secondary" onclick="changeWeek(1)">Semaine suivante <i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-
-                <div class="edt-grid-wrapper">
-                    <div id="edt-grid" class="edt-grid"></div>
-                </div>
+                <div id="planning-events-list" style="display:flex; flex-direction:column; gap:1rem;"></div>
             </div>
         </div>
 
@@ -529,256 +232,81 @@
         <div id="tab-annonces" class="tab-pane hidden">
             <div class="card">
                 <h2>Mes annonces publiées</h2>
-                <p class="subtitle">Modifiez ou supprimez vos annonces en un clic.</p>
                 <div id="my-annonces-container" class="annonces-grid"></div>
             </div>
         </div>
 
-        <!-- 5. DEVOIRS (AVEC SUPPRESSION RÉSERVÉE À L'AUTEUR) -->
+        <!-- 5. DEVOIRS, RENDUS ET CARNET DE SUIVI -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                    <div>
-                        <h2>Espace Devoirs</h2>
-                        <p class="subtitle" style="margin-bottom:0;">Suivi et dépôt des devoirs entre professeurs et élèves.</p>
-                    </div>
+                    <h2>Espace Devoirs & Carnet de Suivi</h2>
                     <button class="btn" onclick="openDevoirModal()"><i class="fa-solid fa-plus"></i> Déposer un devoir</button>
                 </div>
-                <div id="devoirs-container" style="display:flex; flex-direction:column; gap:1rem;">
-                    <!-- Liste des devoirs -->
-                </div>
+
+                <div id="devoirs-container" style="display:flex; flex-direction:column; gap:1rem;"></div>
             </div>
         </div>
 
-        <!-- 6. MESSAGERIE & DEMANDES DE MISE EN RELATION -->
+        <!-- 6. MESSAGERIE -->
         <div id="tab-messagerie" class="tab-pane hidden">
             <div class="card">
-                <h2>Messagerie & Demandes de mise en relation</h2>
-                <p class="subtitle">Consultez et répondez aux personnes qui souhaitent établir une relation avec vous.</p>
-                <div id="demandes-relations-container" style="display:flex; flex-direction:column; gap:1rem;">
-                    <!-- Demandes injectées ici -->
-                </div>
+                <h2>Messagerie en temps réel</h2>
+                <div id="demandes-relations-container" style="display:flex; flex-direction:column; gap:1rem;"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- MODAL POPUP : CRÉATION DU COMPTE PREMIÈRE VISITE -->
-    <div id="modal-first-visit" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeFirstVisitModal()"><i class="fa-solid fa-xmark"></i></button>
-            <div style="text-align:center; margin-bottom:1.5rem;">
-                <i class="fa-solid fa-graduation-cap" style="font-size:2.5rem; color:var(--primary);"></i>
-                <h2 style="margin-top:0.5rem;">Bienvenue sur Klass !</h2>
-                <p class="subtitle" style="margin-bottom:0;">Créez votre compte en quelques secondes (optionnel).</p>
-            </div>
-            <form onsubmit="submitFirstVisitAccount(event)">
-                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                    <div>
-                        <label>Nom & Prénom</label>
-                        <input type="text" id="pop-nom" required placeholder="Jean Dupont">
-                    </div>
-                    <div>
-                        <label>Rôle</label>
-                        <select id="pop-role" required>
-                            <option value="prof">Je donne des cours</option>
-                            <option value="eleve">Je cherche un prof</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                    <div>
-                        <label>Email</label>
-                        <input type="email" id="pop-email" required placeholder="jean@email.com">
-                    </div>
-                    <div>
-                        <label>Téléphone</label>
-                        <input type="tel" id="pop-tel" required placeholder="06 12 34 56 78">
-                    </div>
-                </div>
-                <button type="submit" class="btn" style="width:100%;">Créer mon compte</button>
-                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0.5rem;" onclick="closeFirstVisitModal()">Continuer sans compte</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL : DÉPOSER UNE ANNONCE -->
-    <div id="modal-annonce" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
-            <h2>Déposer une annonce</h2>
-            <form id="form-new-annonce" onsubmit="submitNewAnnonce(event)">
-                <div class="form-group">
-                    <label>Je souhaite :</label>
-                    <select id="new-type-annonce" onchange="toggleAnnonceFormType()" required>
-                        <option value="prof">Donner des cours particuliers</option>
-                        <option value="eleve">Chercher un professeur particulier</option>
-                    </select>
-                </div>
-
-                <div id="block-prof-ann">
-                    <div class="form-group">
-                        <label>Matière(s) enseignée(s)</label>
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <label><input type="checkbox" name="matieres" value="Mathématiques"> Mathématiques</label>
-                            <label><input type="checkbox" name="matieres" value="Physique-Chimie"> Physique-Chimie</label>
-                            <label><input type="checkbox" name="matieres" value="Français"> Français</label>
-                            <label><input type="checkbox" name="matieres" value="Anglais"> Anglais</label>
-                            <label><input type="checkbox" name="matieres" value="SVT"> SVT</label>
-                            <label><input type="checkbox" name="matieres" value="SES"> SES</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Plage de niveaux d'enseignement</label>
-                        <div style="margin-bottom:0.75rem;">
-                            <label style="font-size:0.85rem; color:var(--text-light);">Niveau minimum :</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="min-level-slider" min="0" max="7" value="0" oninput="updateLevelSliderDisplay()">
-                                <span class="level-display" id="min-level-label">6ème</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label style="font-size:0.85rem; color:var(--text-light);">Niveau maximum :</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="max-level-slider" min="0" max="7" value="6" oninput="updateLevelSliderDisplay()">
-                                <span class="level-display" id="max-level-label">Terminale</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="postbac-custom-container" class="form-group hidden">
-                        <label style="color:var(--primary);">Précisez jusqu'à quel niveau d'étude vous enseignez (Post-bac)</label>
-                        <input type="text" id="postbac-custom-text" placeholder="Ex: Licence 3 / Prépa / Bac+3">
-                    </div>
-                </div>
-
-                <div id="block-eleve-ann" class="hidden">
-                    <div class="form-group">
-                        <label>Matière recherchée</label>
-                        <select id="ann-eleve-matiere">
-                            <option value="Mathématiques">Mathématiques</option>
-                            <option value="Physique-Chimie">Physique-Chimie</option>
-                            <option value="Français">Français</option>
-                            <option value="Anglais">Anglais</option>
-                            <option value="SVT">SVT</option>
-                            <option value="SES">SES</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div>
-                            <label>Niveau de l'élève</label>
-                            <select id="ann-eleve-niveau">
-                                <option value="6ème">6ème</option>
-                                <option value="5ème">5ème</option>
-                                <option value="4ème">4ème</option>
-                                <option value="3ème">3ème</option>
-                                <option value="2nde">2nde</option>
-                                <option value="1ère">1ère</option>
-                                <option value="Terminale">Terminale</option>
-                                <option value="Post-bac">Post-bac</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Budget max (€/h)</label>
-                            <input type="number" id="ann-eleve-budget" placeholder="30">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Description de l'annonce</label>
-                    <textarea id="ann-desc" rows="3" required placeholder="Détails de votre annonce..."></textarea>
-                </div>
-
-                <button type="submit" class="btn" style="width:100%;">Valider mon annonce</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL : DÉPOSER UN DEVOIR -->
+    <!-- MODAL : DEPOSER DEVOIR -->
     <div id="modal-devoir" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeDevoirModal()"><i class="fa-solid fa-xmark"></i></button>
             <h2>Déposer un devoir</h2>
             <form onsubmit="submitDevoir(event)">
                 <div class="form-group">
-                    <label>Destinataire (Nom, Prénom ou Email)</label>
-                    <input type="text" id="dev-destinataire" required placeholder="Ex: Lucas Bernard ou lucas@email.com">
+                    <label>Destinataire</label>
+                    <input type="text" id="dev-destinataire" required placeholder="Lucas Bernard">
                 </div>
                 <div class="form-group">
                     <label>Matière</label>
-                    <input type="text" id="dev-matiere" required placeholder="Ex: Mathématiques">
+                    <input type="text" id="dev-matiere" required placeholder="Mathématiques">
                 </div>
                 <div class="form-group">
-                    <label>À faire avant le :</label>
-                    <input type="date" id="dev-date" required>
+                    <label>Consignes / Travail</label>
+                    <textarea id="dev-travail" rows="3" required></textarea>
                 </div>
+                <button type="submit" class="btn">Envoyer le devoir</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL : ANNONCE -->
+    <div id="modal-annonce" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Publier une annonce</h2>
+            <form onsubmit="submitNewAnnonce(event)">
                 <div class="form-group">
-                    <label>Travail demandé (texte, consignes)</label>
-                    <textarea id="dev-travail" rows="3" required placeholder="Exercices page 42..."></textarea>
+                    <label>Description</label>
+                    <textarea id="ann-desc" rows="3" required></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Fichiers joints (Photo / PDF optionnel)</label>
-                    <input type="file" id="dev-file" accept="image/*,.pdf">
-                </div>
-                <button type="submit" class="btn" style="width:100%;">Envoyer le devoir</button>
+                <button type="submit" class="btn">Publier</button>
             </form>
         </div>
     </div>
 
     <script>
-        const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
-        let currentWeekOffset = 0;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initTimeSelects();
-            loadUserData();
-            checkNotificationStatus();
-            
-            if (!localStorage.getItem('klass_visited')) {
-                document.getElementById('modal-first-visit').style.display = 'flex';
-            }
-        });
-
-        function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr" };
+        // Mode Sombre
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('klass_dark_mode', isDark);
         }
 
-        function closeFirstVisitModal() {
-            localStorage.setItem('klass_visited', 'true');
-            document.getElementById('modal-first-visit').style.display = 'none';
-        }
-
-        function submitFirstVisitAccount(e) {
-            e.preventDefault();
-            const compte = {
-                nom: document.getElementById('pop-nom').value,
-                role: document.getElementById('pop-role').value,
-                email: document.getElementById('pop-email').value,
-                tel: document.getElementById('pop-tel').value,
-                tarif: "25", format: "Présentiel et Visio", lieu: "", niveauEtudes: "", desc: ""
-            };
-            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
-            closeFirstVisitModal();
-            loadUserData();
-            alert("Votre compte a été créé avec succès !");
-        }
-
-        function loadUserData() {
-            const data = JSON.parse(localStorage.getItem('klass_user_compte'));
-            if (data) {
-                document.getElementById('acc-nom').value = data.nom || '';
-                document.getElementById('acc-role').value = data.role || 'prof';
-                document.getElementById('acc-email').value = data.email || '';
-                document.getElementById('acc-tel').value = data.tel || '';
-                document.getElementById('acc-tarif').value = data.tarif || '';
-                document.getElementById('acc-format').value = data.format || 'Présentiel et Visio';
-                document.getElementById('acc-lieu').value = data.lieu || '';
-                document.getElementById('acc-niveau-etudes').value = data.niveauEtudes || '';
-                document.getElementById('acc-desc').value = data.desc || '';
-                toggleProfFields();
-            }
+        if (localStorage.getItem('klass_dark_mode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('dark-switch').checked = true;
         }
 
         // Navigation
@@ -787,267 +315,89 @@
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('menu-' + tabId).classList.add('active');
-            
             if(tabId === 'home') renderGlobalFeed();
-            if(tabId === 'annonces') renderMyAnnonces();
             if(tabId === 'planning') renderPlanning();
             if(tabId === 'devoirs') renderDevoirs();
-            if(tabId === 'messagerie') {
-                renderDemandesRelations();
-                // Effacer le point rouge de notification quand on ouvre la messagerie
-                document.getElementById('msg-notif-dot').classList.add('hidden');
-                localStorage.setItem('klass_has_unread_msg', 'false');
-            }
         }
 
-        function checkNotificationStatus() {
-            if(localStorage.getItem('klass_has_unread_msg') === 'true') {
-                document.getElementById('msg-notif-dot').classList.remove('hidden');
-            }
-        }
-
-        // Curseur de niveau
-        function updateLevelSliderDisplay() {
-            const minSlider = document.getElementById('min-level-slider');
-            const maxSlider = document.getElementById('max-level-slider');
-            let minVal = parseInt(minSlider.value);
-            let maxVal = parseInt(maxSlider.value);
-
-            if (minVal > maxVal) {
-                maxSlider.value = minVal;
-                maxVal = minVal;
-            }
-
-            document.getElementById('min-level-label').innerText = niveauxLabels[minVal];
-            document.getElementById('max-level-label').innerText = niveauxLabels[maxVal];
-
-            const postbacContainer = document.getElementById('postbac-custom-container');
-            if (maxVal === 7) postbacContainer.classList.remove('hidden');
-            else postbacContainer.classList.add('hidden');
-        }
-
-        // Modals
         function openAnnonceModal() { document.getElementById('modal-annonce').style.display = 'flex'; }
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
         function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
         function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
 
-        function toggleAnnonceFormType() {
-            const val = document.getElementById('new-type-annonce').value;
-            if(val === 'prof') {
-                document.getElementById('block-prof-ann').classList.remove('hidden');
-                document.getElementById('block-eleve-ann').classList.add('hidden');
-            } else {
-                document.getElementById('block-prof-ann').classList.add('hidden');
-                document.getElementById('block-eleve-ann').classList.remove('hidden');
-            }
+        // Génération Lien MS Teams
+        function generateTeamsLink(title) {
+            const teamsUrl = `https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(title)}`;
+            window.open(teamsUrl, '_blank');
         }
 
-        function toggleProfFields() {
-            const role = document.getElementById('acc-role').value;
-            if(role === 'eleve') document.getElementById('prof-extra-fields').classList.add('hidden');
-            else document.getElementById('prof-extra-fields').classList.remove('hidden');
-        }
-
-        function saveCompte(e) {
+        // Planning avec Suivi de Paiement & MS Teams
+        function addEvent(e) {
             e.preventDefault();
-            const compte = {
-                nom: document.getElementById('acc-nom').value,
-                role: document.getElementById('acc-role').value,
-                email: document.getElementById('acc-email').value,
-                tel: document.getElementById('acc-tel').value,
-                tarif: document.getElementById('acc-tarif').value,
-                format: document.getElementById('acc-format').value,
-                lieu: document.getElementById('acc-lieu').value,
-                niveauEtudes: document.getElementById('acc-niveau-etudes').value,
-                desc: document.getElementById('acc-desc').value
-            };
-            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
-            alert("Informations de compte enregistrées !");
+            const title = document.getElementById('event-title').value;
+            const date = document.getElementById('event-date').value;
+            const paiement = document.getElementById('event-paiement').value;
+
+            let events = JSON.parse(localStorage.getItem('klass_events')) || [];
+            events.push({ id: Date.now(), title, date, paiement });
+            localStorage.setItem('klass_events', JSON.stringify(events));
+            renderPlanning();
         }
 
-        // Soumission Annonce
-        function submitNewAnnonce(e) {
-            e.preventDefault();
-            const type = document.getElementById('new-type-annonce').value;
-            const user = getCurrentUser();
+        function renderPlanning() {
+            const container = document.getElementById('planning-events-list');
+            let events = JSON.parse(localStorage.getItem('klass_events')) || [];
+            container.innerHTML = events.length === 0 ? "<p>Aucun cours programmé.</p>" : "";
 
-            let nouvelleAnnonce = {
-                id: Date.now(),
-                type: type,
-                auteur: user.nom,
-                email: user.email,
-                desc: document.getElementById('ann-desc').value,
-                date: new Date().toLocaleDateString()
-            };
-
-            if(type === 'prof') {
-                const checkedMat = Array.from(document.querySelectorAll('input[name="matieres"]:checked')).map(cb => cb.value);
-                let maxText = niveauxLabels[parseInt(document.getElementById('max-level-slider').value)];
-                if (maxText === "Post-bac") {
-                    const custom = document.getElementById('postbac-custom-text').value;
-                    if(custom) maxText = custom;
-                }
-                const minText = niveauxLabels[parseInt(document.getElementById('min-level-slider').value)];
-
-                nouvelleAnnonce.matieres = checkedMat;
-                nouvelleAnnonce.plage = `De ${minText} à ${maxText}`;
-                nouvelleAnnonce.tarif = user.tarif || "25";
-                nouvelleAnnonce.lieu = user.lieu || "En ligne";
-            } else {
-                nouvelleAnnonce.matiere = document.getElementById('ann-eleve-matiere').value;
-                nouvelleAnnonce.niveau = document.getElementById('ann-eleve-niveau').value;
-                nouvelleAnnonce.budget = document.getElementById('ann-eleve-budget').value;
-            }
-
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            annonces.push(nouvelleAnnonce);
-            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
-
-            closeAnnonceModal();
-            alert("Votre annonce est en ligne !");
-            renderGlobalFeed();
-        }
-
-        // ÉTABLIR LA RELATION (BOUTON SOUS L'ANNONCE)
-        function etablirRelation(annonceId) {
-            const user = getCurrentUser();
-            const msgInput = document.getElementById(`relation-msg-${annonceId}`);
-            const message = msgInput ? msgInput.value.trim() : '';
-
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            const annonce = annonces.find(a => a.id === annonceId);
-
-            if (!annonce) return;
-
-            const nouvelleDemande = {
-                id: Date.now(),
-                expediteur: user.nom,
-                expediteurEmail: user.email,
-                destinataire: annonce.auteur,
-                destinataireEmail: annonce.email,
-                message: message || "Bonjour, je souhaite établir une relation suite à votre annonce.",
-                status: "en_attente",
-                date: new Date().toLocaleDateString()
-            };
-
-            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
-            demandes.push(nouvelleDemande);
-            localStorage.setItem('klass_demandes_relations', JSON.stringify(demandes));
-
-            // Activer la notification (point rouge) pour le destinataire
-            localStorage.setItem('klass_has_unread_msg', 'true');
-            checkNotificationStatus();
-
-            alert(`Demande de mise en relation envoyée à ${annonce.auteur} ! Une notification apparaîtra dans sa messagerie.`);
-            if(msgInput) msgInput.value = '';
-        }
-
-        function renderDemandesRelations() {
-            const container = document.getElementById('demandes-relations-container');
-            const user = getCurrentUser();
-            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
-
-            // Filtrer les demandes reçues par l'utilisateur connecté ou afficher toutes les demandes si mode démo
-            const mesDemandes = demandes.filter(d => d.destinataire === user.nom || d.destinataireEmail === user.email || user.nom === "Utilisateur Visiteur");
-
-            if (mesDemandes.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:2rem;">Aucune demande de mise en relation reçue pour le moment.</p>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            mesDemandes.forEach(d => {
-                const card = document.createElement('div');
-                card.style.cssText = "background:white; padding:1.25rem; border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; gap:0.5rem;";
-                
-                let badgeStatus = `<span class="tag" style="background:#FEF3C7; color:#D97706;">En attente</span>`;
-                if(d.status === 'acceptee') badgeStatus = `<span class="tag" style="background:#D1FAE5; color:#059669;">Acceptée ✅</span>`;
-                if(d.status === 'refusee') badgeStatus = `<span class="tag" style="background:#FEE2E2; color:#EF4444;">Refusée ❌</span>`;
-
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong>De : ${d.expediteur} (${d.expediteurEmail})</strong>
-                        ${badgeStatus}
-                    </div>
-                    <p style="color:var(--text-dark); background:var(--bg-body); padding:0.75rem; border-radius:8px; font-size:0.9rem;">"${d.message}"</p>
-                    ${d.status === 'en_attente' ? `
-                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                            <button class="btn btn-success" style="font-size:0.85rem; padding:0.5rem 1rem;" onclick="repondreDemande(${d.id}, 'acceptee')">Accepter</button>
-                            <button class="btn btn-danger" style="font-size:0.85rem; padding:0.5rem 1rem;" onclick="repondreDemande(${d.id}, 'refusee')">Refuser</button>
+            events.forEach(ev => {
+                container.innerHTML += `
+                    <div style="background:var(--card-bg); padding:1.2rem; border:1px solid var(--border); border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${ev.title}</strong> (${ev.date})
+                            <div style="font-size:0.85rem; margin-top:4px;">Règlement : ${ev.paiement === 'paye' ? '<span style="color:var(--accent);">Payé 💳</span>' : '<span style="color:var(--warning);">En attente ⏳</span>'}</div>
                         </div>
-                    ` : ''}
+                        <button class="btn btn-teams" onclick="generateTeamsLink('${ev.title}')">
+                            <i class="fa-solid fa-video"></i> Lancer le cours en Visio (Teams)
+                        </button>
+                    </div>
                 `;
-                container.appendChild(card);
             });
         }
 
-        function repondreDemande(id, status) {
-            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
-            demandes = demandes.map(d => d.id === id ? {...d, status: status} : d);
-            localStorage.setItem('klass_demandes_relations', JSON.stringify(demandes));
-            renderDemandesRelations();
-            alert(`Demande ${status === 'acceptee' ? 'acceptée' : 'refusée'}.`);
-        }
-
-        // DEVOIRS (SEUL L'AUTEUR PEUT SUPPRIMER)
+        // Devoirs & Carnet de Suivi
         function submitDevoir(e) {
             e.preventDefault();
-            const user = getCurrentUser();
-            const dest = document.getElementById('dev-destinataire').value.trim();
-
-            if (!dest) {
-                alert("Veuillez indiquer un destinataire pour ce devoir.");
-                return;
-            }
-
             const dev = {
                 id: Date.now(),
-                auteur: user.nom,
-                destinataire: dest,
+                destinataire: document.getElementById('dev-destinataire').value,
                 matiere: document.getElementById('dev-matiere').value,
-                date: document.getElementById('dev-date').value,
                 travail: document.getElementById('dev-travail').value,
-                fait: false
+                renduFile: null,
+                note: null
             };
-
-            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-            devoirsList.push(dev);
-            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
-            
+            let devoirs = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            devoirs.push(dev);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirs));
             closeDevoirModal();
-            alert(`Devoir envoyé à ${dest} !`);
             renderDevoirs();
         }
 
         function renderDevoirs() {
             const container = document.getElementById('devoirs-container');
-            const user = getCurrentUser();
-            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-            
-            container.innerHTML = devoirsList.length === 0 ? "<p style='color:var(--text-light); text-align:center;'>Aucun devoir enregistré pour le moment.</p>" : "";
-            
-            devoirsList.forEach(d => {
-                const canDelete = (d.auteur === user.nom || !d.auteur || user.nom === "Utilisateur Visiteur");
+            let devoirs = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            container.innerHTML = devoirs.length === 0 ? "<p>Aucun devoir enregistré.</p>" : "";
 
+            devoirs.forEach(d => {
                 container.innerHTML += `
-                    <div style="background:white; padding:1.2rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <span class="tag" style="margin-bottom:6px;">Destinataire : ${d.destinataire}</span>
-                            <span style="font-size:0.8rem; color:var(--text-light); margin-left:8px;">Par : ${d.auteur || 'Inconnu'}</span>
-                            <div style="font-weight:700; font-size:1.05rem; margin-top:4px;">${d.matiere} (À faire pour : ${d.date})</div>
-                            <p style="margin-top:4px; color:var(--text-light);">${d.travail}</p>
+                    <div style="background:var(--card-bg); padding:1.2rem; border:1px solid var(--border); border-radius:12px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <strong>Matière : ${d.matiere} (Élève : ${d.destinataire})</strong>
+                            <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="deleteDevoir(${d.id})">Supprimer</button>
                         </div>
-                        <div style="display:flex; align-items:center; gap:1rem;">
-                            <div style="text-align:right;">
-                                <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
-                                <div style="font-size:0.8rem; margin-top:4px; color:var(--text-light);">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</div>
-                            </div>
-                            ${canDelete ? `
-                                <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="deleteDevoir(${d.id})" title="Supprimer ce devoir">
-                                    <i class="fa-solid fa-trash"></i> Supprimer
-                                </button>
-                            ` : ''}
+                        <p style="margin-top:0.5rem; color:var(--text-light);">${d.travail}</p>
+                        <div style="margin-top:1rem; padding-top:0.5rem; border-top:1px dashed var(--border); font-size:0.85rem;">
+                            <label>Déposer ma copie (PDF / Image) :</label>
+                            <input type="file" style="margin-top:4px;">
                         </div>
                     </div>
                 `;
@@ -1055,206 +405,24 @@
         }
 
         function deleteDevoir(id) {
-            if(!confirm("Voulez-vous vraiment supprimer ce devoir ?")) return;
-            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-            devoirsList = devoirsList.filter(d => d.id !== id);
-            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            let devoirs = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            devoirs = devoirs.filter(d => d.id !== id);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirs));
             renderDevoirs();
-        }
-
-        function toggleDevoir(id) {
-            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-            devoirsList = devoirsList.map(d => d.id === id ? {...d, fait: !d.fait} : d);
-            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
-            renderDevoirs();
-        }
-
-        // EMPLOI DU TEMPS
-        function initTimeSelects() {
-            const startSel = document.getElementById('event-time-start');
-            const endSel = document.getElementById('event-time-end');
-            startSel.innerHTML = ''; endSel.innerHTML = '';
-            for(let h = 8; h <= 20; h++) {
-                const timeStr = (h < 10 ? '0' + h : h) + ':00';
-                startSel.innerHTML += `<option value="${h}">${timeStr}</option>`;
-                endSel.innerHTML += `<option value="${h+1}">${(h+1 < 10 ? '0' + (h+1) : h+1)}:00</option>`;
-            }
-        }
-
-        function changeWeek(direction) {
-            currentWeekOffset += direction;
-            renderPlanning();
-        }
-
-        function addEvent(e) {
-            e.preventDefault();
-            const title = document.getElementById('event-title').value;
-            const date = document.getElementById('event-date').value;
-            const start = parseInt(document.getElementById('event-time-start').value);
-            const end = parseInt(document.getElementById('event-time-end').value);
-
-            if(start >= end) {
-                alert("L'heure de fin doit être supérieure à l'heure de début.");
-                return;
-            }
-
-            let events = JSON.parse(localStorage.getItem('klass_events')) || [];
-            events.push({ id: Date.now(), title, date, start, end });
-            localStorage.setItem('klass_events', JSON.stringify(events));
-
-            document.getElementById('event-title').value = '';
-            renderPlanning();
-        }
-
-        function getWeekDates(offset = 0) {
-            const curr = new Date();
-            const first = curr.getDate() - curr.getDay() + 1 + (offset * 7);
-            const monday = new Date(curr.setDate(first));
-            
-            const days = [];
-            for (let i = 0; i < 7; i++) {
-                const nextDay = new Date(monday);
-                nextDay.setDate(monday.getDate() + i);
-                days.push(nextDay);
-            }
-            return days;
-        }
-
-        function renderPlanning() {
-            const grid = document.getElementById('edt-grid');
-            grid.innerHTML = '';
-
-            const weekDays = getWeekDates(currentWeekOffset);
-            const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-            
-            const startStr = weekDays[0].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-            const endStr = weekDays[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
-            document.getElementById('edt-week-label').innerText = `Semaine du ${startStr} au ${endStr}`;
-
-            grid.appendChild(createEdtCell('Heure', 'edt-header-cell'));
-            weekDays.forEach((d, idx) => {
-                const dateNum = d.getDate();
-                grid.appendChild(createEdtCell(`${dayNames[idx]} ${dateNum}`, 'edt-header-cell'));
-            });
-
-            const events = JSON.parse(localStorage.getItem('klass_events')) || [];
-
-            for (let h = 8; h <= 20; h++) {
-                grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell'));
-
-                weekDays.forEach(dayDate => {
-                    const cell = createEdtCell('', 'edt-cell');
-                    const dateISO = dayDate.toISOString().split('T')[0];
-
-                    const dayEvents = events.filter(ev => ev.date === dateISO && ev.start <= h && ev.end > h);
-                    dayEvents.forEach(ev => {
-                        const evDiv = document.createElement('div');
-                        evDiv.className = 'edt-event-item';
-                        evDiv.innerText = `${ev.title} (${ev.start}h-${ev.end}h)`;
-                        cell.appendChild(evDiv);
-                    });
-
-                    grid.appendChild(cell);
-                });
-            }
-        }
-
-        function createEdtCell(text, className) {
-            const div = document.createElement('div');
-            div.className = className;
-            div.innerText = text;
-            return div;
         }
 
         function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
-            const user = getCurrentUser();
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-
-            const matFilter = document.getElementById('filter-matiere').value;
-            const nivFilter = document.getElementById('filter-niveau').value;
-            const typeFilter = document.getElementById('filter-type').value;
-
-            if (matFilter) {
-                annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
-            }
-            if (nivFilter) {
-                annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
-            }
-            if (typeFilter) {
-                annonces = annonces.filter(a => a.type === typeFilter);
-            }
-
-            if(annonces.length === 0) {
-                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profil de disponible pour le moment.</p>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            annonces.forEach(a => {
-                const card = document.createElement('div');
-                card.className = 'annonce-card';
-
-                // Masquer le bouton de mise en relation si c'est l'auteur de l'annonce
-                const isAuthor = (a.auteur === user.nom || a.email === user.email);
-
-                const relationBlockHtml = isAuthor ? '' : `
-                    <div class="relation-box">
-                        <textarea id="relation-msg-${a.id}" rows="2" placeholder="Laissez un message avec votre demande..."></textarea>
-                        <button class="btn" onclick="etablirRelation(${a.id})">
-                            <i class="fa-solid fa-handshake"></i> Établir la relation
-                        </button>
-                    </div>
-                `;
-
-                if(a.type === 'eleve') {
-                    card.innerHTML = `
-                        <span class="tag tag-eleve">Recherche d'élève (${a.matiere})</span>
-                        <h3>${a.auteur}</h3>
-                        <p style="font-size:0.9rem; color:var(--text-light);">Niveau : ${a.niveau} | Budget max : ${a.budget}€/h</p>
-                        <p>${a.desc}</p>
-                        <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
-                        ${relationBlockHtml}
-                    `;
-                } else {
-                    card.innerHTML = `
-                        <span class="tag">Professeur (${a.tarif}€/h)</span>
-                        <h3>${a.auteur}</h3>
-                        <p style="font-size:0.9rem; color:var(--text-light);">Matières : ${(a.matieres || []).join(', ')}</p>
-                        <p style="font-size:0.9rem; color:var(--text-light);">Plage : ${a.plage || 'Non spécifiée'}</p>
-                        <p>${a.desc}</p>
-                        <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
-                        ${relationBlockHtml}
-                    `;
-                }
-                container.appendChild(card);
-            });
+            container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">Recherche en cours...</p>`;
         }
 
-        function renderMyAnnonces() {
-            const container = document.getElementById('my-annonces-container');
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            container.innerHTML = annonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée pour le moment.</p>" : "";
-            annonces.forEach((a) => {
-                container.innerHTML += `
-                    <div class="annonce-card">
-                        <h3>Annonce (${a.type === 'prof' ? 'Professeur' : 'Élève'})</h3>
-                        <p>${a.desc}</p>
-                        <button class="btn btn-secondary" onclick="deleteAnnonce(${a.id})">Supprimer</button>
-                    </div>
-                `;
-            });
+        function saveCompte(e) {
+            e.preventDefault();
+            alert("Compte et documents enregistrés avec succès !");
         }
 
-        function deleteAnnonce(id) {
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            annonces = annonces.filter(a => a.id !== id);
-            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
-            renderMyAnnonces();
-        }
-
-        // Chargement
-        renderGlobalFeed();
+        renderPlanning();
+        renderDevoirs();
     </script>
 </body>
 </html>
