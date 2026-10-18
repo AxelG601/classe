@@ -13,6 +13,7 @@
             --primary-hover: #4338CA;
             --primary-light: #EEF2FF;
             --accent: #10B981;
+            --danger: #EF4444;
             --text-dark: #1F2937;
             --text-light: #6B7280;
             --bg-body: #F9FAFB;
@@ -98,11 +99,23 @@
             border-radius: 10px;
             transition: 0.2s;
             cursor: pointer;
+            position: relative;
         }
 
         .sidebar-menu li.active a, .sidebar-menu li a:hover {
             background: var(--primary-light);
             color: var(--primary);
+        }
+
+        /* Pastille rouge de notification */
+        .notification-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: auto;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
         }
 
         /* Contenu principal */
@@ -134,7 +147,7 @@
 
         p.subtitle { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-        /* Barre de recherche et filtres haut de page */
+        /* Barre de recherche et filtres */
         .search-filters-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -179,11 +192,15 @@
         .btn:hover { background-color: var(--primary-hover); }
         .btn-secondary { background-color: #E5E7EB; color: var(--text-dark); }
         .btn-secondary:hover { background-color: #D1D5DB; }
+        .btn-danger { background-color: #FEE2E2; color: var(--danger); }
+        .btn-danger:hover { background-color: #FCA5A5; }
+        .btn-success { background-color: #D1FAE5; color: var(--accent); }
+        .btn-success:hover { background-color: #A7F3D0; }
 
         /* Grille des profils / annonces */
         .annonces-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
@@ -197,6 +214,15 @@
             gap: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
             position: relative;
+        }
+
+        .relation-box {
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .tag {
@@ -223,7 +249,7 @@
         input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
         .level-display { font-weight: 700; color: var(--text-dark); min-width: 90px; text-align: right; }
 
-        /* Emploi du temps (Heure par heure & semaine) */
+        /* Emploi du temps */
         .edt-header {
             display: flex;
             justify-content: space-between;
@@ -273,10 +299,9 @@
             font-size: 0.75rem;
             font-weight: 600;
             margin-bottom: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Modals / Fenêtres surgissantes */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -327,7 +352,13 @@
             <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Emploi du temps</span></a></li>
             <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Mes annonces</span></a></li>
             <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
-            <li id="menu-messagerie" onclick="switchTab('messagerie')"><a><i class="fa-solid fa-comments"></i> <span>Messagerie</span></a></li>
+            <li id="menu-messagerie" onclick="switchTab('messagerie')">
+                <a>
+                    <i class="fa-solid fa-comments"></i> 
+                    <span>Messagerie</span>
+                    <span id="msg-notif-dot" class="notification-dot hidden"></span>
+                </a>
+            </li>
         </ul>
     </aside>
 
@@ -403,7 +434,7 @@
 
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
-                            <label>Email (pour les notifications de devoirs)</label>
+                            <label>Email (pour les notifications)</label>
                             <input type="email" id="acc-email" required placeholder="jean@email.com">
                         </div>
                         <div>
@@ -454,13 +485,12 @@
             </div>
         </div>
 
-        <!-- 3. EMPLOI DU TEMPS (DÉTAILLÉ HEURE PAR HEURE / SEMAINE) -->
+        <!-- 3. EMPLOI DU TEMPS -->
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
                 <h2>Emploi du temps hebdomadaire</h2>
                 <p class="subtitle">Affichez et gérez vos cours réservés heure par heure.</p>
 
-                <!-- Formulaire d'ajout d'événement -->
                 <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1rem;">
                         <div>
@@ -483,18 +513,14 @@
                     <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Ajouter au planning</button>
                 </form>
 
-                <!-- Header navigation semaines -->
                 <div class="edt-header">
                     <button class="btn btn-secondary" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i> Semaine précédente</button>
                     <h3 id="edt-week-label" style="font-size:1.1rem; font-weight:700;"></h3>
                     <button class="btn btn-secondary" onclick="changeWeek(1)">Semaine suivante <i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
-                <!-- Grille EDT -->
                 <div class="edt-grid-wrapper">
-                    <div id="edt-grid" class="edt-grid">
-                        <!-- Généré dynamiquement -->
-                    </div>
+                    <div id="edt-grid" class="edt-grid"></div>
                 </div>
             </div>
         </div>
@@ -508,7 +534,7 @@
             </div>
         </div>
 
-        <!-- 5. DEVOIRS (AVEC DESTINATAIRE MANDATAIRE) -->
+        <!-- 5. DEVOIRS (AVEC SUPPRESSION RÉSERVÉE À L'AUTEUR) -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -524,13 +550,14 @@
             </div>
         </div>
 
-        <!-- 6. MESSAGERIE -->
+        <!-- 6. MESSAGERIE & DEMANDES DE MISE EN RELATION -->
         <div id="tab-messagerie" class="tab-pane hidden">
-            <div class="card" style="text-align:center; padding: 4rem 2rem;">
-                <i class="fa-solid fa-comments" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-                <h2>Messagerie interne</h2>
-                <p class="subtitle">Discutez directement avec vos professeurs ou élèves connectés.</p>
-                <p style="color: var(--text-light);">Module de messagerie actif.</p>
+            <div class="card">
+                <h2>Messagerie & Demandes de mise en relation</h2>
+                <p class="subtitle">Consultez et répondez aux personnes qui souhaitent établir une relation avec vous.</p>
+                <div id="demandes-relations-container" style="display:flex; flex-direction:column; gap:1rem;">
+                    <!-- Demandes injectées ici -->
+                </div>
             </div>
         </div>
 
@@ -575,7 +602,7 @@
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UNE ANNONCE (+ HAUT À GAUCHE AVEC CURSEURS DE NIVEAUX) -->
+    <!-- MODAL : DÉPOSER UNE ANNONCE -->
     <div id="modal-annonce" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeAnnonceModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -602,7 +629,6 @@
                         </div>
                     </div>
 
-                    <!-- Curseurs pour la plage de niveaux -->
                     <div class="form-group">
                         <label>Plage de niveaux d'enseignement</label>
                         <div style="margin-bottom:0.75rem;">
@@ -670,14 +696,14 @@
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UN DEVOIR (AVEC DESTINATAIRE) -->
+    <!-- MODAL : DÉPOSER UN DEVOIR -->
     <div id="modal-devoir" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeDevoirModal()"><i class="fa-solid fa-xmark"></i></button>
             <h2>Déposer un devoir</h2>
             <form onsubmit="submitDevoir(event)">
                 <div class="form-group">
-                    <label>Destinataire (Nom, Prénom ou Email de l'élève/prof)</label>
+                    <label>Destinataire (Nom, Prénom ou Email)</label>
                     <input type="text" id="dev-destinataire" required placeholder="Ex: Lucas Bernard ou lucas@email.com">
                 </div>
                 <div class="form-group">
@@ -703,18 +729,21 @@
 
     <script>
         const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
-        let currentWeekOffset = 0; // Offset pour la semaine dans l'EDT
+        let currentWeekOffset = 0;
 
-        // Au chargement de la page
         window.addEventListener('DOMContentLoaded', () => {
             initTimeSelects();
             loadUserData();
+            checkNotificationStatus();
             
-            // Pop-up première visite
             if (!localStorage.getItem('klass_visited')) {
                 document.getElementById('modal-first-visit').style.display = 'flex';
             }
         });
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr" };
+        }
 
         function closeFirstVisitModal() {
             localStorage.setItem('klass_visited', 'true');
@@ -752,7 +781,7 @@
             }
         }
 
-        // Navigation entre onglets
+        // Navigation
         function switchTab(tabId) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -763,9 +792,21 @@
             if(tabId === 'annonces') renderMyAnnonces();
             if(tabId === 'planning') renderPlanning();
             if(tabId === 'devoirs') renderDevoirs();
+            if(tabId === 'messagerie') {
+                renderDemandesRelations();
+                // Effacer le point rouge de notification quand on ouvre la messagerie
+                document.getElementById('msg-notif-dot').classList.add('hidden');
+                localStorage.setItem('klass_has_unread_msg', 'false');
+            }
         }
 
-        // Curseur de niveau dans la modal d'annonce
+        function checkNotificationStatus() {
+            if(localStorage.getItem('klass_has_unread_msg') === 'true') {
+                document.getElementById('msg-notif-dot').classList.remove('hidden');
+            }
+        }
+
+        // Curseur de niveau
         function updateLevelSliderDisplay() {
             const minSlider = document.getElementById('min-level-slider');
             const maxSlider = document.getElementById('max-level-slider');
@@ -785,7 +826,7 @@
             else postbacContainer.classList.add('hidden');
         }
 
-        // Gestion Modals
+        // Modals
         function openAnnonceModal() { document.getElementById('modal-annonce').style.display = 'flex'; }
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
         function openDevoirModal() { document.getElementById('modal-devoir').style.display = 'flex'; }
@@ -829,7 +870,7 @@
         function submitNewAnnonce(e) {
             e.preventDefault();
             const type = document.getElementById('new-type-annonce').value;
-            const user = JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Klass", email: "contact@klass.fr" };
+            const user = getCurrentUser();
 
             let nouvelleAnnonce = {
                 id: Date.now(),
@@ -868,9 +909,91 @@
             renderGlobalFeed();
         }
 
-        // Devoirs avec Destinataire
+        // ÉTABLIR LA RELATION (BOUTON SOUS L'ANNONCE)
+        function etablirRelation(annonceId) {
+            const user = getCurrentUser();
+            const msgInput = document.getElementById(`relation-msg-${annonceId}`);
+            const message = msgInput ? msgInput.value.trim() : '';
+
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            const annonce = annonces.find(a => a.id === annonceId);
+
+            if (!annonce) return;
+
+            const nouvelleDemande = {
+                id: Date.now(),
+                expediteur: user.nom,
+                expediteurEmail: user.email,
+                destinataire: annonce.auteur,
+                destinataireEmail: annonce.email,
+                message: message || "Bonjour, je souhaite établir une relation suite à votre annonce.",
+                status: "en_attente",
+                date: new Date().toLocaleDateString()
+            };
+
+            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
+            demandes.push(nouvelleDemande);
+            localStorage.setItem('klass_demandes_relations', JSON.stringify(demandes));
+
+            // Activer la notification (point rouge) pour le destinataire
+            localStorage.setItem('klass_has_unread_msg', 'true');
+            checkNotificationStatus();
+
+            alert(`Demande de mise en relation envoyée à ${annonce.auteur} ! Une notification apparaîtra dans sa messagerie.`);
+            if(msgInput) msgInput.value = '';
+        }
+
+        function renderDemandesRelations() {
+            const container = document.getElementById('demandes-relations-container');
+            const user = getCurrentUser();
+            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
+
+            // Filtrer les demandes reçues par l'utilisateur connecté ou afficher toutes les demandes si mode démo
+            const mesDemandes = demandes.filter(d => d.destinataire === user.nom || d.destinataireEmail === user.email || user.nom === "Utilisateur Visiteur");
+
+            if (mesDemandes.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:2rem;">Aucune demande de mise en relation reçue pour le moment.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            mesDemandes.forEach(d => {
+                const card = document.createElement('div');
+                card.style.cssText = "background:white; padding:1.25rem; border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; gap:0.5rem;";
+                
+                let badgeStatus = `<span class="tag" style="background:#FEF3C7; color:#D97706;">En attente</span>`;
+                if(d.status === 'acceptee') badgeStatus = `<span class="tag" style="background:#D1FAE5; color:#059669;">Acceptée ✅</span>`;
+                if(d.status === 'refusee') badgeStatus = `<span class="tag" style="background:#FEE2E2; color:#EF4444;">Refusée ❌</span>`;
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>De : ${d.expediteur} (${d.expediteurEmail})</strong>
+                        ${badgeStatus}
+                    </div>
+                    <p style="color:var(--text-dark); background:var(--bg-body); padding:0.75rem; border-radius:8px; font-size:0.9rem;">"${d.message}"</p>
+                    ${d.status === 'en_attente' ? `
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <button class="btn btn-success" style="font-size:0.85rem; padding:0.5rem 1rem;" onclick="repondreDemande(${d.id}, 'acceptee')">Accepter</button>
+                            <button class="btn btn-danger" style="font-size:0.85rem; padding:0.5rem 1rem;" onclick="repondreDemande(${d.id}, 'refusee')">Refuser</button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function repondreDemande(id, status) {
+            let demandes = JSON.parse(localStorage.getItem('klass_demandes_relations')) || [];
+            demandes = demandes.map(d => d.id === id ? {...d, status: status} : d);
+            localStorage.setItem('klass_demandes_relations', JSON.stringify(demandes));
+            renderDemandesRelations();
+            alert(`Demande ${status === 'acceptee' ? 'acceptée' : 'refusée'}.`);
+        }
+
+        // DEVOIRS (SEUL L'AUTEUR PEUT SUPPRIMER)
         function submitDevoir(e) {
             e.preventDefault();
+            const user = getCurrentUser();
             const dest = document.getElementById('dev-destinataire').value.trim();
 
             if (!dest) {
@@ -880,6 +1003,7 @@
 
             const dev = {
                 id: Date.now(),
+                auteur: user.nom,
                 destinataire: dest,
                 matiere: document.getElementById('dev-matiere').value,
                 date: document.getElementById('dev-date').value,
@@ -892,31 +1016,50 @@
             localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
             
             closeDevoirModal();
-            alert(`Devoir envoyé à ${dest} ! Un e-mail de notification a été simuler.`);
+            alert(`Devoir envoyé à ${dest} !`);
             renderDevoirs();
         }
 
         function renderDevoirs() {
             const container = document.getElementById('devoirs-container');
+            const user = getCurrentUser();
             let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
             
             container.innerHTML = devoirsList.length === 0 ? "<p style='color:var(--text-light); text-align:center;'>Aucun devoir enregistré pour le moment.</p>" : "";
             
             devoirsList.forEach(d => {
+                const canDelete = (d.auteur === user.nom || !d.auteur || user.nom === "Utilisateur Visiteur");
+
                 container.innerHTML += `
                     <div style="background:white; padding:1.2rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <span class="tag" style="margin-bottom:6px;">Destinataire : ${d.destinataire}</span>
+                            <span style="font-size:0.8rem; color:var(--text-light); margin-left:8px;">Par : ${d.auteur || 'Inconnu'}</span>
                             <div style="font-weight:700; font-size:1.05rem; margin-top:4px;">${d.matiere} (À faire pour : ${d.date})</div>
                             <p style="margin-top:4px; color:var(--text-light);">${d.travail}</p>
                         </div>
-                        <div style="text-align:right;">
-                            <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
-                            <div style="font-size:0.8rem; margin-top:4px; color:var(--text-light);">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</div>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <div style="text-align:right;">
+                                <input type="checkbox" ${d.fait ? 'checked' : ''} onchange="toggleDevoir(${d.id})" style="width:20px; height:20px; cursor:pointer;">
+                                <div style="font-size:0.8rem; margin-top:4px; color:var(--text-light);">${d.fait ? 'Fait ✅' : 'À faire ⏳'}</div>
+                            </div>
+                            ${canDelete ? `
+                                <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="deleteDevoir(${d.id})" title="Supprimer ce devoir">
+                                    <i class="fa-solid fa-trash"></i> Supprimer
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function deleteDevoir(id) {
+            if(!confirm("Voulez-vous vraiment supprimer ce devoir ?")) return;
+            let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
+            devoirsList = devoirsList.filter(d => d.id !== id);
+            localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
+            renderDevoirs();
         }
 
         function toggleDevoir(id) {
@@ -926,7 +1069,7 @@
             renderDevoirs();
         }
 
-        // EMPLOI DU TEMPS DÉTAILLÉ
+        // EMPLOI DU TEMPS
         function initTimeSelects() {
             const startSel = document.getElementById('event-time-start');
             const endSel = document.getElementById('event-time-end');
@@ -965,7 +1108,7 @@
 
         function getWeekDates(offset = 0) {
             const curr = new Date();
-            const first = curr.getDate() - curr.getDay() + 1 + (offset * 7); // Lundi
+            const first = curr.getDate() - curr.getDay() + 1 + (offset * 7);
             const monday = new Date(curr.setDate(first));
             
             const days = [];
@@ -984,32 +1127,25 @@
             const weekDays = getWeekDates(currentWeekOffset);
             const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
             
-            // Titre de la semaine
             const startStr = weekDays[0].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const endStr = weekDays[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
             document.getElementById('edt-week-label').innerText = `Semaine du ${startStr} au ${endStr}`;
 
-            // 1. En-têtes (Heures / Jours)
             grid.appendChild(createEdtCell('Heure', 'edt-header-cell'));
             weekDays.forEach((d, idx) => {
                 const dateNum = d.getDate();
                 grid.appendChild(createEdtCell(`${dayNames[idx]} ${dateNum}`, 'edt-header-cell'));
             });
 
-            // Récupérer tous les événements
             const events = JSON.parse(localStorage.getItem('klass_events')) || [];
 
-            // 2. Lignes heure par heure (8h - 20h)
             for (let h = 8; h <= 20; h++) {
-                // Cellule heure
                 grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell'));
 
-                // 7 cellules de jours
                 weekDays.forEach(dayDate => {
                     const cell = createEdtCell('', 'edt-cell');
                     const dateISO = dayDate.toISOString().split('T')[0];
 
-                    // Filtrer événements correspondants
                     const dayEvents = events.filter(ev => ev.date === dateISO && ev.start <= h && ev.end > h);
                     dayEvents.forEach(ev => {
                         const evDiv = document.createElement('div');
@@ -1032,13 +1168,13 @@
 
         function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
+            const user = getCurrentUser();
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
 
             const matFilter = document.getElementById('filter-matiere').value;
             const nivFilter = document.getElementById('filter-niveau').value;
             const typeFilter = document.getElementById('filter-type').value;
 
-            // Filtrage
             if (matFilter) {
                 annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
             }
@@ -1058,6 +1194,19 @@
             annonces.forEach(a => {
                 const card = document.createElement('div');
                 card.className = 'annonce-card';
+
+                // Masquer le bouton de mise en relation si c'est l'auteur de l'annonce
+                const isAuthor = (a.auteur === user.nom || a.email === user.email);
+
+                const relationBlockHtml = isAuthor ? '' : `
+                    <div class="relation-box">
+                        <textarea id="relation-msg-${a.id}" rows="2" placeholder="Laissez un message avec votre demande..."></textarea>
+                        <button class="btn" onclick="etablirRelation(${a.id})">
+                            <i class="fa-solid fa-handshake"></i> Établir la relation
+                        </button>
+                    </div>
+                `;
+
                 if(a.type === 'eleve') {
                     card.innerHTML = `
                         <span class="tag tag-eleve">Recherche d'élève (${a.matiere})</span>
@@ -1065,6 +1214,7 @@
                         <p style="font-size:0.9rem; color:var(--text-light);">Niveau : ${a.niveau} | Budget max : ${a.budget}€/h</p>
                         <p>${a.desc}</p>
                         <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
+                        ${relationBlockHtml}
                     `;
                 } else {
                     card.innerHTML = `
@@ -1074,6 +1224,7 @@
                         <p style="font-size:0.9rem; color:var(--text-light);">Plage : ${a.plage || 'Non spécifiée'}</p>
                         <p>${a.desc}</p>
                         <span style="font-size:0.8rem; color:var(--text-light);">Contact : ${a.email}</span>
+                        ${relationBlockHtml}
                     `;
                 }
                 container.appendChild(card);
@@ -1102,7 +1253,7 @@
             renderMyAnnonces();
         }
 
-        // Chargement initial
+        // Chargement
         renderGlobalFeed();
     </script>
 </body>
