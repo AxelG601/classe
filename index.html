@@ -493,9 +493,8 @@
             </form>
 
             <div id="post-account-creation-actions" class="hidden" style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
-                <p style="color:var(--accent); text-align:center; font-weight:700;">Nouveau compte enregistré avec succès !</p>
-                <button class="btn btn-success" id="btn-login-new-acc">Se connecter au nouveau compte</button>
-                <button class="btn btn-secondary" onclick="closeCreateAccountModal()">Revenir sur l'ancien compte</button>
+                <p style="color:var(--accent); text-align:center; font-weight:700;">Nouveau compte enregistré et connecté !</p>
+                <button class="btn btn-secondary" onclick="closeCreateAccountModal()">Fermer</button>
             </div>
         </div>
     </div>
@@ -699,7 +698,6 @@
             document.body.classList.add('dark-mode');
         }
 
-        /* GESTION MULTI-COMPTES CORRIGÉE */
         function initAccountsStorage() {
             let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
             let currentAcc = JSON.parse(localStorage.getItem('klass_user_compte'));
@@ -793,13 +791,16 @@
                 localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
             }
 
+            // Déconnexion de l'ancien et connexion immédiate au nouveau compte
+            localStorage.setItem('klass_user_compte', JSON.stringify(newCompte));
+            loadUserData();
+            updateSidebarAvatar();
+            renderAccountsDropdown();
+            renderGlobalFeed();
+            activeChatUser = null;
+
             document.getElementById('form-create-new-account').classList.add('hidden');
             document.getElementById('post-account-creation-actions').classList.remove('hidden');
-
-            document.getElementById('btn-login-new-acc').onclick = function() {
-                switchAccount(newCompte.email);
-                closeCreateAccountModal();
-            };
         }
 
         function updateSidebarAvatar() {
