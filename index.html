@@ -48,17 +48,26 @@
         .sidebar-brand span { color: var(--accent); }
         .btn-add-top {
             background: var(--primary); color: white; border: none; width: 36px; height: 36px;
-            border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .sidebar-menu { list-style: none; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+        /* Infobulle "Déposer une annonce" */
+        .btn-add-top::after {
+            content: attr(data-tooltip);
+            position: absolute; left: 110%; top: 50%; transform: translateY(-50%);
+            background: var(--text-dark); color: white; padding: 4px 8px; border-radius: 6px;
+            font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100;
+        }
+        .btn-add-top:hover::after { opacity: 1; }
+
+        .sidebar-menu { list-style: none; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; flex: 1; overflow-y: auto; }
         .sidebar-menu li a {
-            display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem; color: var(--text-light);
+            display: flex; align-items: center; gap: 12px; padding: 0.75rem 1rem; color: var(--text-light);
             text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; position: relative;
         }
         .sidebar-menu li.active a, .sidebar-menu li a:hover { background: var(--primary-light); color: var(--primary); }
         .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
 
-        /* Avatar Sidebar & Menu Déroulant Multi-Comptes au Clic */
+        /* Avatar Sidebar & Menu Déroulant Multi-Comptes */
         .sidebar-account-container { position: relative; display: inline-block; }
         .sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: inline-block; vertical-align: middle; cursor: pointer; border: 2px solid var(--primary); }
         
@@ -155,7 +164,7 @@
         .edt-event-item { background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
 
         /* Tchat */
-        .chat-container { display: flex; flex-direction: column; gap: 1rem; height: 350px; overflow-y: auto; padding: 1rem; background: var(--bg-body); border-radius: 12px; border: 1px solid var(--border); }
+        .chat-container { display: flex; flex-direction: column; gap: 1rem; height: 400px; overflow-y: auto; padding: 1rem; background: var(--bg-body); border-radius: 12px; border: 1px solid var(--border); }
         .chat-bubble { max-width: 75%; padding: 0.75rem 1rem; border-radius: 16px; font-size: 0.9rem; line-height: 1.4; position: relative; }
         .chat-bubble-me { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .chat-bubble-other { background: var(--card-bg); color: var(--text-dark); align-self: flex-start; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
@@ -177,7 +186,7 @@
                 flex-direction: row; align-items: center; justify-content: space-around; padding: 0 0.5rem;
             }
             .sidebar-brand, .dark-mode-toggle { display: none; }
-            .sidebar-menu { flex-direction: row; padding: 0; gap: 0; width: 100%; justify-content: space-around; }
+            .sidebar-menu { flex-direction: row; padding: 0; gap: 0; width: 100%; justify-content: space-around; overflow-y: visible; }
             .sidebar-menu li a { flex-direction: column; gap: 2px; padding: 0.5rem; font-size: 0.65rem; text-align: center; }
             .sidebar-menu li a i { font-size: 1.2rem; }
             .sidebar-menu li a span { display: block; }
@@ -195,10 +204,13 @@
     <aside>
         <div class="sidebar-brand">
             <div>K<span>l</span>.</div>
-            <button class="btn-add-top" title="Déposer une annonce" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
+            <button class="btn-add-top" title="" data-tooltip="Déposer une annonce" onclick="openAnnonceModal()"><i class="fa-solid fa-plus"></i></button>
         </div>
         <ul class="sidebar-menu">
             <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil</span></a></li>
+            <li id="menu-suggestion" onclick="switchTab('suggestion')">
+                <a><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Suggestion</span><span id="suggestion-notif-dot" class="notification-dot hidden"></span></a>
+            </li>
             <li id="menu-compte">
                 <a>
                     <div class="sidebar-account-container" onclick="toggleAccountsDropdown(event)">
@@ -278,7 +290,16 @@
             <div id="global-annonces-container" class="annonces-grid"></div>
         </div>
 
-        <!-- 2. MON COMPTE -->
+        <!-- 2. SUGGESTION -->
+        <div id="tab-suggestion" class="tab-pane hidden">
+            <div class="card">
+                <h2>Suggestions compatibles avec vos annonces</h2>
+                <p class="subtitle">Profils et annonces croisés correspondant à vos critères de recherche ou d'enseignement.</p>
+                <div id="suggestion-annonces-container" class="annonces-grid"></div>
+            </div>
+        </div>
+
+        <!-- 3. MON COMPTE -->
         <div id="tab-compte" class="tab-pane hidden">
             <div class="card">
                 <h2>Mon Compte actif</h2>
@@ -354,7 +375,7 @@
             </div>
         </div>
 
-        <!-- 3. PLANNING -->
+        <!-- 4. PLANNING -->
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
                 <h2>Emploi du temps & Visio MS Teams</h2>
@@ -401,7 +422,7 @@
             </div>
         </div>
 
-        <!-- 4. ANNONCES -->
+        <!-- 5. ANNONCES -->
         <div id="tab-annonces" class="tab-pane hidden">
             <div class="card">
                 <h2>Mes annonces publiées</h2>
@@ -410,7 +431,7 @@
             </div>
         </div>
 
-        <!-- 5. DEVOIRS -->
+        <!-- 6. DEVOIRS -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -424,7 +445,7 @@
             </div>
         </div>
 
-        <!-- 6. MESSAGERIE -->
+        <!-- 7. MESSAGERIE -->
         <div id="tab-messagerie" class="tab-pane hidden">
             <div class="card">
                 <h2>Messagerie & Discussions Privées</h2>
@@ -607,11 +628,15 @@
                             <option value="Post-bac">Post-bac</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label style="color:var(--primary);">Ville / Quartier recherché *</label>
+                        <input type="text" id="ann-eleve-ville" placeholder="Ex: Paris 15ème">
+                    </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="tarif-container">
                     <label>Tarif horaire (€/h) *</label>
-                    <input type="number" id="ann-tarif" required placeholder="Ex: 25">
+                    <input type="number" id="ann-tarif" placeholder="Ex: 25">
                 </div>
 
                 <div class="form-group">
@@ -701,9 +726,9 @@
             updateSidebarAvatar();
             renderAccountsDropdown();
             renderAllAccountsManagement();
+            checkSuggestionNotification();
         });
 
-        // Fermer le menu déroulant des comptes si on clique en dehors
         window.addEventListener('click', (e) => {
             const container = document.querySelector('.sidebar-account-container');
             const dropdown = document.getElementById('accounts-dropdown');
@@ -812,7 +837,7 @@
                         <div style="font-size:0.8rem; color:var(--text-light);">${acc.email} • ${acc.role === 'prof' ? 'Professeur' : 'Élève'}</div>
                     </div>
                     <div style="display:flex; gap:0.5rem;">
-                        ${!isCurrent ? `<button class="btn btn-success" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="switchAccount('${acc.email}')">Se connecter</button>` : ''}
+                        ${!isCurrent ? `<button class="btn btn-success" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="switchAccount('${acc.email}')">Basculer sur ce compte</button>` : ''}
                         <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="promptDeleteAccount('${acc.email}')"><i class="fa-solid fa-trash"></i> Supprimer</button>
                     </div>
                 `;
@@ -927,6 +952,11 @@
             document.getElementById('menu-' + tabId).classList.add('active');
             
             if(tabId === 'home') renderGlobalFeed();
+            if(tabId === 'suggestion') {
+                renderSuggestions();
+                document.getElementById('suggestion-notif-dot').classList.add('hidden');
+                localStorage.setItem('klass_has_new_suggestion', 'false');
+            }
             if(tabId === 'compte') renderAllAccountsManagement();
             if(tabId === 'annonces') renderMyAnnonces();
             if(tabId === 'planning') renderPlanning();
@@ -941,6 +971,12 @@
         function checkNotificationStatus() {
             if(localStorage.getItem('klass_has_unread_msg') === 'true') {
                 document.getElementById('msg-notif-dot').classList.remove('hidden');
+            }
+        }
+
+        function checkSuggestionNotification() {
+            if(localStorage.getItem('klass_has_new_suggestion') === 'true') {
+                document.getElementById('suggestion-notif-dot').classList.remove('hidden');
             }
         }
 
@@ -968,7 +1004,9 @@
                     document.getElementById('new-type-annonce').value = ann.type;
                     toggleAnnonceFormType();
                     document.getElementById('ann-desc').value = ann.desc;
-                    document.getElementById('ann-tarif').value = ann.tarif || '25';
+                    if(document.getElementById('ann-tarif')) {
+                        document.getElementById('ann-tarif').value = ann.tarif || '25';
+                    }
                     if(ann.type === 'prof') {
                         document.getElementById('new-format-cours').value = ann.formatCours || 'Présentiel et Visio';
                         togglePresentielFields();
@@ -977,6 +1015,8 @@
                             document.getElementById('new-rayon-cours').value = ann.rayonCours;
                             document.getElementById('rayon-val-display').innerText = ann.rayonCours + " km";
                         }
+                    } else {
+                        if(ann.villeCours) document.getElementById('ann-eleve-ville').value = ann.villeCours;
                     }
                 }
             } else {
@@ -994,13 +1034,16 @@
 
         function toggleAnnonceFormType() {
             const val = document.getElementById('new-type-annonce').value;
+            const tarifContainer = document.getElementById('tarif-container');
             if(val === 'prof') {
                 document.getElementById('block-prof-ann').classList.remove('hidden');
                 document.getElementById('block-eleve-ann').classList.add('hidden');
+                if(tarifContainer) tarifContainer.classList.remove('hidden');
                 togglePresentielFields();
             } else {
                 document.getElementById('block-prof-ann').classList.add('hidden');
                 document.getElementById('block-eleve-ann').classList.remove('hidden');
+                if(tarifContainer) tarifContainer.classList.add('hidden'); // Élève : pas de choix du tarif
             }
         }
 
@@ -1075,7 +1118,7 @@
                 auteur: user.nom,
                 email: user.email,
                 photo: user.photo || null,
-                tarif: document.getElementById('ann-tarif').value || '25',
+                tarif: type === 'prof' ? (document.getElementById('ann-tarif').value || '25') : 'Gratuit / Demandeur',
                 desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
@@ -1099,6 +1142,7 @@
             } else {
                 nouvelleAnnonce.matiere = document.getElementById('ann-eleve-matiere').value;
                 nouvelleAnnonce.niveau = document.getElementById('ann-eleve-niveau').value;
+                nouvelleAnnonce.villeCours = document.getElementById('ann-eleve-ville').value;
             }
 
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
@@ -1106,12 +1150,24 @@
                 annonces = annonces.map(a => a.id === parseInt(editId) ? nouvelleAnnonce : a);
             } else {
                 annonces.push(nouvelleAnnonce);
+                // Déclencher le point rouge suggestion
+                localStorage.setItem('klass_has_new_suggestion', 'true');
+                checkSuggestionNotification();
             }
             localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
 
             closeAnnonceModal();
             alert(editId ? "Annonce modifiée avec succès !" : "Votre annonce est en ligne !");
             renderGlobalFeed();
+        }
+
+        function checkRelationExists(targetName) {
+            const user = getCurrentUser();
+            let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
+            return messages.some(m => 
+                (m.sender === user.nom && m.receiver === targetName) ||
+                (m.sender === targetName && m.receiver === user.nom)
+            );
         }
 
         function initierMiseEnRelation(auteurNom) {
@@ -1124,8 +1180,29 @@
             document.getElementById('active-chat-box').classList.remove('hidden');
             document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurNom}`;
 
-            document.getElementById('chat-input').value = prefillMsg;
+            // Espace de discussion épuré avec mention discrète si aucun message
+            let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
+            const user = getCurrentUser();
+            const hasHistory = messages.some(m => 
+                (m.sender === user.nom && m.receiver === auteurNom) ||
+                (m.sender === auteurNom && m.receiver === user.nom)
+            );
+
+            if (!hasHistory) {
+                // Créer un premier message invisible ou enregistrer directement la relation sans polluer le tchat si vide
+                messages.push({
+                    id: Date.now(),
+                    sender: user.nom,
+                    receiver: auteurNom,
+                    text: prefillMsg,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                localStorage.setItem('klass_private_messages', JSON.stringify(messages));
+            }
+
+            document.getElementById('chat-input').value = "";
             renderChatBubbles(auteurNom);
+            renderGlobalFeed();
         }
 
         function renderMessagingSection() {
@@ -1199,6 +1276,11 @@
             );
 
             container.innerHTML = '';
+            if (filteredMsgs.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-light); font-size:0.85rem; margin-top:auto; margin-bottom:auto;">Aucun message pour l'instant</div>`;
+                return;
+            }
+
             filteredMsgs.forEach(m => {
                 const isMe = m.sender === user.nom;
                 const bubble = document.createElement('div');
@@ -1465,6 +1547,77 @@
             return 'badge-default';
         }
 
+        function renderAnnonceCardHTML(a) {
+            const user = getCurrentUser();
+            const isMyOwnAnnonce = (a.email === user.email || a.auteur === user.nom);
+            const isRelationEstablished = checkRelationExists(a.auteur);
+
+            const avatarHtml = a.photo 
+                ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">` 
+                : `<div class="annonce-avatar-placeholder" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')"><i class="fa-solid fa-user"></i></div>`;
+
+            const mainMatiere = a.type === 'prof' 
+                ? (a.matieres && a.matieres.length > 0 ? a.matieres.join(', ') : 'Toutes Matières') 
+                : (a.matiere || 'Matière recherchée');
+            
+            const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
+
+            let formatLocHtml = '';
+            if (a.type === 'prof') {
+                const formatText = a.formatCours || 'Présentiel et Visio';
+                let locDetails = '';
+                if (formatText !== 'Visio uniquement' && a.villeCours) {
+                    locDetails = ` (${a.villeCours}${a.rayonCours ? ' - Rayon ' + a.rayonCours + 'km' : ''})`;
+                }
+                formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Format : ${formatText}${locDetails}</div>`;
+            } else {
+                formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Ville : ${a.villeCours || 'Non spécifiée'}</div>`;
+            }
+
+            const titlePrefix = a.type === 'prof' ? "Je donne des cours de :" : "Je cherche un cours de :";
+
+            let relationButtonHtml = '';
+            if (isMyOwnAnnonce) {
+                relationButtonHtml = `<button class="btn btn-secondary" style="margin-top:0.5rem; width:100%; opacity:0.6; cursor:not-allowed;" disabled>Votre annonce</button>`;
+            } else if (isRelationEstablished) {
+                relationButtonHtml = `
+                    <button class="btn btn-success" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation('${a.auteur.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-check"></i> Relation établie
+                    </button>
+                `;
+            } else {
+                relationButtonHtml = `
+                    <button class="btn" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation('${a.auteur.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-comments"></i> Mise en relation
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="annonce-card">
+                    <div class="annonce-title-prefix">${titlePrefix}</div>
+                    <div class="annonce-top-bar">
+                        <div>
+                            <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
+                            <span class="price-tag">${a.tarif ? a.tarif + (a.type === 'prof' ? ' €/h' : '') : ''}</span>
+                        </div>
+                        ${avatarHtml}
+                    </div>
+                    <div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:var(--text-dark);">${a.auteur}</h3>
+                        <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">${a.type === 'prof' ? 'Plage de niveau : ' + (a.plage || 'S.O.') : 'Niveau de l\'élève : ' + a.niveau}</p>
+                    </div>
+                    ${formatLocHtml}
+                    <p style="font-size:0.95rem; color:var(--text-dark); flex:1;">${a.desc}</p>
+                    <div style="font-size:0.8rem; color:var(--text-light); border-top:1px solid var(--border); padding-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fa-solid fa-envelope"></i> ${a.email}</span>
+                        <span>${a.date || ''}</span>
+                    </div>
+                    ${relationButtonHtml}
+                </div>
+            `;
+        }
+
         function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
@@ -1486,61 +1639,54 @@
 
             container.innerHTML = '';
             annonces.forEach(a => {
-                const card = document.createElement('div');
-                card.className = 'annonce-card';
+                container.innerHTML += renderAnnonceCardHTML(a);
+            });
+        }
 
-                const avatarHtml = a.photo 
-                    ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">` 
-                    : `<div class="annonce-avatar-placeholder" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')"><i class="fa-solid fa-user"></i></div>`;
+        function renderSuggestions() {
+            const container = document.getElementById('suggestion-annonces-container');
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            const user = getCurrentUser();
 
-                const mainMatiere = a.type === 'prof' 
-                    ? (a.matieres && a.matieres.length > 0 ? a.matieres.join(', ') : 'Toutes Matières') 
-                    : (a.matiere || 'Matière recherchée');
-                
-                const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
+            // Trouver les annonces publiées par l'utilisateur connecté (ses différents comptes ou le compte actif)
+            const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
 
-                let formatLocHtml = '';
-                if (a.type === 'prof') {
-                    const formatText = a.formatCours || 'Présentiel et Visio';
-                    let locDetails = '';
-                    if (formatText !== 'Visio uniquement' && a.villeCours) {
-                        locDetails = ` (${a.villeCours}${a.rayonCours ? ' - Rayon ' + a.rayonCours + 'km' : ''})`;
+            if (myAnnonces.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Publiez une annonce pour voir apparaître des suggestions compatibles ici.</p>`;
+                return;
+            }
+
+            let suggestions = [];
+            annonces.forEach(a => {
+                // Ne pas s'auto-suggérer ses propres annonces
+                if (a.email === user.email || a.auteur === user.nom) return;
+
+                myAnnonces.forEach(myAnn => {
+                    if (myAnn.type === 'prof' && a.type === 'eleve') {
+                        // Prof cherche élève : vérifier correspondance matière et ville
+                        const matchMatiere = myAnn.matieres && myAnn.matieres.includes(a.matiere);
+                        const matchVille = !myAnn.villeCours || !a.villeCours || myAnn.villeCours.toLowerCase().includes(a.villeCours.toLowerCase()) || a.villeCours.toLowerCase().includes(myAnn.villeCours.toLowerCase());
+                        if (matchMatiere || matchVille) {
+                            if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
+                        }
+                    } else if (myAnn.type === 'eleve' && a.type === 'prof') {
+                        // Élève cherche prof : vérifier correspondance matière
+                        const matchMatiere = a.matieres && a.matieres.includes(myAnn.matiere);
+                        if (matchMatiere) {
+                            if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
+                        }
                     }
-                    formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Format : ${formatText}${locDetails}</div>`;
-                } else {
-                    formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-graduation-cap"></i> Recherche de cours</div>`;
-                }
+                });
+            });
 
-                const titlePrefix = a.type === 'prof' ? "Je donne des cours de :" : "Je cherche un cours de :";
+            if (suggestions.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucune suggestion compatible pour le moment.</p>`;
+                return;
+            }
 
-                const relationButtonHtml = `
-                    <button class="btn" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation('${a.auteur.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-comments"></i> Mise en relation
-                    </button>
-                `;
-
-                card.innerHTML = `
-                    <div class="annonce-title-prefix">${titlePrefix}</div>
-                    <div class="annonce-top-bar">
-                        <div>
-                            <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
-                            <span class="price-tag">${a.tarif ? a.tarif + ' €/h' : ''}</span>
-                        </div>
-                        ${avatarHtml}
-                    </div>
-                    <div>
-                        <h3 style="font-size:1.1rem; font-weight:700; color:var(--text-dark);">${a.auteur}</h3>
-                        <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">${a.type === 'prof' ? 'Plage de niveau : ' + (a.plage || 'S.O.') : 'Niveau de l\'élève : ' + a.niveau}</p>
-                    </div>
-                    ${formatLocHtml}
-                    <p style="font-size:0.95rem; color:var(--text-dark); flex:1;">${a.desc}</p>
-                    <div style="font-size:0.8rem; color:var(--text-light); border-top:1px solid var(--border); padding-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-                        <span><i class="fa-solid fa-envelope"></i> ${a.email}</span>
-                        <span>${a.date || ''}</span>
-                    </div>
-                    ${relationButtonHtml}
-                `;
-                container.appendChild(card);
+            container.innerHTML = '';
+            suggestions.forEach(a => {
+                container.innerHTML += renderAnnonceCardHTML(a);
             });
         }
 
@@ -1557,7 +1703,7 @@
                     <div class="annonce-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
-                            <span class="price-tag">${a.tarif ? a.tarif + ' €/h' : ''}</span>
+                            <span class="price-tag">${a.tarif ? a.tarif + (a.type === 'prof' ? ' €/h' : '') : ''}</span>
                         </div>
                         <p>${a.desc}</p>
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
