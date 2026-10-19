@@ -58,8 +58,26 @@
         .sidebar-menu li.active a, .sidebar-menu li a:hover { background: var(--primary-light); color: var(--primary); }
         .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
 
-        /* Avatar Sidebar */
-        .sidebar-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; display: inline-block; }
+        /* Avatar Sidebar & Menu Déroulant Multi-Comptes au Survol */
+        .sidebar-account-container { position: relative; display: inline-block; }
+        .sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: inline-block; vertical-align: middle; cursor: pointer; border: 2px solid var(--primary); }
+        
+        .accounts-dropdown {
+            display: none; position: absolute; top: 100%; left: 0; width: 220px; background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            padding: 0.5rem; z-index: 200; margin-top: 5px;
+        }
+        .sidebar-account-container:hover .accounts-dropdown { display: flex; flex-direction: column; gap: 4px; }
+        
+        .account-item {
+            display: flex; align-items: center; gap: 10px; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.2s;
+        }
+        .account-item:hover { background: var(--primary-light); }
+        .account-item.active { border-left: 3px solid var(--primary); background: var(--bg-body); }
+        .account-item-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .account-item-info { display: flex; flex-direction: column; font-size: 0.8rem; overflow: hidden; }
+        .account-item-name { font-weight: 700; color: var(--text-dark); white-space: nowrap; text-overflow: ellipsis; }
+        .account-item-role { font-size: 0.7rem; color: var(--text-light); }
 
         .dark-mode-toggle {
             padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
@@ -100,14 +118,12 @@
         .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
         .annonce-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; position: relative; }
         .annonce-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem; }
-        .annonce-header { display: flex; justify-content: space-between; align-items: center; }
         
         .annonce-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer; transition: transform 0.2s; }
         .annonce-avatar:hover { transform: scale(1.08); }
         .annonce-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid var(--primary); cursor: pointer; transition: transform 0.2s; }
         .annonce-avatar-placeholder:hover { transform: scale(1.08); }
 
-        /* Badges de matières & Tarif lisible */
         .badge-matiere { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-maths { background: #EEF2FF; color: #4F46E5; }
         .badge-physique { background: #E0F2FE; color: #0284C7; }
@@ -122,12 +138,10 @@
 
         .tag-format { font-size: 0.8rem; font-weight: 600; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
 
-        /* Alignement cases à cocher */
         .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
         .checkbox-label input[type="checkbox"] { width: auto; cursor: pointer; }
 
-        /* Curseur */
         .slider-wrapper { display: flex; align-items: center; gap: 1rem; background: var(--bg-body); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
         input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
         .level-display { font-weight: 700; color: var(--text-dark); min-width: 80px; text-align: right; }
@@ -153,7 +167,6 @@
         .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
         .hidden { display: none !important; }
 
-        /* Profile Modal */
         .profile-modal-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
         .profile-modal-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
         .profile-modal-avatar-placeholder { width: 90px; height: 90px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 3px solid var(--primary); }
@@ -190,7 +203,11 @@
             <li class="active" id="menu-home" onclick="switchTab('home')"><a><i class="fa-solid fa-house"></i> <span>Accueil</span></a></li>
             <li id="menu-compte" onclick="switchTab('compte')">
                 <a>
-                    <span id="sidebar-account-icon"><i class="fa-solid fa-user"></i></span> 
+                    <div class="sidebar-account-container">
+                        <span id="sidebar-account-icon"><i class="fa-solid fa-user"></i></span>
+                        <!-- Menu déroulant au survol uniquement -->
+                        <div id="accounts-dropdown" class="accounts-dropdown"></div>
+                    </div>
                     <span>Compte</span>
                 </a>
             </li>
@@ -264,11 +281,11 @@
             <div id="global-annonces-container" class="annonces-grid"></div>
         </div>
 
-        <!-- 2. MON COMPTE (VISIBILITÉ PUBLIQUE/PRIVÉE) -->
+        <!-- 2. MON COMPTE -->
         <div id="tab-compte" class="tab-pane hidden">
             <div class="card">
                 <h2>Mon Compte</h2>
-                <p class="subtitle">Gérez vos informations personnelles et la confidentialité de vos coordonnées.</p>
+                <p class="subtitle">Gérez vos informations personnelles et votre profil.</p>
                 <form id="form-compte" onsubmit="saveCompte(event)">
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
@@ -295,7 +312,6 @@
                         </div>
                     </div>
 
-                    <!-- Option Profil Public / Privé -->
                     <div class="form-group" style="background:var(--primary-light); padding:1rem; border-radius:10px;">
                         <label style="color:var(--primary);">Visibilité du profil public *</label>
                         <select id="acc-visibility">
@@ -329,6 +345,13 @@
 
                     <button type="submit" class="btn">Enregistrer mon compte</button>
                 </form>
+
+                <!-- Bouton Créer un nouveau compte tout en bas -->
+                <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px dashed var(--border); text-align:center;">
+                    <button class="btn btn-secondary" onclick="openCreateAccountModal()">
+                        <i class="fa-solid fa-user-plus"></i> Créer un nouveau compte
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -388,7 +411,7 @@
             </div>
         </div>
 
-        <!-- 5. DEVOIRS (DESTINATAIRES RESTREINTS AUX RELATIONS) -->
+        <!-- 5. DEVOIRS -->
         <div id="tab-devoirs" class="tab-pane hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -402,20 +425,18 @@
             </div>
         </div>
 
-        <!-- 6. MESSAGERIE INTÉGRÉE & DISCUSSIONS PRIVÉES -->
+        <!-- 6. MESSAGERIE -->
         <div id="tab-messagerie" class="tab-pane hidden">
             <div class="card">
                 <h2>Messagerie & Discussions Privées</h2>
                 <p class="subtitle">Échangez en direct avec vos contacts.</p>
                 
                 <div style="display:grid; grid-template-columns: 240px 1fr; gap:1.5rem; min-height:400px;">
-                    <!-- Liste des discussions -->
                     <div style="border-right:1px solid var(--border); padding-right:1rem;">
                         <h3 style="font-size:0.95rem; margin-bottom:1rem; color:var(--text-light);">Vos contacts</h3>
                         <div id="contacts-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
                     </div>
 
-                    <!-- Zone de tchat dynamique -->
                     <div id="chat-window-container" style="display:flex; flex-direction:column; justify-content:space-between;">
                         <div id="chat-placeholder" style="text-align:center; padding:4rem; color:var(--text-light);">
                             <i class="fa-solid fa-comments" style="font-size:3rem; margin-bottom:1rem;"></i>
@@ -438,42 +459,49 @@
 
     </div>
 
-    <!-- POPUP PREMIÈRE VISITE -->
-    <div id="modal-first-visit" class="modal-overlay">
+    <!-- POPUP NOUVEAU COMPTE -->
+    <div id="modal-new-account" class="modal-overlay">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeFirstVisitModal()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="modal-close" onclick="closeCreateAccountModal()"><i class="fa-solid fa-xmark"></i></button>
             <div style="text-align:center; margin-bottom:1.5rem;">
-                <i class="fa-solid fa-graduation-cap" style="font-size:2.5rem; color:var(--primary);"></i>
-                <h2 style="margin-top:0.5rem;">Bienvenue sur Klass !</h2>
-                <p class="subtitle" style="margin-bottom:0;">Créez votre compte en quelques secondes (optionnel).</p>
+                <i class="fa-solid fa-user-plus" style="font-size:2.5rem; color:var(--primary);"></i>
+                <h2 style="margin-top:0.5rem;">Créer un nouveau compte</h2>
+                <p class="subtitle" style="margin-bottom:0;">Renseignez les détails du nouveau profil.</p>
             </div>
-            <form onsubmit="submitFirstVisitAccount(event)">
+            
+            <form id="form-create-new-account" onsubmit="submitNewAccount(event)">
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
                         <label>Nom & Prénom *</label>
-                        <input type="text" id="pop-nom" required placeholder="Jean Dupont">
+                        <input type="text" id="new-acc-nom" required placeholder="Jean Dupont">
                     </div>
                     <div>
                         <label>Rôle *</label>
-                        <select id="pop-role" required>
-                            <option value="prof">Je donne des cours</option>
-                            <option value="eleve">Je cherche un prof</option>
+                        <select id="new-acc-role" required>
+                            <option value="prof">Professeur</option>
+                            <option value="eleve">Élève / Parent</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
                         <label>Email *</label>
-                        <input type="email" id="pop-email" required placeholder="jean@email.com">
+                        <input type="email" id="new-acc-email" required placeholder="jean@email.com">
                     </div>
                     <div>
                         <label>Téléphone *</label>
-                        <input type="tel" id="pop-tel" required placeholder="06 12 34 56 78">
+                        <input type="tel" id="new-acc-tel" required placeholder="06 12 34 56 78">
                     </div>
                 </div>
-                <button type="submit" class="btn" style="width:100%;">Créer mon compte</button>
-                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0.5rem;" onclick="closeFirstVisitModal()">Continuer sans compte</button>
+                <button type="submit" class="btn" style="width:100%;">Enregistrer le nouveau compte</button>
             </form>
+
+            <!-- Étape de confirmation après création -->
+            <div id="post-account-creation-actions" class="hidden" style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <p style="color:var(--accent); text-align:center; font-weight:700;">Nouveau compte enregistré avec succès !</p>
+                <button class="btn btn-success" id="btn-login-new-acc">Se connecter au nouveau compte</button>
+                <button class="btn btn-secondary" onclick="closeCreateAccountModal()">Revenir sur l'ancien compte</button>
+            </div>
         </div>
     </div>
 
@@ -575,7 +603,6 @@
                     </div>
                 </div>
 
-                <!-- Tarif horaire de l'annonce -->
                 <div class="form-group">
                     <label>Tarif horaire (€/h) *</label>
                     <input type="number" id="ann-tarif" required placeholder="Ex: 25">
@@ -591,7 +618,7 @@
         </div>
     </div>
 
-    <!-- MODAL : DÉPOSER UN DEVOIR (DESTINATAIRE SÉLECTIONNABLE DANS SES CONTACTS) -->
+    <!-- MODAL : DEVOIR -->
     <div id="modal-devoir" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeDevoirModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -620,7 +647,7 @@
         </div>
     </div>
 
-    <!-- MODAL : PROFIL PUBLIC (GESTION PRIVÉE / PUBLIQUE) -->
+    <!-- MODAL : PROFIL PUBLIC -->
     <div id="modal-profile" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -662,13 +689,11 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initTimeSelects();
+            initAccountsStorage();
             loadUserData();
             checkNotificationStatus();
             updateSidebarAvatar();
-            
-            if (!localStorage.getItem('klass_visited')) {
-                document.getElementById('modal-first-visit').style.display = 'flex';
-            }
+            renderAccountsDropdown();
         });
 
         function toggleDarkMode() {
@@ -679,8 +704,98 @@
             document.body.classList.add('dark-mode');
         }
 
+        /* GESTION MULTI-COMPTES */
+        function initAccountsStorage() {
+            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            let currentAcc = JSON.parse(localStorage.getItem('klass_user_compte'));
+            
+            if (currentAcc && accounts.length === 0) {
+                accounts.push(currentAcc);
+                localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+            }
+        }
+
         function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
+            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
+        }
+
+        function switchAccount(email) {
+            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            const target = accounts.find(a => a.email === email);
+            if (target) {
+                localStorage.setItem('klass_user_compte', JSON.stringify(target));
+                loadUserData();
+                updateSidebarAvatar();
+                renderAccountsDropdown();
+                renderGlobalFeed();
+                activeChatUser = null;
+                alert(`Connecté en tant que ${target.nom} !`);
+            }
+        }
+
+        function renderAccountsDropdown() {
+            const dropdown = document.getElementById('accounts-dropdown');
+            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            const user = getCurrentUser();
+
+            if (accounts.length === 0) {
+                dropdown.innerHTML = `<p style="font-size:0.75rem; color:var(--text-light); padding:4px;">Un seul compte actif.</p>`;
+                return;
+            }
+
+            dropdown.innerHTML = '';
+            accounts.forEach(acc => {
+                const isActive = acc.email === user.email;
+                const avatar = acc.photo 
+                    ? `<img src="${acc.photo}" class="account-item-avatar">` 
+                    : `<div class="account-item-avatar" style="background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.8rem;"><i class="fa-solid fa-user"></i></div>`;
+
+                const item = document.createElement('div');
+                item.className = `account-item ${isActive ? 'active' : ''}`;
+                item.onclick = (e) => { e.stopPropagation(); switchAccount(acc.email); };
+                item.innerHTML = `
+                    ${avatar}
+                    <div class="account-item-info">
+                        <span class="account-item-name">${acc.nom} ${isActive ? '✓' : ''}</span>
+                        <span class="account-item-role">${acc.role === 'prof' ? 'Prof' : 'Élève'}</span>
+                    </div>
+                `;
+                dropdown.appendChild(item);
+            });
+        }
+
+        function openCreateAccountModal() {
+            document.getElementById('form-create-new-account').reset();
+            document.getElementById('form-create-new-account').classList.remove('hidden');
+            document.getElementById('post-account-creation-actions').classList.add('hidden');
+            document.getElementById('modal-new-account').style.display = 'flex';
+        }
+
+        function closeCreateAccountModal() {
+            document.getElementById('modal-new-account').style.display = 'none';
+        }
+
+        function submitNewAccount(e) {
+            e.preventDefault();
+            const newCompte = {
+                nom: document.getElementById('new-acc-nom').value,
+                role: document.getElementById('new-acc-role').value,
+                email: document.getElementById('new-acc-email').value,
+                tel: document.getElementById('new-acc-tel').value,
+                visibility: 'public', tarif: "25", niveauEtudes: "", desc: "", photo: null
+            };
+
+            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            accounts.push(newCompte);
+            localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+
+            document.getElementById('form-create-new-account').classList.add('hidden');
+            document.getElementById('post-account-creation-actions').classList.remove('hidden');
+
+            document.getElementById('btn-login-new-acc').onclick = function() {
+                switchAccount(newCompte.email);
+                closeCreateAccountModal();
+            };
         }
 
         function updateSidebarAvatar() {
@@ -691,27 +806,6 @@
             } else {
                 container.innerHTML = `<i class="fa-solid fa-user"></i>`;
             }
-        }
-
-        function closeFirstVisitModal() {
-            localStorage.setItem('klass_visited', 'true');
-            document.getElementById('modal-first-visit').style.display = 'none';
-        }
-
-        function submitFirstVisitAccount(e) {
-            e.preventDefault();
-            const compte = {
-                nom: document.getElementById('pop-nom').value,
-                role: document.getElementById('pop-role').value,
-                email: document.getElementById('pop-email').value,
-                tel: document.getElementById('pop-tel').value,
-                visibility: 'public', tarif: "25", niveauEtudes: "", desc: "", photo: null
-            };
-            localStorage.setItem('klass_user_compte', JSON.stringify(compte));
-            closeFirstVisitModal();
-            loadUserData();
-            updateSidebarAvatar();
-            alert("Compte créé avec succès !");
         }
 
         function loadUserData() {
@@ -796,11 +890,7 @@
         }
 
         function closeAnnonceModal() { document.getElementById('modal-annonce').style.display = 'none'; }
-        
-        function openDevoirModal() { 
-            populateDevoirDestinataires();
-            document.getElementById('modal-devoir').style.display = 'flex'; 
-        }
+        function openDevoirModal() { populateDevoirDestinataires(); document.getElementById('modal-devoir').style.display = 'flex'; }
         function closeDevoirModal() { document.getElementById('modal-devoir').style.display = 'none'; }
         function closeProfileModal() { document.getElementById('modal-profile').style.display = 'none'; }
 
@@ -846,21 +936,26 @@
             user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
             user.desc = document.getElementById('acc-desc').value;
 
+            function updateAccountInList(updatedUser) {
+                let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+                accounts = accounts.map(a => a.email === updatedUser.email ? updatedUser : a);
+                localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+                localStorage.setItem('klass_user_compte', JSON.stringify(updatedUser));
+                updateSidebarAvatar();
+                renderAccountsDropdown();
+                alert("Compte sauvegardé !");
+                renderGlobalFeed();
+            }
+
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     user.photo = e.target.result;
-                    localStorage.setItem('klass_user_compte', JSON.stringify(user));
-                    updateSidebarAvatar();
-                    alert("Compte sauvegardé !");
-                    renderGlobalFeed();
+                    updateAccountInList(user);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                localStorage.setItem('klass_user_compte', JSON.stringify(user));
-                updateSidebarAvatar();
-                alert("Compte sauvegardé !");
-                renderGlobalFeed();
+                updateAccountInList(user);
             }
         }
 
@@ -915,21 +1010,15 @@
             renderGlobalFeed();
         }
 
-        // REDIRECTION DU BOUTON "MISE EN RELATION" VERS LA MESSAGERIE AVEC PRÉREMPLISSAGE
         function initierMiseEnRelation(auteurNom) {
             switchTab('messagerie');
             activeChatUser = auteurNom;
             
-            const user = getCurrentUser();
             const prefillMsg = `Bonjour ${auteurNom}, votre annonce m'intéresse est-elle toujours d'actualité ?`;
 
-            const chatHeader = document.getElementById('active-chat-header');
-            const chatBox = document.getElementById('active-chat-box');
-            const placeholder = document.getElementById('chat-placeholder');
-
-            placeholder.classList.add('hidden');
-            chatBox.classList.remove('hidden');
-            chatHeader.innerText = `Discussion avec ${auteurNom}`;
+            document.getElementById('chat-placeholder').classList.add('hidden');
+            document.getElementById('active-chat-box').classList.remove('hidden');
+            document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurNom}`;
 
             document.getElementById('chat-input').value = prefillMsg;
             renderChatBubbles(auteurNom);
@@ -939,7 +1028,6 @@
             const user = getCurrentUser();
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
             
-            // Extraire tous les contacts uniques
             let contacts = new Set();
             messages.forEach(m => {
                 if (m.sender === user.nom) contacts.add(m.receiver);
@@ -1017,37 +1105,25 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // PROFIL PUBLIC (GESTION CONFIDENTIALITÉ PRIVÉE)
         function openUserProfile(auteurName, auteurEmail) {
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            const userCompte = JSON.parse(localStorage.getItem('klass_user_compte')) || {};
+            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            
+            const targetAcc = accounts.find(a => a.nom === auteurName || a.email === auteurEmail) || {};
 
-            let targetPhoto = null;
-            let targetDesc = "Aucune description renseignée.";
-            let targetNiveau = "Non renseigné";
-            let targetTel = "Non renseigné";
+            let targetPhoto = targetAcc.photo || null;
+            let targetDesc = targetAcc.desc || "Aucune description renseignée.";
+            let targetNiveau = targetAcc.niveauEtudes || "Non renseigné";
+            let targetTel = targetAcc.tel || "Non renseigné";
             let targetEmail = auteurEmail;
-            let targetRole = "Membre Klass";
-            let isPrivate = false;
-
-            if (userCompte.nom === auteurName || userCompte.email === auteurEmail) {
-                targetPhoto = userCompte.photo;
-                targetDesc = userCompte.desc || targetDesc;
-                targetNiveau = userCompte.niveauEtudes || targetNiveau;
-                targetTel = userCompte.tel || targetTel;
-                targetRole = userCompte.role === 'prof' ? 'Professeur' : 'Élève / Parent';
-                isPrivate = userCompte.visibility === 'private';
-            } else {
-                const foundAnn = annonces.find(a => a.auteur === auteurName || a.email === auteurEmail);
-                if (foundAnn) targetPhoto = foundAnn.photo;
-            }
+            let targetRole = targetAcc.role === 'prof' ? 'Professeur' : 'Élève / Parent';
+            let isPrivate = targetAcc.visibility === 'private';
 
             document.getElementById('profile-modal-name').innerText = auteurName;
             document.getElementById('profile-modal-role').innerText = targetRole;
             document.getElementById('profile-modal-niveau').innerText = "Niveau d'étude : " + targetNiveau;
             document.getElementById('profile-modal-desc').innerText = targetDesc;
 
-            // Masquage si profil privé
             if (isPrivate) {
                 document.getElementById('profile-modal-email').innerText = "🔒 Masqué (Profil Privé)";
                 document.getElementById('profile-modal-tel').innerText = "🔒 Masqué (Profil Privé)";
@@ -1084,7 +1160,6 @@
             document.getElementById('modal-profile').style.display = 'flex';
         }
 
-        // REMPLISSAGE DES DESTINATAIRES SEULEMENT PARMI LES CONTACTS
         function populateDevoirDestinataires() {
             const select = document.getElementById('dev-destinataire-select');
             const user = getCurrentUser();
@@ -1123,7 +1198,6 @@
             devoirsList.push(dev);
             localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
             
-            // Notification dans la messagerie
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
             messages.push({
                 id: Date.now(),
@@ -1147,7 +1221,7 @@
             container.innerHTML = devoirsList.length === 0 ? "<p style='color:var(--text-light); text-align:center;'>Aucun devoir disponible.</p>" : "";
             
             devoirsList.forEach(d => {
-                const canDelete = (d.auteur === user.nom || !d.auteur || user.nom === "Utilisateur Visiteur");
+                const canDelete = (d.auteur === user.nom || !d.auteur || user.nom === "Visiteur");
 
                 container.innerHTML += `
                     <div style="background:var(--card-bg); padding:1.2rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -1334,7 +1408,6 @@
                     formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-graduation-cap"></i> Recherche de cours</div>`;
                 }
 
-                // Titre dynamique d'annonce
                 const titlePrefix = a.type === 'prof' ? "Je donne des cours de :" : "Je cherche un cours de :";
 
                 const relationButtonHtml = isAuthor ? '' : `
@@ -1375,7 +1448,7 @@
             
             const myAnnonces = annonces.filter(a => a.auteur === user.nom || a.email === user.email);
 
-            container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée.</p>" : "";
+            container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée avec ce compte.</p>" : "";
             myAnnonces.forEach((a) => {
                 container.innerHTML += `
                     <div class="annonce-card">
