@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klass - Soutien Scolaire & Cours Particuliers</title>
+    <!-- Favicon Logo KL -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%234F46E5%22/><text x=%2250%%22 y=%2255%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Plus Jakarta Sans, sans-serif%22 font-weight=%22800%22 font-size=%2248%22 fill=%22%23FFFFFF%22>KL</text></svg>">
+    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS pour la mini-carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     
     <style>
         :root {
@@ -54,7 +60,6 @@
             background: var(--primary); color: white; border: none; width: 36px; height: 36px;
             border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        /* Infobulle adaptative Dark Mode */
         .btn-add-top::after {
             content: attr(data-tooltip);
             position: absolute; left: 110%; top: 50%; transform: translateY(-50%);
@@ -104,16 +109,8 @@
         h1, h2 { color: var(--text-dark); font-weight: 700; margin-bottom: 1rem; }
         p.subtitle { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
-        /* Champs Date & Calendriers lisibles en Mode Sombre */
-        input[type="date"] {
-            color-scheme: light;
-        }
-        body.dark-mode input[type="date"] {
-            color-scheme: dark;
-            background-color: #1E293B;
-            color: #F8FAFC;
-            border-color: #475569;
-        }
+        input[type="date"] { color-scheme: light; }
+        body.dark-mode input[type="date"] { color-scheme: dark; background-color: #1E293B; color: #F8FAFC; border-color: #475569; }
 
         /* Filtres */
         .search-filters-bar {
@@ -137,6 +134,11 @@
         .btn-danger { background-color: #FEE2E2; color: var(--danger); }
         body.dark-mode .btn-danger { background-color: #7F1D1D; color: #FEE2E2; }
         .btn-success { background-color: #D1FAE5; color: var(--accent); }
+
+        /* Mini-carte interactive */
+        #map-container {
+            width: 100%; height: 280px; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border); z-index: 10;
+        }
 
         /* Annonces */
         .annonces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
@@ -172,11 +174,16 @@
         /* EDT */
         .edt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .edt-grid-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--card-bg); }
-        .edt-grid { display: grid; grid-template-columns: 80px repeat(7, minmax(120px, 1fr)); min-width: 900px; }
-        .edt-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.5rem; min-height: 50px; font-size: 0.85rem; }
-        .edt-header-cell { background: var(--primary-light); color: var(--primary); font-weight: 700; text-align: center; padding: 0.75rem 0.5rem; }
-        .edt-time-cell { font-weight: 600; color: var(--text-light); text-align: center; background: var(--bg-body); display: flex; align-items: center; justify-content: center; }
-        .edt-event-item { background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
+        .edt-grid { display: grid; grid-template-columns: 80px repeat(7, minmax(130px, 1fr)); min-width: 950px; }
+        .edt-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.3rem; min-height: 45px; font-size: 0.8rem; cursor: pointer; }
+        .edt-cell:hover { background: var(--primary-light); }
+        .edt-header-cell { background: var(--primary-light); color: var(--primary); font-weight: 700; text-align: center; padding: 0.75rem 0.5rem; cursor: default; }
+        .edt-time-cell { font-weight: 600; color: var(--text-light); text-align: center; background: var(--bg-body); display: flex; align-items: center; justify-content: center; cursor: default; }
+        .edt-event-item { background: var(--primary); color: white; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; margin-bottom: 2px; }
+
+        /* Horloge sélecteur d'heure graphique */
+        .clock-picker-container { display: flex; gap: 1rem; align-items: center; background: var(--bg-body); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
+        .clock-wheel { display: flex; flex-direction: column; align-items: center; flex: 1; }
 
         /* Tchat */
         .chat-container { display: flex; flex-direction: column; gap: 1rem; height: 400px; overflow-y: auto; padding: 1rem; background: var(--bg-body); border-radius: 12px; border: 1px solid var(--border); }
@@ -256,8 +263,11 @@
 
         <!-- 1. ACCUEIL -->
         <div id="tab-home" class="tab-pane">
-            <h1>Fil d'actualité & Recherche</h1>
-            <p class="subtitle">Consultez l'ensemble des annonces de profs et d'élèves en direct.</p>
+            <h1>Fil d'actualité & Recherche Géolocalisée</h1>
+            <p class="subtitle">Visualisez directement les annonces des professeurs ou des élèves autour de chez vous.</p>
+
+            <!-- Mini-carte interactive Leaflet -->
+            <div id="map-container"></div>
 
             <div class="search-filters-bar">
                 <div class="form-group" style="margin-bottom:0;">
@@ -325,7 +335,7 @@
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
                             <label>Nom et Prénom *</label>
-                            <input type="text" id="acc-nom" required placeholder="Ex: Marie Dupont">
+                            <input type="text" id="acc-nom" required placeholder="Utilisateur Visiteur">
                         </div>
                         <div>
                             <label>Je suis : *</label>
@@ -339,7 +349,7 @@
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div>
                             <label>Email *</label>
-                            <input type="email" id="acc-email" required placeholder="marie@email.com">
+                            <input type="email" id="acc-email" required placeholder="visiteur@klass.fr">
                         </div>
                         <div>
                             <label>Numéro de téléphone *</label>
@@ -361,15 +371,24 @@
                     </div>
 
                     <div id="prof-extra-fields">
-                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <label style="color:var(--primary); font-weight:700; margin-bottom:0.5rem;">Tarifs horaires multiples selon le niveau</label>
+                        <div class="form-group" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; background:var(--bg-body); padding:1rem; border-radius:10px; border:1px solid var(--border);">
                             <div>
-                                <label>Tarif horaire (€ / h)</label>
-                                <input type="number" id="acc-tarif" placeholder="Ex: 25">
+                                <label style="font-size:0.8rem;">6ème - 4ème (€/h)</label>
+                                <input type="number" id="acc-tarif-collège" placeholder="Ex: 20">
                             </div>
                             <div>
-                                <label>Niveau d'étude</label>
-                                <input type="text" id="acc-niveau-etudes" placeholder="Ex: Master 2 Mathématiques">
+                                <label style="font-size:0.8rem;">3ème - Terminale (€/h)</label>
+                                <input type="number" id="acc-tarif-lycée" placeholder="Ex: 25">
                             </div>
+                            <div>
+                                <label style="font-size:0.8rem;">Post-bac (€/h)</label>
+                                <input type="number" id="acc-tarif-sup" placeholder="Ex: 35">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:1rem;">
+                            <label>Niveau d'étude</label>
+                            <input type="text" id="acc-niveau-etudes" placeholder="Ex: Master 2 Mathématiques">
                         </div>
                     </div>
 
@@ -396,10 +415,10 @@
         <div id="tab-planning" class="tab-pane hidden">
             <div class="card">
                 <h2>Emploi du temps & Visio MS Teams</h2>
-                <p class="subtitle">Gérez vos séances heure par heure.</p>
+                <p class="subtitle">Gérez vos séances heure par heure. Cliquez directement sur une case du planning ou utilisez le formulaire ci-dessous.</p>
 
                 <form onsubmit="addEvent(event)" style="background:var(--bg-body); padding:1.25rem; border-radius:12px; border:1px solid var(--border); margin-bottom:1.5rem;">
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1rem;">
                         <div>
                             <label>Titre / Cours</label>
                             <input type="text" id="event-title" required placeholder="Ex: Cours Maths">
@@ -415,14 +434,6 @@
                             <input type="date" id="event-date" required>
                         </div>
                         <div>
-                            <label>Début</label>
-                            <select id="event-time-start" required></select>
-                        </div>
-                        <div>
-                            <label>Fin</label>
-                            <select id="event-time-end" required></select>
-                        </div>
-                        <div>
                             <label>Règlement</label>
                             <select id="event-paiement">
                                 <option value="paye">Payé 💳</option>
@@ -430,6 +441,39 @@
                             </select>
                         </div>
                     </div>
+
+                    <!-- Sélecteur d'horloge graphique -->
+                    <div class="form-group">
+                        <label>Plage horaire (Horaires précis)</label>
+                        <div class="clock-picker-container">
+                            <div class="clock-wheel">
+                                <label style="font-size:0.8rem; color:var(--text-light);">Début</label>
+                                <div style="display:flex; gap:5px; width:100%;">
+                                    <select id="event-start-hour" style="flex:1;"></select>
+                                    <select id="event-start-min" style="flex:1;">
+                                        <option value="00">00</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                        <option value="45">45</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="font-weight:700; margin-top:1rem;">➔</div>
+                            <div class="clock-wheel">
+                                <label style="font-size:0.8rem; color:var(--text-light);">Fin</label>
+                                <div style="display:flex; gap:5px; width:100%;">
+                                    <select id="event-end-hour" style="flex:1;"></select>
+                                    <select id="event-end-min" style="flex:1;">
+                                        <option value="00">00</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                        <option value="45">45</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Ajouter au planning</button>
                 </form>
 
@@ -449,7 +493,7 @@
         <div id="tab-annonces" class="tab-pane hidden">
             <div class="card">
                 <h2>Mes annonces publiées</h2>
-                <p class="subtitle">Modifiez ou supprimez vos annonces et leurs tarifs en direct.</p>
+                <p class="subtitle">Modifiez ou supprimez vos annonces en direct.</p>
                 <div id="my-annonces-container" class="annonces-grid"></div>
             </div>
         </div>
@@ -516,7 +560,7 @@
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
                         <label>Nom & Prénom *</label>
-                        <input type="text" id="new-acc-nom" required placeholder="Jean Dupont">
+                        <input type="text" id="new-acc-nom" required placeholder="Utilisateur Visiteur">
                     </div>
                     <div>
                         <label>Rôle *</label>
@@ -529,7 +573,7 @@
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
                         <label>Email *</label>
-                        <input type="email" id="new-acc-email" required placeholder="jean@email.com">
+                        <input type="email" id="new-acc-email" required placeholder="visiteur@klass.fr">
                     </div>
                     <div>
                         <label>Téléphone *</label>
@@ -657,11 +701,6 @@
                     </div>
                 </div>
 
-                <div class="form-group" id="tarif-container">
-                    <label>Tarif horaire (€/h) *</label>
-                    <input type="number" id="ann-tarif" placeholder="Ex: 25">
-                </div>
-
                 <div class="form-group">
                     <label>Description de l'annonce *</label>
                     <textarea id="ann-desc" rows="3" required placeholder="Présentez votre demande ou cours..."></textarea>
@@ -701,7 +740,7 @@
         </div>
     </div>
 
-    <!-- MODAL PROFIL PUBLIC -->
+    <!-- MODAL PROFIL PUBLIC & AVIS -->
     <div id="modal-profile" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeProfileModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -731,15 +770,51 @@
                 </div>
             </div>
 
+            <!-- Section Tarifs multiples -->
+            <div id="profile-modal-tarifs-box" class="form-group hidden" style="background:var(--primary-light); padding:1rem; border-radius:10px;">
+                <label style="color:var(--primary);">Tarifs horaires par niveau</label>
+                <div id="profile-modal-tarifs-content" style="font-size:0.9rem; font-weight:600; display:flex; gap:1.5rem; margin-top:4px;"></div>
+            </div>
+
+            <!-- SECTION AVIS ET NOTES -->
+            <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
+                <h3 style="font-size:1.1rem; margin-bottom:0.8rem;"><i class="fa-solid fa-star" style="color:var(--warning);"></i> Avis et Notes</h3>
+                <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+
+                <!-- Formulaire optionnel d'ajout d'avis -->
+                <form id="form-add-review" onsubmit="submitReview(event)" style="background:var(--bg-body); padding:1rem; border-radius:10px; border:1px solid var(--border);">
+                    <input type="hidden" id="review-target-email" value="">
+                    <label style="font-size:0.85rem; font-weight:700;">Laisser une note et un commentaire (Optionnel)</label>
+                    <div style="display:flex; gap:1rem; align-items:center; margin:0.5rem 0;">
+                        <div>
+                            <select id="review-rating" style="padding:0.4rem; font-weight:700; color:var(--warning);">
+                                <option value="5">★★★★★ (5/5)</option>
+                                <option value="4">★★★★☆ (4/5)</option>
+                                <option value="3">★★★☆☆ (3/5)</option>
+                                <option value="2">★★☆☆☆ (2/5)</option>
+                                <option value="1">★☆☆☆☆ (1/5)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <textarea id="review-comment" rows="2" placeholder="Votre commentaire sur ce professeur (optionnel)..." style="font-size:0.85rem; margin-bottom:0.5rem;"></textarea>
+                    <button type="submit" class="btn" style="padding:0.4rem 1rem; font-size:0.85rem;">Publier l'avis</button>
+                </form>
+            </div>
+
             <h3 style="font-size:1.1rem; margin-top:1.5rem; margin-bottom:1rem;">Annonces publiées par ce membre</h3>
             <div id="profile-modal-annonces-list" style="display:flex; flex-direction:column; gap:0.8rem;"></div>
         </div>
     </div>
 
+    <!-- Leaflet JS pour la mini-carte -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
         const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
         let currentWeekOffset = 0;
         let activeChatUser = null;
+        let interactiveMap = null;
+        let mapMarkers = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             initTimeSelects();
@@ -749,6 +824,7 @@
             updateSidebarAvatar();
             renderAccountsDropdown();
             renderAllAccountsManagement();
+            initLeafletMap();
         });
 
         window.addEventListener('click', (e) => {
@@ -789,7 +865,7 @@
         }
 
         function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
+            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
         }
 
         function switchAccount(email) {
@@ -922,7 +998,7 @@
                 role: document.getElementById('new-acc-role').value,
                 email: document.getElementById('new-acc-email').value,
                 tel: document.getElementById('new-acc-tel').value,
-                visibility: 'public', tarif: "25", niveauEtudes: "", desc: "", photo: null
+                visibility: 'public', tarifs: { college: "20", lycee: "25", sup: "35" }, niveauEtudes: "", desc: "", photo: null
             };
 
             let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
@@ -961,7 +1037,13 @@
                 document.getElementById('acc-email').value = data.email || '';
                 document.getElementById('acc-tel').value = data.tel || '';
                 document.getElementById('acc-visibility').value = data.visibility || 'public';
-                document.getElementById('acc-tarif').value = data.tarif || '';
+                
+                if (data.tarifs) {
+                    document.getElementById('acc-tarif-collège').value = data.tarifs.college || '';
+                    document.getElementById('acc-tarif-lycée').value = data.tarifs.lycee || '';
+                    document.getElementById('acc-tarif-sup').value = data.tarifs.sup || '';
+                }
+                
                 document.getElementById('acc-niveau-etudes').value = data.niveauEtudes || '';
                 document.getElementById('acc-desc').value = data.desc || '';
                 toggleProfFields();
@@ -976,7 +1058,10 @@
 
             const currentUser = getCurrentUser().nom;
             
-            if(tabId === 'home') renderGlobalFeed();
+            if(tabId === 'home') {
+                renderGlobalFeed();
+                setTimeout(() => { if (interactiveMap) interactiveMap.invalidateSize(); }, 200);
+            }
             if(tabId === 'suggestion') {
                 renderSuggestions();
                 document.getElementById('suggestion-notif-dot').classList.add('hidden');
@@ -1046,9 +1131,6 @@
                     document.getElementById('new-type-annonce').value = ann.type;
                     toggleAnnonceFormType();
                     document.getElementById('ann-desc').value = ann.desc;
-                    if(document.getElementById('ann-tarif')) {
-                        document.getElementById('ann-tarif').value = ann.tarif || '25';
-                    }
                     if(ann.type === 'prof') {
                         document.getElementById('new-format-cours').value = ann.formatCours || 'Présentiel et Visio';
                         togglePresentielFields();
@@ -1076,16 +1158,13 @@
 
         function toggleAnnonceFormType() {
             const val = document.getElementById('new-type-annonce').value;
-            const tarifContainer = document.getElementById('tarif-container');
             if(val === 'prof') {
                 document.getElementById('block-prof-ann').classList.remove('hidden');
                 document.getElementById('block-eleve-ann').classList.add('hidden');
-                if(tarifContainer) tarifContainer.classList.remove('hidden');
                 togglePresentielFields();
             } else {
                 document.getElementById('block-prof-ann').classList.add('hidden');
                 document.getElementById('block-eleve-ann').classList.remove('hidden');
-                if(tarifContainer) tarifContainer.classList.add('hidden');
             }
         }
 
@@ -1115,7 +1194,13 @@
             user.email = document.getElementById('acc-email').value;
             user.tel = document.getElementById('acc-tel').value;
             user.visibility = document.getElementById('acc-visibility').value;
-            user.tarif = document.getElementById('acc-tarif').value;
+            
+            user.tarifs = {
+                college: document.getElementById('acc-tarif-collège').value || '20',
+                lycee: document.getElementById('acc-tarif-lycée').value || '25',
+                sup: document.getElementById('acc-tarif-sup').value || '35'
+            };
+
             user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
             user.desc = document.getElementById('acc-desc').value;
 
@@ -1160,7 +1245,7 @@
                 auteur: user.nom,
                 email: user.email,
                 photo: user.photo || null,
-                tarif: type === 'prof' ? (document.getElementById('ann-tarif').value || '25') : 'Recherche',
+                tarifs: user.tarifs || { college: 20, lycee: 25, sup: 35 },
                 desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
@@ -1178,7 +1263,7 @@
                     nouvelleAnnonce.villeCours = document.getElementById('new-ville-cours').value;
                     nouvelleAnnonce.rayonCours = document.getElementById('new-rayon-cours').value;
                 } else {
-                    nouvelleAnnonce.villeCours = '';
+                    nouvelleAnnonce.villeCours = 'Visio';
                     nouvelleAnnonce.rayonCours = 0;
                 }
             } else {
@@ -1193,7 +1278,6 @@
             } else {
                 annonces.push(nouvelleAnnonce);
                 
-                // Activer point rouge suggestion pour les autres comptes/utilisateurs
                 let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
                 let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
                 accounts.forEach(acc => {
@@ -1207,6 +1291,7 @@
             closeAnnonceModal();
             alert(editId ? "Annonce modifiée avec succès !" : "Votre annonce est en ligne !");
             renderGlobalFeed();
+            updateMapMarkers();
         }
 
         function checkRelationExists(targetName) {
@@ -1245,7 +1330,6 @@
                 });
                 localStorage.setItem('klass_private_messages', JSON.stringify(messages));
 
-                // Notification rouge pour le destinataire
                 let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
                 notifsMsg[auteurNom] = true;
                 localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
@@ -1312,7 +1396,6 @@
 
             localStorage.setItem('klass_private_messages', JSON.stringify(messages));
             
-            // Notification message
             let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
             notifsMsg[activeChatUser] = true;
             localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
@@ -1375,12 +1458,30 @@
                 document.getElementById('profile-modal-tel').innerText = targetTel;
             }
 
+            // Affichage des tarifs multiples
+            const tariffsBox = document.getElementById('profile-modal-tarifs-box');
+            const tariffsContent = document.getElementById('profile-modal-tarifs-content');
+            if (targetAcc.role === 'prof' && targetAcc.tarifs) {
+                tariffsBox.classList.remove('hidden');
+                tariffsContent.innerHTML = `
+                    <div>6ème-4ème : <strong>${targetAcc.tarifs.college || 20}€/h</strong></div>
+                    <div>3ème-Term : <strong>${targetAcc.tarifs.lycee || 25}€/h</strong></div>
+                    <div>Post-bac : <strong>${targetAcc.tarifs.sup || 35}€/h</strong></div>
+                `;
+            } else {
+                tariffsBox.classList.add('hidden');
+            }
+
             const avatarContainer = document.getElementById('profile-modal-avatar-container');
             if (targetPhoto) {
                 avatarContainer.innerHTML = `<img src="${targetPhoto}" class="profile-modal-avatar" alt="Photo">`;
             } else {
                 avatarContainer.innerHTML = `<div class="profile-modal-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
             }
+
+            // Avis et notes
+            document.getElementById('review-target-email').value = targetEmail;
+            renderReviewsList(targetEmail);
 
             const userAnnonces = annonces.filter(a => a.auteur === auteurName || a.email === auteurEmail);
             const annoncesListContainer = document.getElementById('profile-modal-annonces-list');
@@ -1393,7 +1494,7 @@
                     const item = document.createElement('div');
                     item.style.cssText = "background:var(--bg-body); padding:0.8rem; border-radius:8px; border:1px solid var(--border);";
                     item.innerHTML = `
-                        <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'} - ${a.tarif ? (a.type === 'prof' ? a.tarif + '€/h' : 'Recherche') : ''}</div>
+                        <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'}</div>
                         <p style="font-size:0.85rem; color:var(--text-dark); margin-top:2px;">${a.desc}</p>
                     `;
                     annoncesListContainer.appendChild(item);
@@ -1401,6 +1502,55 @@
             }
 
             document.getElementById('modal-profile').style.display = 'flex';
+        }
+
+        function renderReviewsList(targetEmail) {
+            let reviews = JSON.parse(localStorage.getItem('klass_reviews')) || {};
+            const targetReviews = reviews[targetEmail] || [];
+            const container = document.getElementById('profile-reviews-list');
+
+            if (targetReviews.length === 0) {
+                container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-light);">Aucun avis pour l'instant.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            targetReviews.forEach(r => {
+                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                const item = document.createElement('div');
+                item.style.cssText = `background:var(--bg-body); padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--border); font-size:0.85rem;`;
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; font-weight:700;">
+                        <span>${r.author}</span>
+                        <span style="color:var(--warning);">${stars}</span>
+                    </div>
+                    ${r.comment ? `<p style="color:var(--text-dark); margin-top:4px;">${r.comment}</p>` : ''}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function submitReview(e) {
+            e.preventDefault();
+            const targetEmail = document.getElementById('review-target-email').value;
+            const rating = parseInt(document.getElementById('review-rating').value);
+            const comment = document.getElementById('review-comment').value.trim();
+            const user = getCurrentUser();
+
+            let reviews = JSON.parse(localStorage.getItem('klass_reviews')) || {};
+            if (!reviews[targetEmail]) reviews[targetEmail] = [];
+
+            reviews[targetEmail].push({
+                author: user.nom,
+                rating: rating,
+                comment: comment,
+                date: new Date().toLocaleDateString()
+            });
+
+            localStorage.setItem('klass_reviews', JSON.stringify(reviews));
+            document.getElementById('review-comment').value = '';
+            renderReviewsList(targetEmail);
+            alert("Avis publié avec succès !");
         }
 
         function populateDevoirDestinataires() {
@@ -1441,7 +1591,6 @@
             devoirsList.push(dev);
             localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
             
-            // Notification devoir pour le destinataire
             let notifsDev = JSON.parse(localStorage.getItem('klass_notifs_devoirs')) || {};
             notifsDev[dest] = true;
             localStorage.setItem('klass_notifs_devoirs', JSON.stringify(notifsDev));
@@ -1505,14 +1654,17 @@
         }
 
         function initTimeSelects() {
-            const startSel = document.getElementById('event-time-start');
-            const endSel = document.getElementById('event-time-end');
-            startSel.innerHTML = ''; endSel.innerHTML = '';
+            const startH = document.getElementById('event-start-hour');
+            const endH = document.getElementById('event-end-hour');
+            if (!startH || !endH) return;
+            startH.innerHTML = ''; endH.innerHTML = '';
             for(let h = 8; h <= 20; h++) {
-                const timeStr = (h < 10 ? '0' + h : h) + ':00';
-                startSel.innerHTML += `<option value="${h}">${timeStr}</option>`;
-                endSel.innerHTML += `<option value="${h+1}">${(h+1 < 10 ? '0' + (h+1) : h+1)}:00</option>`;
+                const hStr = h < 10 ? '0' + h : h;
+                startH.innerHTML += `<option value="${h}">${hStr}h</option>`;
+                endH.innerHTML += `<option value="${h}">${hStr}h</option>`;
             }
+            startH.value = "9";
+            endH.value = "10";
         }
 
         function populatePlanningContacts() {
@@ -1539,22 +1691,38 @@
         }
 
         function addEvent(e) {
-            e.preventDefault();
+            if(e) e.preventDefault();
             const user = getCurrentUser();
-            const title = document.getElementById('event-title').value;
+            const title = document.getElementById('event-title').value || "Cours Particulier";
             const contactName = document.getElementById('event-contact-select').value;
             const date = document.getElementById('event-date').value;
-            const start = parseInt(document.getElementById('event-time-start').value);
-            const end = parseInt(document.getElementById('event-time-end').value);
+            
+            const startH = parseInt(document.getElementById('event-start-hour').value);
+            const startM = document.getElementById('event-start-min').value;
+            const endH = parseInt(document.getElementById('event-end-hour').value);
+            const endM = document.getElementById('event-end-min').value;
             const paiement = document.getElementById('event-paiement').value;
 
-            if(start >= end) return alert("L'heure de fin doit être supérieure à l'heure de début.");
+            const startTimeVal = startH + (parseInt(startM) / 60);
+            const endTimeVal = endH + (parseInt(endM) / 60);
+
+            if(startTimeVal >= endTimeVal) return alert("L'heure de fin doit être supérieure à l'heure de début.");
 
             let events = JSON.parse(localStorage.getItem('klass_events')) || [];
-            events.push({ id: Date.now(), title, contactName, date, start, end, paiement, auteur: user.nom });
+            events.push({ 
+                id: Date.now(), 
+                title, 
+                contactName, 
+                date, 
+                start: startTimeVal, 
+                end: endTimeVal, 
+                startFormatted: `${startH < 10 ? '0'+startH : startH}h${startM}`,
+                endFormatted: `${endH < 10 ? '0'+endH : endH}h${endM}`,
+                paiement, 
+                auteur: user.nom 
+            });
             localStorage.setItem('klass_events', JSON.stringify(events));
 
-            // Alerte sur la messagerie du contact mentionné
             if (contactName) {
                 const teamsUrl = `https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(title)}`;
                 let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
@@ -1562,7 +1730,7 @@
                     id: Date.now(),
                     sender: user.nom,
                     receiver: contactName,
-                    text: `📅 NOUVEAU COURS PLANIFIÉ : "${title}" le ${date} de ${start}h00 à ${end}h00. Lien Visio Teams : ${teamsUrl}`,
+                    text: `📅 NOUVEAU COURS PLANIFIÉ : "${title}" le ${date} de ${startH}h${startM} à ${endH}h${endM}. Lien Visio Teams : ${teamsUrl}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
                 localStorage.setItem('klass_private_messages', JSON.stringify(messages));
@@ -1592,6 +1760,7 @@
 
         function renderPlanning() {
             const grid = document.getElementById('edt-grid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             const weekDays = getWeekDates(currentWeekOffset);
@@ -1601,26 +1770,26 @@
             const endStr = weekDays[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
             document.getElementById('edt-week-label').innerText = `Semaine du ${startStr} au ${endStr}`;
 
-            grid.appendChild(createEdtCell('Heure', 'edt-header-cell'));
+            grid.appendChild(createEdtCell('Heure', 'edt-header-cell', null, null));
             weekDays.forEach((d, idx) => {
-                grid.appendChild(createEdtCell(`${dayNames[idx]} ${d.getDate()}`, 'edt-header-cell'));
+                grid.appendChild(createEdtCell(`${dayNames[idx]} ${d.getDate()}`, 'edt-header-cell', null, null));
             });
 
             const events = JSON.parse(localStorage.getItem('klass_events')) || [];
             const user = getCurrentUser();
 
             for (let h = 8; h <= 20; h++) {
-                grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell'));
+                grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell', null, null));
 
                 weekDays.forEach(dayDate => {
-                    const cell = createEdtCell('', 'edt-cell');
                     const dateISO = dayDate.toISOString().split('T')[0];
+                    const cell = createEdtCell('', 'edt-cell', dateISO, h);
 
                     const dayEvents = events.filter(ev => (ev.auteur === user.nom || ev.contactName === user.nom) && ev.date === dateISO && ev.start <= h && ev.end > h);
                     dayEvents.forEach(ev => {
                         const evDiv = document.createElement('div');
                         evDiv.className = 'edt-event-item';
-                        evDiv.innerHTML = `${ev.title} ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}<br><button onclick="generateTeamsLink('${ev.title}')" style="font-size:0.65rem; background:white; color:var(--primary); border:none; padding:2px 4px; border-radius:4px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
+                        evDiv.innerHTML = `${ev.title} (${ev.startFormatted}-${ev.endFormatted}) ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}<br><button onclick="event.stopPropagation(); generateTeamsLink('${ev.title}')" style="font-size:0.6rem; background:white; color:var(--primary); border:none; padding:1px 3px; border-radius:3px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
                         cell.appendChild(evDiv);
                     });
 
@@ -1629,10 +1798,19 @@
             }
         }
 
-        function createEdtCell(text, className) {
+        function createEdtCell(text, className, dateISO, hour) {
             const div = document.createElement('div');
             div.className = className;
             div.innerText = text;
+            if (dateISO && hour !== null) {
+                div.onclick = () => {
+                    document.getElementById('event-date').value = dateISO;
+                    document.getElementById('event-start-hour').value = hour;
+                    document.getElementById('event-end-hour').value = hour + 1 > 20 ? 20 : hour + 1;
+                    switchTab('planning');
+                    alert(`Créneau du ${dateISO} à ${hour}h sélectionné. Remplissez le titre et validez.`);
+                };
+            }
             return div;
         }
 
@@ -1700,7 +1878,7 @@
                     <div class="annonce-top-bar">
                         <div>
                             <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
-                            <span class="price-tag">${a.type === 'prof' ? (a.tarif ? a.tarif + ' €/h' : '') : 'Recherche'}</span>
+                            <span class="price-tag">${a.type === 'prof' ? (a.tarifs ? a.tarifs.lycee + ' €/h' : '25 €/h') : 'Recherche'}</span>
                         </div>
                         ${avatarHtml}
                     </div>
@@ -1741,6 +1919,55 @@
             container.innerHTML = '';
             annonces.forEach(a => {
                 container.innerHTML += renderAnnonceCardHTML(a);
+            });
+        }
+
+        // Initialisation de la mini-carte interactive Leaflet
+        function initLeafletMap() {
+            if (interactiveMap) return;
+            interactiveMap = L.map('map-container').setView([46.603354, 1.888334], 6); // Centre de la France
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(interactiveMap);
+
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            if (!interactiveMap) return;
+            mapMarkers.forEach(m => interactiveMap.removeLayer(m));
+            mapMarkers = [];
+
+            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            
+            // Coordonnées approximatives fictives ou par défaut pour illustrer la géolocalisation des villes courantes
+            const cityCoords = {
+                "paris": [48.8566, 2.3522],
+                "lyon": [45.7640, 4.8357],
+                "marseille": [43.2965, 5.3698],
+                "bordeaux": [44.8378, -0.5792],
+                "toulouse": [43.6047, 1.4442],
+                "nantes": [47.2184, -1.5536]
+            };
+
+            annonces.forEach(a => {
+                if (a.villeCours && a.villeCours !== 'Visio') {
+                    const cityName = a.villeCours.toLowerCase().trim();
+                    let coords = [46.6, 2.8]; // Position par défaut
+                    for (let key in cityCoords) {
+                        if (cityName.includes(key)) {
+                            coords = cityCoords[key];
+                            break;
+                        }
+                    }
+                    // Ajouter une petite variation aléatoire pour éviter le superposition parfaite
+                    coords = [coords[0] + (Math.random() - 0.5) * 0.05, coords[1] + (Math.random() - 0.5) * 0.05];
+
+                    const marker = L.marker(coords).addTo(interactiveMap);
+                    marker.bindPopup(`<b>${a.auteur}</b><br>${a.type === 'prof' ? 'Professeur' : 'Élève'}<br>${a.villeCours}`);
+                    mapMarkers.push(marker);
+                }
             });
         }
 
@@ -1800,7 +2027,7 @@
                     <div class="annonce-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
-                            <span class="price-tag">${a.type === 'prof' ? (a.tarif ? a.tarif + ' €/h' : '') : 'Recherche'}</span>
+                            <span class="price-tag">${a.type === 'prof' ? (a.tarifs ? a.tarifs.lycee + ' €/h' : '25 €/h') : 'Recherche'}</span>
                         </div>
                         <p>${a.desc}</p>
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
@@ -1817,6 +2044,7 @@
             annonces = annonces.filter(a => a.id !== id);
             localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
             renderMyAnnonces();
+            updateMapMarkers();
         }
 
         renderGlobalFeed();
