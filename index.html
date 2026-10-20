@@ -597,7 +597,7 @@
             <i class="fa-solid fa-triangle-exclamation" style="font-size:2.5rem; color:var(--danger); margin-bottom:1rem;"></i>
             <h2>Confirmer la suppression</h2>
             <p class="subtitle">Êtes-vous sûr de vouloir supprimer ce compte et toutes les annonces associées ?</p>
-            <input type="hidden" id="delete-account-email-target" value="">
+            <input type="hidden" id="delete-account-id-target" value="">
             <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
                 <button class="btn btn-danger" onclick="confirmDeleteAccount()">Oui je veux supprimer mon compte et ses annonces</button>
                 <button class="btn btn-secondary" onclick="closeDeleteAccountModal()">Non je garde ce compte</button>
@@ -893,7 +893,6 @@
             if (container && !container.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
-            // Cacher les suggestions autocomplete si clic extérieur
             if (!e.target.closest('.form-group')) {
                 document.querySelectorAll('.autocomplete-suggestions').forEach(el => el.style.display = 'none');
             }
@@ -946,27 +945,48 @@
             document.body.classList.add('dark-mode');
         }
 
+        // --- GESTION MULTI-COMPTES SÉCURISÉE AVEC ID UNIQUE ---
         async function initAccountsStorage() {
             let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             let currentAcc = await CloudDatabase.get('klass_user_compte');
             
             if (accounts.length === 0) {
-                const defaultUser = { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", role: "prof", photo: null, visibility: 'public', niveauEtudes: "", desc: "" };
+                const defaultUser = { 
+                    id: 'acc_' + Date.now(), 
+                    nom: "Utilisateur Visiteur", 
+                    email: "visiteur@klass.fr", 
+                    role: "prof", 
+                    photo: null, 
+                    visibility: 'public', 
+                    niveauEtudes: "", 
+                    desc: "" 
+                };
                 accounts = [defaultUser];
                 await CloudDatabase.set('klass_accounts_list', accounts);
                 await CloudDatabase.set('klass_user_compte', defaultUser);
-            } else if (!currentAcc) {
-                await CloudDatabase.set('klass_user_compte', accounts[0]);
+            } else {
+                let updated = false;
+                accounts = accounts.map((a, i) => {
+                    if (!a.id) { updated = true; return { ...a, id: 'acc_' + (Date.now() + i) }; }
+                    return a;
+                });
+                if (updated) await CloudDatabase.set('klass_accounts_list', accounts);
+
+                if (!currentAcc || !accounts.some(a => a.id === currentAcc.id)) {
+                    await CloudDatabase.set('klass_user_compte', accounts[0]);
+                }
             }
         }
 
         function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
+            return JSON.parse(localStorage.getItem('klass_user_compte')) || { 
+                id: 'acc_guest', nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' 
+            };
         }
 
-        async function switchAccount(email) {
+        async function switchAccount(accountId) {
             let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-            const target = accounts.find(a => a.email === email);
+            const target = accounts.find(a => a.id === accountId || a.email === accountId);
             if (target) {
                 await CloudDatabase.set('klass_user_compte', target);
                 loadUserData();
@@ -993,14 +1013,14 @@
 
             dropdown.innerHTML = '';
             accounts.forEach(acc => {
-                const isActive = acc.email === user.email;
+                const isActive = acc.id === user.id;
                 const avatar = acc.photo 
                     ? `<img src="${acc.photo}" class="account-item-avatar">` 
                     : `<div class="account-item-avatar" style="background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.8rem;"><i class="fa-solid fa-user"></i></div>`;
 
                 const item = document.createElement('div');
                 item.className = `account-item ${isActive ? 'active' : ''}`;
-                item.onclick = (e) => { e.stopPropagation(); switchAccount(acc.email); };
+                item.onclick = (e) => { e.stopPropagation(); switchAccount(acc.id); };
                 item.innerHTML = `
                     ${avatar}
                     <div class="account-item-info">
@@ -1019,7 +1039,7 @@
 
             container.innerHTML = '';
             accounts.forEach(acc => {
-                const isCurrent = acc.email === currentUser.email;
+                const isCurrent = acc.id === currentUser.id;
                 const card = document.createElement('div');
                 card.style.cssText = `background:var(--bg-body); padding:1rem; border-radius:10px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;`;
                 
@@ -1029,38 +1049,41 @@
                         <div style="font-size:0.8rem; color:var(--text-light);">${acc.email} • ${acc.role === 'prof' ? 'Professeur' : 'Élève'}</div>
                     </div>
                     <div style="display:flex; gap:0.5rem;">
-                        ${!isCurrent ? `<button class="btn btn-success" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="switchAccount('${acc.email}')">Basculer sur ce compte</button>` : ''}
-                        <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="promptDeleteAccount('${acc.email}')"><i class="fa-solid fa-trash"></i> Supprimer</button>
+                        ${!isCurrent ? `<button class="btn btn-success" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="switchAccount('${acc.id}')">Basculer sur ce compte</button>` : ''}
+                        <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="promptDeleteAccount('${acc.id}')"><i class="fa-solid fa-trash"></i> Supprimer</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function promptDeleteAccount(email) {
-            document.getElementById('delete-account-email-target').value = email;
+        function promptDeleteAccount(accId) {
+            document.getElementById('delete-account-id-target').value = accId;
             document.getElementById('modal-delete-account').style.display = 'flex';
         }
 
         function closeDeleteAccountModal() { document.getElementById('modal-delete-account').style.display = 'none'; }
 
         async function confirmDeleteAccount() {
-            const targetEmail = document.getElementById('delete-account-email-target').value;
+            const targetId = document.getElementById('delete-account-id-target').value;
             let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             const currentUser = getCurrentUser();
+            const targetAcc = accounts.find(a => a.id === targetId);
 
-            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
-            annonces = annonces.filter(a => a.email !== targetEmail);
-            await CloudDatabase.set('klass_all_annonces', annonces);
+            if (targetAcc) {
+                let annonces = await CloudDatabase.get('klass_all_annonces') || [];
+                annonces = annonces.filter(a => a.email !== targetAcc.email && a.auteur !== targetAcc.nom);
+                await CloudDatabase.set('klass_all_annonces', annonces);
+            }
 
-            accounts = accounts.filter(a => a.email !== targetEmail);
+            accounts = accounts.filter(a => a.id !== targetId);
             await CloudDatabase.set('klass_accounts_list', accounts);
 
             closeDeleteAccountModal();
 
-            if (currentUser.email === targetEmail) {
+            if (currentUser.id === targetId) {
                 if (accounts.length > 0) {
-                    await switchAccount(accounts[0].email);
+                    await switchAccount(accounts[0].id);
                 } else {
                     await CloudDatabase.remove('klass_user_compte');
                     location.reload();
@@ -1081,19 +1104,23 @@
 
         async function submitNewAccount(e) {
             e.preventDefault();
-            const newEmail = document.getElementById('new-acc-email').value;
+            const newEmail = document.getElementById('new-acc-email').value.trim();
             let accounts = await CloudDatabase.get('klass_accounts_list') || [];
 
-            if (accounts.some(a => a.email === newEmail)) {
-                return alert("Un compte avec cet email existe déjà ! Veuillez utiliser un email unique.");
+            if (accounts.some(a => a.email.toLowerCase() === newEmail.toLowerCase())) {
+                return alert("Un compte avec cet email existe déjà ! Veuillez utiliser une adresse email différente.");
             }
 
             const newCompte = {
-                nom: document.getElementById('new-acc-nom').value,
+                id: 'acc_' + Date.now(),
+                nom: document.getElementById('new-acc-nom').value.trim(),
                 role: document.getElementById('new-acc-role').value,
                 email: newEmail,
-                tel: document.getElementById('new-acc-tel').value,
-                visibility: 'public', niveauEtudes: "", desc: "", photo: null
+                tel: document.getElementById('new-acc-tel').value.trim(),
+                visibility: 'public', 
+                niveauEtudes: "", 
+                desc: "", 
+                photo: null
             };
 
             accounts.push(newCompte);
@@ -1290,30 +1317,28 @@
         async function saveCompte(e) {
             e.preventDefault();
             const fileInput = document.getElementById('acc-file');
-            let oldUser = getCurrentUser();
-            
-            let user = getCurrentUser();
-            const oldEmail = user.email;
-            const oldNom = user.nom;
+            let currentUser = getCurrentUser();
+            const oldEmail = currentUser.email;
+            const oldNom = currentUser.nom;
 
-            user.nom = document.getElementById('acc-nom').value;
-            user.role = document.getElementById('acc-role').value;
-            user.email = document.getElementById('acc-email').value;
-            user.tel = document.getElementById('acc-tel').value;
-            user.visibility = document.getElementById('acc-visibility').value;
-            user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
-            user.desc = document.getElementById('acc-desc').value;
+            currentUser.nom = document.getElementById('acc-nom').value.trim();
+            currentUser.role = document.getElementById('acc-role').value;
+            currentUser.email = document.getElementById('acc-email').value.trim();
+            currentUser.tel = document.getElementById('acc-tel').value.trim();
+            currentUser.visibility = document.getElementById('acc-visibility').value;
+            currentUser.niveauEtudes = document.getElementById('acc-niveau-etudes').value.trim();
+            currentUser.desc = document.getElementById('acc-desc').value.trim();
 
             async function finalizeAccountUpdate(updatedUser) {
-                // Mettre à jour dans la liste des comptes
                 let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-                const index = accounts.findIndex(a => a.email === oldEmail || a.nom === oldNom);
+                const index = accounts.findIndex(a => a.id === updatedUser.id);
                 if (index !== -1) accounts[index] = updatedUser;
                 else accounts.push(updatedUser);
+                
                 await CloudDatabase.set('klass_accounts_list', accounts);
                 await CloudDatabase.set('klass_user_compte', updatedUser);
 
-                // Synchroniser en cascade les annonces liées à ce compte
+                // Synchronisation dynamique des annonces appartenant à ce compte
                 let annonces = await CloudDatabase.get('klass_all_annonces') || [];
                 annonces = annonces.map(a => {
                     if (a.email === oldEmail || a.auteur === oldNom) {
@@ -1338,12 +1363,12 @@
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = async function(e) {
-                    user.photo = e.target.result;
-                    await finalizeAccountUpdate(user);
+                    currentUser.photo = e.target.result;
+                    await finalizeAccountUpdate(currentUser);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                await finalizeAccountUpdate(user);
+                await finalizeAccountUpdate(currentUser);
             }
         }
 
@@ -1399,7 +1424,7 @@
                 annonces.push(nouvelleAnnonce);
                 let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
                 let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-                accounts.forEach(acc => { if (acc.nom !== user.nom) notifsSugg[acc.nom] = true; });
+                accounts.forEach(acc => { if (acc.id !== user.id) notifsSugg[acc.nom] = true; });
                 localStorage.setItem('klass_notifs_suggestions', JSON.stringify(notifsSugg));
                 checkNotificationStatus();
             }
@@ -1974,7 +1999,6 @@
             
             const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
 
-            // Calcul de la moyenne des tarifs horaires saisis sur cette annonce spécifique
             let avgPrice = 25;
             if (a.tarifs) {
                 const c = parseFloat(a.tarifs.college) || 20;
