@@ -77,7 +77,6 @@
         .sidebar-menu li.active a, .sidebar-menu li a:hover { background: var(--primary-light); color: var(--primary); }
         .notification-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; display: inline-block; margin-left: auto; }
 
-        /* Avatar Sidebar & Menu Déroulant Multi-Comptes */
         .sidebar-account-container { position: relative; display: inline-block; }
         .sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: inline-block; vertical-align: middle; cursor: pointer; border: 2px solid var(--primary); }
         
@@ -117,9 +116,7 @@
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;
             background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);
         }
-        .view-switcher-bar {
-            display: flex; gap: 1rem; margin-bottom: 2rem;
-        }
+        .view-switcher-bar { display: flex; gap: 1rem; margin-bottom: 2rem; }
         .view-switcher-btn {
             flex: 1; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-dark); font-weight: 700; cursor: pointer; text-align: center;
         }
@@ -318,18 +315,16 @@
                 </div>
             </div>
 
-            <!-- Boutons de bascule (placés en dessous des filtres) -->
+            <!-- Boutons de bascule -->
             <div class="view-switcher-bar">
                 <button id="btn-view-feed" class="view-switcher-btn active" onclick="switchHomeView('feed')"><i class="fa-solid fa-list"></i> Fil d'actualité</button>
                 <button id="btn-view-map" class="view-switcher-btn" onclick="switchHomeView('map')"><i class="fa-solid fa-map-location-dot"></i> Recherche Géolocalisée</button>
             </div>
 
-            <!-- Vue Fil d'actualité -->
             <div id="home-view-feed">
                 <div id="global-annonces-container" class="annonces-grid"></div>
             </div>
 
-            <!-- Vue Recherche Géolocalisée -->
             <div id="home-view-map" class="hidden">
                 <div id="map-container"></div>
             </div>
@@ -728,6 +723,33 @@
         </div>
     </div>
 
+    <!-- POPUP MISE EN RELATION & CHOIX DU NIVEAU -->
+    <div id="modal-relation" class="modal-overlay">
+        <div class="modal-content" style="max-width:480px;">
+            <button class="modal-close" onclick="closeRelationModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-bottom:0.5rem;">Sélectionnez votre niveau</h2>
+            <p class="subtitle">Choisissez votre niveau scolaire pour adapter le tarif du cours avec ce professeur.</p>
+            
+            <input type="hidden" id="rel-annonce-id" value="">
+            <input type="hidden" id="rel-auteur-nom" value="">
+
+            <div class="form-group">
+                <label>Votre niveau</label>
+                <select id="rel-niveau-select" onchange="updateRelationPricePreview()">
+                    <option value="college">6ème - 4ème</option>
+                    <option value="lycee">3ème - Terminale</option>
+                    <option value="sup">Post-bac</option>
+                </select>
+            </div>
+
+            <div id="rel-price-preview" style="background:var(--primary-light); padding:1rem; border-radius:10px; font-weight:700; color:var(--primary); margin-bottom:1.5rem; text-align:center;">
+                Tarif horaire estimé : <span>-- €/h</span>
+            </div>
+
+            <button type="button" class="btn" style="width:100%;" onclick="confirmAndSendRelation()">Envoyer la demande de mise en relation</button>
+        </div>
+    </div>
+
     <!-- MODAL DEVOIR -->
     <div id="modal-devoir" class="modal-overlay">
         <div class="modal-content">
@@ -820,23 +842,14 @@
         </div>
     </div>
 
-    <!-- Leaflet JS pour la mini-carte -->
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
-        // --- COUCHE D'ABSTRACTION CLOUD (Prêt pour Firebase / Supabase / MongoDB) ---
         const CloudDatabase = {
-            async get(key) {
-                // Remplacer par un appel fetch ou client Supabase/Firebase si connecté
-                return JSON.parse(localStorage.getItem(key));
-            },
-            async set(key, value) {
-                localStorage.setItem(key, JSON.stringify(value));
-                // Synchronisation Cloud potentielle ici : fetch('/api/sync', { method: 'POST', body: JSON.stringify({key, value}) })
-            },
-            async remove(key) {
-                localStorage.removeItem(key);
-            }
+            async get(key) { return JSON.parse(localStorage.getItem(key)); },
+            async set(key, value) { localStorage.setItem(key, JSON.stringify(value)); },
+            async remove(key) { localStorage.removeItem(key); }
         };
 
         const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
@@ -844,7 +857,7 @@
         let activeChatUser = null;
         let interactiveMap = null;
         let mapMarkers = [];
-        let currentHomeView = 'feed'; // 'feed' ou 'map'
+        let currentHomeView = 'feed';
 
         window.addEventListener('DOMContentLoaded', async () => {
             initTimeSelects();
@@ -935,10 +948,7 @@
 
                 const item = document.createElement('div');
                 item.className = `account-item ${isActive ? 'active' : ''}`;
-                item.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    switchAccount(acc.email); 
-                };
+                item.onclick = (e) => { e.stopPropagation(); switchAccount(acc.email); };
                 item.innerHTML = `
                     ${avatar}
                     <div class="account-item-info">
@@ -980,9 +990,7 @@
             document.getElementById('modal-delete-account').style.display = 'flex';
         }
 
-        function closeDeleteAccountModal() {
-            document.getElementById('modal-delete-account').style.display = 'none';
-        }
+        function closeDeleteAccountModal() { document.getElementById('modal-delete-account').style.display = 'none'; }
 
         async function confirmDeleteAccount() {
             const targetEmail = document.getElementById('delete-account-email-target').value;
@@ -1017,10 +1025,7 @@
             document.getElementById('form-create-new-account').reset();
             document.getElementById('modal-new-account').style.display = 'flex';
         }
-
-        function closeCreateAccountModal() {
-            document.getElementById('modal-new-account').style.display = 'none';
-        }
+        function closeCreateAccountModal() { document.getElementById('modal-new-account').style.display = 'none'; }
 
         async function submitNewAccount(e) {
             e.preventDefault();
@@ -1089,9 +1094,7 @@
 
             const currentUser = getCurrentUser().nom;
             
-            if(tabId === 'home') {
-                renderActiveHomeView();
-            }
+            if(tabId === 'home') renderActiveHomeView();
             if(tabId === 'suggestion') {
                 renderSuggestions();
                 document.getElementById('suggestion-notif-dot').classList.add('hidden');
@@ -1101,10 +1104,7 @@
             }
             if(tabId === 'compte') renderAllAccountsManagement();
             if(tabId === 'annonces') renderMyAnnonces();
-            if(tabId === 'planning') {
-                populatePlanningContacts();
-                renderPlanning();
-            }
+            if(tabId === 'planning') { populatePlanningContacts(); renderPlanning(); }
             if(tabId === 'devoirs') {
                 renderDevoirs();
                 document.getElementById('devoirs-notif-dot').classList.add('hidden');
@@ -1139,24 +1139,18 @@
                 btnFeed.classList.remove('active');
                 viewMap.classList.remove('hidden');
                 viewFeed.classList.add('hidden');
-                setTimeout(() => { 
-                    if (interactiveMap) interactiveMap.invalidateSize(); 
-                }, 200);
+                setTimeout(() => { if (interactiveMap) interactiveMap.invalidateSize(); }, 200);
                 updateMapMarkers();
             }
         }
 
         function renderActiveHomeView() {
-            if (currentHomeView === 'feed') {
-                renderGlobalFeed();
-            } else {
-                updateMapMarkers();
-            }
+            if (currentHomeView === 'feed') renderGlobalFeed();
+            else updateMapMarkers();
         }
 
         function checkNotificationStatus() {
             const currentUser = getCurrentUser().nom;
-            
             let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
             if(notifsMsg[currentUser]) document.getElementById('msg-notif-dot').classList.remove('hidden');
             else document.getElementById('msg-notif-dot').classList.add('hidden');
@@ -1173,12 +1167,7 @@
         function updateLevelSliderDisplay() {
             let minVal = parseInt(document.getElementById('min-level-slider').value);
             let maxVal = parseInt(document.getElementById('max-level-slider').value);
-
-            if (minVal > maxVal) {
-                document.getElementById('max-level-slider').value = minVal;
-                maxVal = minVal;
-            }
-
+            if (minVal > maxVal) { document.getElementById('max-level-slider').value = minVal; maxVal = minVal; }
             document.getElementById('min-level-label').innerText = niveauxLabels[minVal];
             document.getElementById('max-level-label').innerText = niveauxLabels[maxVal];
         }
@@ -1234,11 +1223,8 @@
         function togglePresentielFields() {
             const format = document.getElementById('new-format-cours').value;
             const container = document.getElementById('presentiel-extra-container');
-            if (format === 'Visio uniquement') {
-                container.classList.add('hidden');
-            } else {
-                container.classList.remove('hidden');
-            }
+            if (format === 'Visio uniquement') container.classList.add('hidden');
+            else container.classList.remove('hidden');
         }
 
         function toggleProfFields() {
@@ -1270,11 +1256,8 @@
             async function updateAccountInList(updatedUser) {
                 let accounts = await CloudDatabase.get('klass_accounts_list') || [];
                 const index = accounts.findIndex(a => a.email === updatedUser.email);
-                if (index !== -1) {
-                    accounts[index] = updatedUser;
-                } else {
-                    accounts.push(updatedUser);
-                }
+                if (index !== -1) accounts[index] = updatedUser;
+                else accounts.push(updatedUser);
                 await CloudDatabase.set('klass_accounts_list', accounts);
                 await CloudDatabase.set('klass_user_compte', updatedUser);
                 updateSidebarAvatar();
@@ -1340,12 +1323,9 @@
                 annonces = annonces.map(a => a.id === parseInt(editId) ? nouvelleAnnonce : a);
             } else {
                 annonces.push(nouvelleAnnonce);
-                
                 let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
                 let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-                accounts.forEach(acc => {
-                    if (acc.nom !== user.nom) notifsSugg[acc.nom] = true;
-                });
+                accounts.forEach(acc => { if (acc.nom !== user.nom) notifsSugg[acc.nom] = true; });
                 localStorage.setItem('klass_notifs_suggestions', JSON.stringify(notifsSugg));
                 checkNotificationStatus();
             }
@@ -1356,51 +1336,80 @@
             renderActiveHomeView();
         }
 
-        function checkRelationExistsForAnnonce(annonceId, auteurName) {
+        // --- GESTION DES STATUTS DE MISE EN RELATION ET POP-UP ---
+        function getRelationStatus(annonceId) {
             const user = getCurrentUser();
             let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
-            // Clé unique par annonce et par utilisateur
-            return relations[`${annonceId}_${user.nom}`] === true || relations[`${annonceId}_${auteurName}`] === true;
+            return relations[`${annonceId}_${user.nom}`] || 'none'; // 'none', 'pending', 'accepted', 'rejected'
         }
 
-        function initierMiseEnRelation(annonceId, auteurNom) {
+        function openRelationModal(annonceId, auteurName, tarifsObj) {
+            document.getElementById('rel-annonce-id').value = annonceId;
+            document.getElementById('rel-auteur-nom').value = auteurName;
+            
+            // Stocker temporairement les tarifs de l'annonce dans la modale
+            window.activeModalTarifs = tarifsObj || { college: 20, lycee: 25, sup: 35 };
+            updateRelationPricePreview();
+
+            document.getElementById('modal-relation').style.display = 'flex';
+        }
+
+        function closeRelationModal() {
+            document.getElementById('modal-relation').style.display = 'none';
+        }
+
+        function updateRelationPricePreview() {
+            const levelKey = document.getElementById('rel-niveau-select').value;
+            const tarifs = window.activeModalTarifs || { college: 20, lycee: 25, sup: 35 };
+            let price = tarifs[levelKey] || 25;
+            document.querySelector('#rel-price-preview span').innerText = `${price} €/h`;
+        }
+
+        function confirmAndSendRelation() {
+            const annonceId = parseInt(document.getElementById('rel-annonce-id').value);
+            const auteurName = document.getElementById('rel-auteur-nom').value;
+            const levelKey = document.getElementById('rel-niveau-select').value;
+            const tarifs = window.activeModalTarifs || { college: 20, lycee: 25, sup: 35 };
+            const selectedPrice = tarifs[levelKey] || 25;
+
+            const levelNames = { college: "6ème - 4ème", lycee: "3ème - Terminale", sup: "Post-bac" };
+            const selectedLevelName = levelNames[levelKey] || "Lycée";
+
             const user = getCurrentUser();
             let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
-            relations[`${annonceId}_${user.nom}`] = true;
+            relations[`${annonceId}_${user.nom}`] = 'pending';
             localStorage.setItem('klass_annonce_relations', JSON.stringify(relations));
 
-            switchTab('messagerie');
-            activeChatUser = auteurNom;
-            
-            const prefillMsg = `Bonjour ${auteurNom}, votre annonce m'intéresse est-elle toujours d'actualité ?`;
+            // Stocker la demande en attente pour l'utilisateur 2 (prof)
+            let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
+            pendingRequests.push({
+                id: annonceId,
+                eleveNom: user.nom,
+                profNom: auteurName,
+                niveau: selectedLevelName,
+                tarif: selectedPrice,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('klass_pending_requests', JSON.stringify(pendingRequests));
 
-            document.getElementById('chat-placeholder').classList.add('hidden');
-            document.getElementById('active-chat-box').classList.remove('hidden');
-            document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurNom}`;
+            const prefillMsg = `Bonjour ${auteurName}, je souhaite entrer en relation pour votre cours. Niveau choisi : ${selectedLevelName} (Tarif : ${selectedPrice} €/h).`;
 
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
-            const hasHistory = messages.some(m => 
-                (m.sender === user.nom && m.receiver === auteurNom) ||
-                (m.sender === auteurNom && m.receiver === user.nom)
-            );
+            messages.push({
+                id: Date.now(),
+                sender: user.nom,
+                receiver: auteurName,
+                text: prefillMsg,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            localStorage.setItem('klass_private_messages', JSON.stringify(messages));
 
-            if (!hasHistory) {
-                messages.push({
-                    id: Date.now(),
-                    sender: user.nom,
-                    receiver: auteurNom,
-                    text: prefillMsg,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                });
-                localStorage.setItem('klass_private_messages', JSON.stringify(messages));
+            let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+            notifsMsg[auteurName] = true;
+            localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
 
-                let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
-                notifsMsg[auteurNom] = true;
-                localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
-            }
-
-            document.getElementById('chat-input').value = "";
-            renderChatBubbles(auteurNom);
+            closeRelationModal();
+            alert("Demande de mise en relation envoyée avec succès !");
             renderActiveHomeView();
         }
 
@@ -1414,12 +1423,34 @@
                 if (m.receiver === user.nom) contacts.add(m.sender);
             });
 
+            // Gérer aussi l'affichage des demandes en attente pour l'utilisateur 2
+            let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
+            const myRequests = pendingRequests.filter(r => r.profNom === user.nom);
+
             const contactsContainer = document.getElementById('contacts-list');
             contactsContainer.innerHTML = '';
 
-            if (contacts.size === 0) {
+            if (myRequests.length > 0) {
+                contactsContainer.innerHTML += `<div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-bottom:0.5rem;">Demandes reçues (${myRequests.length})</div>`;
+                myRequests.forEach(req => {
+                    const reqItem = document.createElement('div');
+                    reqItem.style.cssText = `padding:0.6rem; border-radius:8px; background:var(--primary-light); margin-bottom:0.5rem; font-size:0.85rem;`;
+                    reqItem.innerHTML = `
+                        <strong>${req.eleveNom}</strong><br>
+                        <small>${req.niveau} • ${req.tarif}€/h</small>
+                        <div style="display:flex; gap:5px; margin-top:5px;">
+                            <button class="btn btn-success" style="padding:2px 6px; font-size:0.75rem;" onclick="respondToRequest(${req.id}, '${req.eleveNom}', true)">Accepter</button>
+                            <button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="respondToRequest(${req.id}, '${req.eleveNom}', false)">Refuser</button>
+                        </div>
+                    `;
+                    contactsContainer.appendChild(reqItem);
+                });
+            }
+
+            if (contacts.size === 0 && myRequests.length === 0) {
                 contactsContainer.innerHTML = `<p style="font-size:0.85rem; color:var(--text-light);">Aucun contact pour l'instant.</p>`;
             } else {
+                contactsContainer.innerHTML += `<div style="font-size:0.8rem; font-weight:700; color:var(--text-light); margin:0.5rem 0;">Discussions</div>`;
                 contacts.forEach(contactName => {
                     const item = document.createElement('div');
                     item.style.cssText = `padding:0.75rem; border-radius:8px; cursor:pointer; font-size:0.9rem; font-weight:600; background:${activeChatUser === contactName ? 'var(--primary-light)' : 'var(--bg-body)'}; color:${activeChatUser === contactName ? 'var(--primary)' : 'var(--text-dark)'};`;
@@ -1436,9 +1467,22 @@
                 });
             }
 
-            if (activeChatUser) {
-                renderChatBubbles(activeChatUser);
-            }
+            if (activeChatUser) renderChatBubbles(activeChatUser);
+        }
+
+        function respondToRequest(annonceId, eleveNom, isAccepted) {
+            let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
+            relations[`${annonceId}_${eleveNom}`] = isAccepted ? 'accepted' : 'rejected';
+            localStorage.setItem('klass_annonce_relations', JSON.stringify(relations));
+
+            // Retirer de la liste des demandes en attente
+            let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
+            pendingRequests = pendingRequests.filter(r => !(r.id === annonceId && r.eleveNom === eleveNom));
+            localStorage.setItem('klass_pending_requests', JSON.stringify(pendingRequests));
+
+            alert(isAccepted ? "Demande acceptée ! La relation est désormais établie." : "Demande refusée.");
+            renderMessagingSection();
+            renderActiveHomeView();
         }
 
         function sendMessage(e) {
@@ -1459,7 +1503,6 @@
             });
 
             localStorage.setItem('klass_private_messages', JSON.stringify(messages));
-            
             let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
             notifsMsg[activeChatUser] = true;
             localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
@@ -1536,11 +1579,8 @@
             }
 
             const avatarContainer = document.getElementById('profile-modal-avatar-container');
-            if (targetPhoto) {
-                avatarContainer.innerHTML = `<img src="${targetPhoto}" class="profile-modal-avatar" alt="Photo">`;
-            } else {
-                avatarContainer.innerHTML = `<div class="profile-modal-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
-            }
+            if (targetPhoto) avatarContainer.innerHTML = `<img src="${targetPhoto}" class="profile-modal-avatar" alt="Photo">`;
+            else avatarContainer.innerHTML = `<div class="profile-modal-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
             document.getElementById('review-target-email').value = targetEmail;
             renderReviewsList(targetEmail);
@@ -1548,20 +1588,15 @@
             const userAnnonces = annonces.filter(a => a.auteur === auteurName || a.email === auteurEmail);
             const annoncesListContainer = document.getElementById('profile-modal-annonces-list');
             
-            if (userAnnonces.length === 0) {
-                annoncesListContainer.innerHTML = `<p style="color:var(--text-light); font-size:0.9rem;">Aucune autre annonce publiée.</p>`;
-            } else {
-                annoncesListContainer.innerHTML = '';
-                userAnnonces.forEach(a => {
-                    const item = document.createElement('div');
-                    item.style.cssText = "background:var(--bg-body); padding:0.8rem; border-radius:8px; border:1px solid var(--border);";
-                    item.innerHTML = `
+            annoncesListContainer.innerHTML = userAnnonces.length === 0 ? `<p style="color:var(--text-light); font-size:0.9rem;">Aucune autre annonce publiée.</p>` : '';
+            userAnnonces.forEach(a => {
+                annoncesListContainer.innerHTML += `
+                    <div style="background:var(--bg-body); padding:0.8rem; border-radius:8px; border:1px solid var(--border);">
                         <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'}</div>
                         <p style="font-size:0.85rem; color:var(--text-dark); margin-top:2px;">${a.desc}</p>
-                    `;
-                    annoncesListContainer.appendChild(item);
-                });
-            }
+                    </div>
+                `;
+            });
 
             document.getElementById('modal-profile').style.display = 'flex';
         }
@@ -1579,16 +1614,15 @@
             container.innerHTML = '';
             targetReviews.forEach(r => {
                 const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-                const item = document.createElement('div');
-                item.style.cssText = `background:var(--bg-body); padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--border); font-size:0.85rem;`;
-                item.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; font-weight:700;">
-                        <span>${r.author}</span>
-                        <span style="color:var(--warning);">${stars}</span>
+                container.innerHTML += `
+                    <div style="background:var(--bg-body); padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--border); font-size:0.85rem;">
+                        <div style="display:flex; justify-content:space-between; font-weight:700;">
+                            <span>${r.author}</span>
+                            <span style="color:var(--warning);">${stars}</span>
+                        </div>
+                        ${r.comment ? `<p style="color:var(--text-dark); margin-top:4px;">${r.comment}</p>` : ''}
                     </div>
-                    ${r.comment ? `<p style="color:var(--text-dark); margin-top:4px;">${r.comment}</p>` : ''}
                 `;
-                container.appendChild(item);
             });
         }
 
@@ -1602,13 +1636,7 @@
             let reviews = JSON.parse(localStorage.getItem('klass_reviews')) || {};
             if (!reviews[targetEmail]) reviews[targetEmail] = [];
 
-            reviews[targetEmail].push({
-                author: user.nom,
-                rating: rating,
-                comment: comment,
-                date: new Date().toLocaleDateString()
-            });
-
+            reviews[targetEmail].push({ author: user.nom, rating, comment, date: new Date().toLocaleDateString() });
             localStorage.setItem('klass_reviews', JSON.stringify(reviews));
             document.getElementById('review-comment').value = '';
             renderReviewsList(targetEmail);
@@ -1627,22 +1655,17 @@
             });
 
             select.innerHTML = '<option value="">Sélectionner un contact en relation...</option>';
-            contacts.forEach(c => {
-                select.innerHTML += `<option value="${c}">${c}</option>`;
-            });
+            contacts.forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
         }
 
         function submitDevoir(e) {
             e.preventDefault();
             const user = getCurrentUser();
             const dest = document.getElementById('dev-destinataire-select').value;
-
             if (!dest) return alert("Veuillez choisir un destinataire parmi vos contacts.");
 
             const dev = {
-                id: Date.now(),
-                auteur: user.nom,
-                destinataire: dest,
+                id: Date.now(), auteur: user.nom, destinataire: dest,
                 matiere: document.getElementById('dev-matiere').value,
                 date: document.getElementById('dev-date').value,
                 travail: document.getElementById('dev-travail').value,
@@ -1659,9 +1682,7 @@
 
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
             messages.push({
-                id: Date.now(),
-                sender: user.nom,
-                receiver: dest,
+                id: Date.now(), sender: user.nom, receiver: dest,
                 text: `📚 NOUVEAU DEVOIR DÉPOSÉ en ${dev.matiere} (A faire pour le ${dev.date}) : "${dev.travail}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
@@ -1676,14 +1697,11 @@
             const container = document.getElementById('devoirs-container');
             const user = getCurrentUser();
             let devoirsList = JSON.parse(localStorage.getItem('klass_devoirs')) || [];
-            
             const myDevoirs = devoirsList.filter(d => d.auteur === user.nom || d.destinataire === user.nom);
 
             container.innerHTML = myDevoirs.length === 0 ? "<p style='color:var(--text-light); text-align:center;'>Aucun devoir disponible pour ce compte.</p>" : "";
-            
             myDevoirs.forEach(d => {
                 const canDelete = (d.auteur === user.nom || !d.auteur);
-
                 container.innerHTML += `
                     <div style="background:var(--card-bg); padding:1.2rem; border:1px solid var(--border); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
@@ -1725,25 +1743,20 @@
                 startH.innerHTML += `<option value="${h}">${hStr}h</option>`;
                 endH.innerHTML += `<option value="${h}">${hStr}h</option>`;
             }
-            startH.value = "9";
-            endH.value = "10";
+            startH.value = "9"; endH.value = "10";
         }
 
         function populatePlanningContacts() {
             const select = document.getElementById('event-contact-select');
             const user = getCurrentUser();
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
-            
             let contacts = new Set();
             messages.forEach(m => {
                 if (m.sender === user.nom) contacts.add(m.receiver);
                 if (m.receiver === user.nom) contacts.add(m.sender);
             });
-
             select.innerHTML = '<option value="">Aucun contact</option>';
-            contacts.forEach(c => {
-                select.innerHTML += `<option value="${c}">${c}</option>`;
-            });
+            contacts.forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
         }
 
         function changeWeek(direction) { currentWeekOffset += direction; renderPlanning(); }
@@ -1758,12 +1771,11 @@
             const title = document.getElementById('event-title').value || "Cours Particulier";
             const contactName = document.getElementById('event-contact-select').value;
             const date = document.getElementById('event-date').value;
-            
             const startH = parseInt(document.getElementById('event-start-hour').value);
             const startM = document.getElementById('event-start-min').value;
             const endH = parseInt(document.getElementById('event-end-hour').value);
             const endM = document.getElementById('event-end-min').value;
-            const paiement = document.getElementById('event-paiement').value; // "en attente" par défaut
+            const paiement = document.getElementById('event-paiement').value;
 
             const startTimeVal = startH + (parseInt(startM) / 60);
             const endTimeVal = endH + (parseInt(endM) / 60);
@@ -1772,16 +1784,10 @@
 
             let events = JSON.parse(localStorage.getItem('klass_events')) || [];
             events.push({ 
-                id: Date.now(), 
-                title, 
-                contactName, 
-                date, 
-                start: startTimeVal, 
-                end: endTimeVal, 
+                id: Date.now(), title, contactName, date, start: startTimeVal, end: endTimeVal, 
                 startFormatted: `${startH < 10 ? '0'+startH : startH}h${startM}`,
                 endFormatted: `${endH < 10 ? '0'+endH : endH}h${endM}`,
-                paiement, 
-                auteur: user.nom 
+                paiement, auteur: user.nom 
             });
             localStorage.setItem('klass_events', JSON.stringify(events));
 
@@ -1789,30 +1795,25 @@
                 const teamsUrl = `https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(title)}`;
                 let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
                 messages.push({
-                    id: Date.now(),
-                    sender: user.nom,
-                    receiver: contactName,
+                    id: Date.now(), sender: user.nom, receiver: contactName,
                     text: `📅 NOUVEAU COURS PLANIFIÉ : "${title}" le ${date} de ${startH}h${startM} à ${endH}h${endM}. Lien Visio Teams : ${teamsUrl}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
                 localStorage.setItem('klass_private_messages', JSON.stringify(messages));
-
                 let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
                 notifsMsg[contactName] = true;
                 localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
             }
 
             document.getElementById('event-title').value = '';
-            alert("Événement ajouté au planning !" + (contactName ? ` Une alerte a été envoyée à ${contactName}.` : ""));
+            alert("Événement ajouté au planning !");
             renderPlanning();
         }
 
         function toggleEventPayment(eventId) {
             let events = JSON.parse(localStorage.getItem('klass_events')) || [];
             events = events.map(ev => {
-                if (ev.id === eventId) {
-                    ev.paiement = ev.paiement === 'paye' ? 'attente' : 'paye';
-                }
+                if (ev.id === eventId) ev.paiement = ev.paiement === 'paye' ? 'attente' : 'paye';
                 return ev;
             });
             localStorage.setItem('klass_events', JSON.stringify(events));
@@ -1854,7 +1855,6 @@
 
             for (let h = 8; h <= 20; h++) {
                 grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell', null, null));
-
                 weekDays.forEach(dayDate => {
                     const dateISO = dayDate.toISOString().split('T')[0];
                     const cell = createEdtCell('', 'edt-cell', dateISO, h);
@@ -1867,11 +1867,10 @@
                         const evDiv = document.createElement('div');
                         evDiv.className = 'edt-event-item';
                         evDiv.innerHTML = `${ev.title} (${ev.startFormatted}-${ev.endFormatted}) ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}
-                            <br><span onclick="event.stopPropagation(); toggleEventPayment(${ev.id})" style="display:inline-block; padding:1px 4px; border-radius:4px; font-size:0.6rem; color:white; ${payClass} cursor:pointer;" title="Cliquer pour changer le statut">${payStatus}</span>
+                            <br><span onclick="event.stopPropagation(); toggleEventPayment(${ev.id})" style="display:inline-block; padding:1px 4px; border-radius:4px; font-size:0.6rem; color:white; ${payClass} cursor:pointer;">${payStatus}</span>
                             <br><button onclick="event.stopPropagation(); generateTeamsLink('${ev.title}')" style="font-size:0.6rem; background:white; color:var(--primary); border:none; padding:1px 3px; border-radius:3px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
                         cell.appendChild(evDiv);
                     });
-
                     grid.appendChild(cell);
                 });
             }
@@ -1908,7 +1907,7 @@
         function renderAnnonceCardHTML(a) {
             const user = getCurrentUser();
             const isMyOwnAnnonce = (a.email === user.email || a.auteur === user.nom);
-            const isRelationEstablished = checkRelationExistsForAnnonce(a.id, a.auteur);
+            const relationStatus = getRelationStatus(a.id);
 
             const avatarHtml = a.photo 
                 ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">` 
@@ -1920,13 +1919,19 @@
             
             const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
 
+            // Calcul de la moyenne des tarifs horaires saisis
+            let avgPrice = 25;
+            if (a.tarifs) {
+                const c = parseFloat(a.tarifs.college) || 20;
+                const l = parseFloat(a.tarifs.lycee) || 25;
+                const s = parseFloat(a.tarifs.sup) || 35;
+                avgPrice = Math.round((c + l + s) / 3);
+            }
+
             let formatLocHtml = '';
             if (a.type === 'prof') {
                 const formatText = a.formatCours || 'Présentiel et Visio';
-                let locDetails = '';
-                if (formatText !== 'Visio uniquement' && a.villeCours) {
-                    locDetails = ` (${a.villeCours}${a.rayonCours ? ' - Rayon ' + a.rayonCours + 'km' : ''})`;
-                }
+                let locDetails = formatText !== 'Visio uniquement' && a.villeCours ? ` (${a.villeCours}${a.rayonCours ? ' - Rayon ' + a.rayonCours + 'km' : ''})` : '';
                 formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Format : ${formatText}${locDetails}</div>`;
             } else {
                 formatLocHtml = `<div class="tag-format"><i class="fa-solid fa-location-dot"></i> Ville : ${a.villeCours || 'Non spécifiée'}</div>`;
@@ -1935,20 +1940,24 @@
             const titlePrefix = a.type === 'prof' ? "Je donne des cours de :" : "Je cherche un cours de :";
 
             let relationButtonHtml = '';
+            let statusTextHtml = '';
+
             if (isMyOwnAnnonce) {
                 relationButtonHtml = `<button class="btn btn-secondary" style="margin-top:0.5rem; width:100%; opacity:0.6; cursor:not-allowed;" disabled>Votre annonce</button>`;
-            } else if (isRelationEstablished) {
-                relationButtonHtml = `
-                    <button class="btn btn-success" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation(${a.id}, '${a.auteur.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-check"></i> Relation établie
-                    </button>
-                `;
             } else {
-                relationButtonHtml = `
-                    <button class="btn" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation(${a.id}, '${a.auteur.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-comments"></i> Mise en relation
-                    </button>
-                `;
+                if (relationStatus === 'pending') {
+                    relationButtonHtml = `<button class="btn btn-secondary" style="margin-top:0.5rem; width:100%;" disabled>Demande envoyée ⏳</button>`;
+                    statusTextHtml = `<div style="font-size:0.8rem; font-weight:700; color:var(--warning); text-align:center; margin-top:4px;">Demande envoyée</div>`;
+                } else if (relationStatus === 'accepted') {
+                    relationButtonHtml = `<button class="btn btn-success" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelationDirecte('${a.auteur.replace(/'/g, "\\'")}')"><i class="fa-solid fa-comments"></i> Ouvrir la discussion</button>`;
+                    statusTextHtml = `<div style="font-size:0.8rem; font-weight:700; color:var(--accent); text-align:center; margin-top:4px;">Relation établie ✅</div>`;
+                } else if (relationStatus === 'rejected') {
+                    relationButtonHtml = `<button class="btn btn-danger" style="margin-top:0.5rem; width:100%;" disabled>Demande refusée</button>`;
+                    statusTextHtml = `<div style="font-size:0.8rem; font-weight:700; color:var(--danger); text-align:center; margin-top:4px;">Relation échouée ❌</div>`;
+                } else {
+                    const tarifsJson = JSON.stringify(a.tarifs || {college:20, lycee:25, sup:35}).replace(/"/g, '&quot;');
+                    relationButtonHtml = `<button class="btn" style="margin-top:0.5rem; width:100%;" onclick="openRelationModal(${a.id}, '${a.auteur.replace(/'/g, "\\'")}', ${tarifsJson})"><i class="fa-solid fa-comments"></i> Mise en relation</button>`;
+                }
             }
 
             return `
@@ -1957,7 +1966,7 @@
                     <div class="annonce-top-bar">
                         <div>
                             <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
-                            <span class="price-tag">${a.type === 'prof' ? (a.tarifs ? a.tarifs.lycee + ' €/h' : '25 €/h') : 'Recherche'}</span>
+                            <span class="price-tag">${a.type === 'prof' ? 'Environ ' + avgPrice + ' €/h' : 'Recherche'}</span>
                         </div>
                         ${avatarHtml}
                     </div>
@@ -1972,8 +1981,19 @@
                         <span>${a.date || ''}</span>
                     </div>
                     ${relationButtonHtml}
+                    ${statusTextHtml}
                 </div>
             `;
+        }
+
+        function initierMiseEnRelationDirecte(auteurName) {
+            switchTab('messagerie');
+            activeChatUser = auteurName;
+            document.getElementById('chat-placeholder').classList.add('hidden');
+            document.getElementById('active-chat-box').classList.remove('hidden');
+            document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurName}`;
+            renderMessagingSection();
+            renderChatBubbles(auteurName);
         }
 
         async function renderGlobalFeed() {
@@ -1986,9 +2006,7 @@
 
             if (matFilter) annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
             if (nivFilter) annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
-            if (villeFilter) {
-                annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
-            }
+            if (villeFilter) annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
 
             if(annonces.length === 0) {
                 container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-light); padding: 3rem;">Aucun profil de disponible pour le moment.</p>`;
@@ -1996,20 +2014,13 @@
             }
 
             container.innerHTML = '';
-            annonces.forEach(a => {
-                container.innerHTML += renderAnnonceCardHTML(a);
-            });
+            annonces.forEach(a => { container.innerHTML += renderAnnonceCardHTML(a); });
         }
 
-        // Initialisation de la mini-carte interactive Leaflet avec coordonnées précises corrigées
         function initLeafletMap() {
             if (interactiveMap) return;
             interactiveMap = L.map('map-container').setView([46.603354, 1.888334], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(interactiveMap);
-
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(interactiveMap);
             updateMapMarkers();
         }
 
@@ -2019,29 +2030,18 @@
             mapMarkers = [];
 
             let annonces = await CloudDatabase.get('klass_all_annonces') || [];
-
             const matFilter = document.getElementById('filter-matiere').value;
             const nivFilter = document.getElementById('filter-niveau').value;
             const villeFilter = document.getElementById('filter-ville').value.toLowerCase().trim();
 
             if (matFilter) annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
             if (nivFilter) annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
-            if (villeFilter) {
-                annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
-            }
+            if (villeFilter) annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
             
-            // Coordonnées exactes corrigées pour les villes principales (Grenoble, Paris, Lyon, etc.)
             const cityCoords = {
-                "grenoble": [45.1885, 5.7245],
-                "paris": [48.8566, 2.3522],
-                "lyon": [45.7640, 4.8357],
-                "marseille": [43.2965, 5.3698],
-                "bordeaux": [44.8378, -0.5792],
-                "toulouse": [43.6047, 1.4442],
-                "nantes": [47.2184, -1.5536],
-                "lille": [50.6292, 3.0573],
-                "strasbourg": [48.5734, 7.7521],
-                "nice": [43.7102, 7.2620]
+                "grenoble": [45.1885, 5.7245], "paris": [48.8566, 2.3522], "lyon": [45.7640, 4.8357],
+                "marseille": [43.2965, 5.3698], "bordeaux": [44.8378, -0.5792], "toulouse": [43.6047, 1.4442],
+                "nantes": [47.2184, -1.5536], "lille": [50.6292, 3.0573], "strasbourg": [48.5734, 7.7521], "nice": [43.7102, 7.2620]
             };
 
             annonces.forEach(a => {
@@ -2049,10 +2049,7 @@
                     const cityName = a.villeCours.toLowerCase().trim();
                     let coords = [46.6, 2.8]; 
                     for (let key in cityCoords) {
-                        if (cityName.includes(key)) {
-                            coords = cityCoords[key];
-                            break;
-                        }
+                        if (cityName.includes(key)) { coords = cityCoords[key]; break; }
                     }
                     coords = [coords[0] + (Math.random() - 0.5) * 0.02, coords[1] + (Math.random() - 0.5) * 0.02];
 
@@ -2067,7 +2064,6 @@
             const container = document.getElementById('suggestion-annonces-container');
             let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             const user = getCurrentUser();
-
             const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
 
             if (myAnnonces.length === 0) {
@@ -2078,19 +2074,14 @@
             let suggestions = [];
             annonces.forEach(a => {
                 if (a.email === user.email || a.auteur === user.nom) return;
-
                 myAnnonces.forEach(myAnn => {
                     if (myAnn.type === 'prof' && a.type === 'eleve') {
                         const matchMatiere = myAnn.matieres && myAnn.matieres.includes(a.matiere);
                         const matchVille = !myAnn.villeCours || !a.villeCours || myAnn.villeCours.toLowerCase().includes(a.villeCours.toLowerCase()) || a.villeCours.toLowerCase().includes(myAnn.villeCours.toLowerCase());
-                        if (matchMatiere || matchVille) {
-                            if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
-                        }
+                        if (matchMatiere || matchVille) { if (!suggestions.some(s => s.id === a.id)) suggestions.push(a); }
                     } else if (myAnn.type === 'eleve' && a.type === 'prof') {
                         const matchMatiere = a.matieres && a.matieres.includes(myAnn.matiere);
-                        if (matchMatiere) {
-                            if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
-                        }
+                        if (matchMatiere) { if (!suggestions.some(s => s.id === a.id)) suggestions.push(a); }
                     }
                 });
             });
@@ -2101,16 +2092,13 @@
             }
 
             container.innerHTML = '';
-            suggestions.forEach(a => {
-                container.innerHTML += renderAnnonceCardHTML(a);
-            });
+            suggestions.forEach(a => { container.innerHTML += renderAnnonceCardHTML(a); });
         }
 
         async function renderMyAnnonces() {
             const container = document.getElementById('my-annonces-container');
             let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             const user = getCurrentUser();
-            
             const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
 
             container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée avec ce compte.</p>" : "";
@@ -2119,7 +2107,7 @@
                     <div class="annonce-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
-                            <span class="price-tag">${a.type === 'prof' ? (a.tarifs ? a.tarifs.lycee + ' €/h' : '25 €/h') : 'Recherche'}</span>
+                            <span class="price-tag">${a.type === 'prof' ? 'Environ 25 €/h' : 'Recherche'}</span>
                         </div>
                         <p>${a.desc}</p>
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
