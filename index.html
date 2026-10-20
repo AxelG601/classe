@@ -122,12 +122,21 @@
         }
         .view-switcher-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .form-group { margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; position: relative; }
         label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-dark); }
         input, select, textarea {
             width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 10px;
             font-size: 0.95rem; outline: none; background: var(--bg-body); color: var(--text-dark);
         }
+
+        /* Liste de suggestions de villes autocomplete */
+        .autocomplete-suggestions {
+            position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000; max-height: 150px; overflow-y: auto; display: none; margin-top: 2px;
+        }
+        .autocomplete-suggestion-item { padding: 8px 12px; font-size: 0.9rem; cursor: pointer; }
+        .autocomplete-suggestion-item:hover { background: var(--primary-light); color: var(--primary); }
 
         .btn {
             background-color: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; font-size: 0.95rem;
@@ -384,21 +393,6 @@
                     </div>
 
                     <div id="prof-extra-fields">
-                        <label style="color:var(--primary); font-weight:700; margin-bottom:0.5rem;">Tarifs horaires multiples selon le niveau</label>
-                        <div class="form-group" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; background:var(--bg-body); padding:1rem; border-radius:10px; border:1px solid var(--border);">
-                            <div>
-                                <label style="font-size:0.8rem;">6ème - 4ème (€/h)</label>
-                                <input type="number" id="acc-tarif-collège" placeholder="Ex: 20">
-                            </div>
-                            <div>
-                                <label style="font-size:0.8rem;">3ème - Terminale (€/h)</label>
-                                <input type="number" id="acc-tarif-lycée" placeholder="Ex: 25">
-                            </div>
-                            <div>
-                                <label style="font-size:0.8rem;">Post-bac (€/h)</label>
-                                <input type="number" id="acc-tarif-sup" placeholder="Ex: 35">
-                            </div>
-                        </div>
                         <div class="form-group" style="margin-top:1rem;">
                             <label>Niveau d'étude</label>
                             <input type="text" id="acc-niveau-etudes" placeholder="Ex: Master 2 Mathématiques">
@@ -565,14 +559,14 @@
             <div style="text-align:center; margin-bottom:1.5rem;">
                 <i class="fa-solid fa-user-plus" style="font-size:2.5rem; color:var(--primary);"></i>
                 <h2 style="margin-top:0.5rem;">Créer un nouveau compte</h2>
-                <p class="subtitle" style="margin-bottom:0;">Renseignez les détails du nouveau profil.</p>
+                <p class="subtitle" style="margin-bottom:0;">Renseignez les détails du nouveau profil indépendant.</p>
             </div>
             
             <form id="form-create-new-account" onsubmit="submitNewAccount(event)">
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
                         <label>Nom & Prénom *</label>
-                        <input type="text" id="new-acc-nom" required placeholder="Utilisateur Visiteur">
+                        <input type="text" id="new-acc-nom" required placeholder="Ex: Marie Dupont">
                     </div>
                     <div>
                         <label>Rôle *</label>
@@ -584,15 +578,15 @@
                 </div>
                 <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                     <div>
-                        <label>Email *</label>
-                        <input type="email" id="new-acc-email" required placeholder="visiteur@klass.fr">
+                        <label>Email unique *</label>
+                        <input type="email" id="new-acc-email" required placeholder="marie@klass.fr">
                     </div>
                     <div>
                         <label>Téléphone *</label>
                         <input type="tel" id="new-acc-tel" required placeholder="06 12 34 56 78">
                     </div>
                 </div>
-                <button type="submit" class="btn" style="width:100%;">Enregistrer et se connecter</button>
+                <button type="submit" class="btn" style="width:100%;">Créer et basculer sur ce compte</button>
             </form>
         </div>
     </div>
@@ -640,6 +634,25 @@
                         </div>
                     </div>
 
+                    <!-- Tarifs spécifiques à cette annonce -->
+                    <div class="form-group" style="background:var(--primary-light); padding:1rem; border-radius:10px;">
+                        <label style="color:var(--primary); font-weight:700; margin-bottom:0.5rem;">Tarifs horaires par niveau pour cette annonce (€/h)</label>
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem;">
+                            <div>
+                                <label style="font-size:0.8rem;">6ème - 4ème</label>
+                                <input type="number" id="ann-tarif-college" placeholder="Ex: 20" value="20" required>
+                            </div>
+                            <div>
+                                <label style="font-size:0.8rem;">3ème - Terminale</label>
+                                <input type="number" id="ann-tarif-lycee" placeholder="Ex: 25" value="25" required>
+                            </div>
+                            <div>
+                                <label style="font-size:0.8rem;">Post-bac</label>
+                                <input type="number" id="ann-tarif-sup" placeholder="Ex: 35" value="35" required>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>Format des cours *</label>
                         <select id="new-format-cours" onchange="togglePresentielFields()" required>
@@ -651,8 +664,9 @@
 
                     <div id="presentiel-extra-container">
                         <div class="form-group">
-                            <label style="color:var(--primary);">Ville / Quartier d'enseignement *</label>
-                            <input type="text" id="new-ville-cours" placeholder="Ex: Grenoble / Cours Berriat">
+                            <label style="color:var(--primary);">Ville / Quartier d'enseignement (avec suggestions) *</label>
+                            <input type="text" id="new-ville-cours" placeholder="Ex: Grenoble, Paris, Lyon..." oninput="handleCityAutocomplete(this.value, 'ville-suggestions-prof')" autocomplete="off">
+                            <div id="ville-suggestions-prof" class="autocomplete-suggestions"></div>
                         </div>
 
                         <div class="form-group">
@@ -708,8 +722,9 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label style="color:var(--primary);">Ville / Quartier recherché *</label>
-                        <input type="text" id="ann-eleve-ville" placeholder="Ex: Grenoble Hyper-centre">
+                        <label style="color:var(--primary);">Ville / Quartier recherché (avec suggestions) *</label>
+                        <input type="text" id="ann-eleve-ville" placeholder="Ex: Grenoble Hyper-centre..." oninput="handleCityAutocomplete(this.value, 'ville-suggestions-eleve')" autocomplete="off">
+                        <div id="ville-suggestions-eleve" class="autocomplete-suggestions"></div>
                     </div>
                 </div>
 
@@ -809,11 +824,6 @@
                 </div>
             </div>
 
-            <div id="profile-modal-tarifs-box" class="form-group hidden" style="background:var(--primary-light); padding:1rem; border-radius:10px;">
-                <label style="color:var(--primary);">Tarifs horaires par niveau</label>
-                <div id="profile-modal-tarifs-content" style="font-size:0.9rem; font-weight:600; display:flex; gap:1.5rem; margin-top:4px;"></div>
-            </div>
-
             <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
                 <h3 style="font-size:1.1rem; margin-bottom:0.8rem;"><i class="fa-solid fa-star" style="color:var(--warning);"></i> Avis et Notes</h3>
                 <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
@@ -853,6 +863,12 @@
         };
 
         const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
+        const frenchCities = [
+            "Paris", "Lyon", "Marseille", "Grenoble", "Bordeaux", "Toulouse", "Nantes", "Lille", 
+            "Strasbourg", "Nice", "Rennes", "Montpellier", "Reims", "Le Havre", "Saint-Étienne", 
+            "Toulon", "Angers", "Dijon", "Brest", "Nîmes", "Villeurbanne", "Clermont-Ferrand"
+        ];
+
         let currentWeekOffset = 0;
         let activeChatUser = null;
         let interactiveMap = null;
@@ -877,7 +893,43 @@
             if (container && !container.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
+            // Cacher les suggestions autocomplete si clic extérieur
+            if (!e.target.closest('.form-group')) {
+                document.querySelectorAll('.autocomplete-suggestions').forEach(el => el.style.display = 'none');
+            }
         });
+
+        function handleCityAutocomplete(query, containerId) {
+            const container = document.getElementById(containerId);
+            if (!query || query.trim().length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            const q = query.toLowerCase();
+            const matches = frenchCities.filter(c => c.toLowerCase().includes(q));
+            
+            if (matches.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            matches.forEach(city => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-suggestion-item';
+                item.innerText = city;
+                item.onclick = () => {
+                    if (containerId === 'ville-suggestions-prof') {
+                        document.getElementById('new-ville-cours').value = city;
+                    } else {
+                        document.getElementById('ann-eleve-ville').value = city;
+                    }
+                    container.style.display = 'none';
+                };
+                container.appendChild(item);
+            });
+            container.style.display = 'block';
+        }
 
         function toggleAccountsDropdown(event) {
             event.stopPropagation();
@@ -898,13 +950,13 @@
             let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             let currentAcc = await CloudDatabase.get('klass_user_compte');
             
-            if (currentAcc && !accounts.some(a => a.email === currentAcc.email)) {
-                accounts.push(currentAcc);
+            if (accounts.length === 0) {
+                const defaultUser = { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", role: "prof", photo: null, visibility: 'public', niveauEtudes: "", desc: "" };
+                accounts = [defaultUser];
                 await CloudDatabase.set('klass_accounts_list', accounts);
-            } else if (accounts.length === 0 && !currentAcc) {
-                const defaultUser = { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", role: "prof", photo: null, visibility: 'public' };
                 await CloudDatabase.set('klass_user_compte', defaultUser);
-                await CloudDatabase.set('klass_accounts_list', [defaultUser]);
+            } else if (!currentAcc) {
+                await CloudDatabase.set('klass_user_compte', accounts[0]);
             }
         }
 
@@ -1029,21 +1081,25 @@
 
         async function submitNewAccount(e) {
             e.preventDefault();
+            const newEmail = document.getElementById('new-acc-email').value;
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
+
+            if (accounts.some(a => a.email === newEmail)) {
+                return alert("Un compte avec cet email existe déjà ! Veuillez utiliser un email unique.");
+            }
+
             const newCompte = {
                 nom: document.getElementById('new-acc-nom').value,
                 role: document.getElementById('new-acc-role').value,
-                email: document.getElementById('new-acc-email').value,
+                email: newEmail,
                 tel: document.getElementById('new-acc-tel').value,
-                visibility: 'public', tarifs: { college: "20", lycee: "25", sup: "35" }, niveauEtudes: "", desc: "", photo: null
+                visibility: 'public', niveauEtudes: "", desc: "", photo: null
             };
 
-            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-            if (!accounts.some(a => a.email === newCompte.email)) {
-                accounts.push(newCompte);
-                await CloudDatabase.set('klass_accounts_list', accounts);
-            }
-
+            accounts.push(newCompte);
+            await CloudDatabase.set('klass_accounts_list', accounts);
             await CloudDatabase.set('klass_user_compte', newCompte);
+
             loadUserData();
             updateSidebarAvatar();
             renderAccountsDropdown();
@@ -1052,7 +1108,7 @@
             activeChatUser = null;
 
             closeCreateAccountModal();
-            alert(`Nouveau compte créé et connecté en tant que ${newCompte.nom} !`);
+            alert(`Nouveau compte indépendant créé et connecté en tant que ${newCompte.nom} !`);
         }
 
         function updateSidebarAvatar() {
@@ -1073,13 +1129,6 @@
                 document.getElementById('acc-email').value = data.email || '';
                 document.getElementById('acc-tel').value = data.tel || '';
                 document.getElementById('acc-visibility').value = data.visibility || 'public';
-                
-                if (data.tarifs) {
-                    document.getElementById('acc-tarif-collège').value = data.tarifs.college || '';
-                    document.getElementById('acc-tarif-lycée').value = data.tarifs.lycee || '';
-                    document.getElementById('acc-tarif-sup').value = data.tarifs.sup || '';
-                }
-                
                 document.getElementById('acc-niveau-etudes').value = data.niveauEtudes || '';
                 document.getElementById('acc-desc').value = data.desc || '';
                 toggleProfFields();
@@ -1183,6 +1232,11 @@
                     document.getElementById('new-type-annonce').value = ann.type;
                     toggleAnnonceFormType();
                     document.getElementById('ann-desc').value = ann.desc;
+                    if(ann.tarifs) {
+                        document.getElementById('ann-tarif-college').value = ann.tarifs.college || 20;
+                        document.getElementById('ann-tarif-lycee').value = ann.tarifs.lycee || 25;
+                        document.getElementById('ann-tarif-sup').value = ann.tarifs.sup || 35;
+                    }
                     if(ann.type === 'prof') {
                         document.getElementById('new-format-cours').value = ann.formatCours || 'Présentiel et Visio';
                         togglePresentielFields();
@@ -1236,34 +1290,48 @@
         async function saveCompte(e) {
             e.preventDefault();
             const fileInput = document.getElementById('acc-file');
+            let oldUser = getCurrentUser();
             
             let user = getCurrentUser();
+            const oldEmail = user.email;
+            const oldNom = user.nom;
+
             user.nom = document.getElementById('acc-nom').value;
             user.role = document.getElementById('acc-role').value;
             user.email = document.getElementById('acc-email').value;
             user.tel = document.getElementById('acc-tel').value;
             user.visibility = document.getElementById('acc-visibility').value;
-            
-            user.tarifs = {
-                college: document.getElementById('acc-tarif-collège').value || '20',
-                lycee: document.getElementById('acc-tarif-lycée').value || '25',
-                sup: document.getElementById('acc-tarif-sup').value || '35'
-            };
-
             user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
             user.desc = document.getElementById('acc-desc').value;
 
-            async function updateAccountInList(updatedUser) {
+            async function finalizeAccountUpdate(updatedUser) {
+                // Mettre à jour dans la liste des comptes
                 let accounts = await CloudDatabase.get('klass_accounts_list') || [];
-                const index = accounts.findIndex(a => a.email === updatedUser.email);
+                const index = accounts.findIndex(a => a.email === oldEmail || a.nom === oldNom);
                 if (index !== -1) accounts[index] = updatedUser;
                 else accounts.push(updatedUser);
                 await CloudDatabase.set('klass_accounts_list', accounts);
                 await CloudDatabase.set('klass_user_compte', updatedUser);
+
+                // Synchroniser en cascade les annonces liées à ce compte
+                let annonces = await CloudDatabase.get('klass_all_annonces') || [];
+                annonces = annonces.map(a => {
+                    if (a.email === oldEmail || a.auteur === oldNom) {
+                        return {
+                            ...a,
+                            auteur: updatedUser.nom,
+                            email: updatedUser.email,
+                            photo: updatedUser.photo || a.photo
+                        };
+                    }
+                    return a;
+                });
+                await CloudDatabase.set('klass_all_annonces', annonces);
+
                 updateSidebarAvatar();
                 renderAccountsDropdown();
                 renderAllAccountsManagement();
-                alert("Compte sauvegardé !");
+                alert("Compte et annonces associées mis à jour avec succès !");
                 renderActiveHomeView();
             }
 
@@ -1271,11 +1339,11 @@
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     user.photo = e.target.result;
-                    await updateAccountInList(user);
+                    await finalizeAccountUpdate(user);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                await updateAccountInList(user);
+                await finalizeAccountUpdate(user);
             }
         }
 
@@ -1285,13 +1353,19 @@
             const user = getCurrentUser();
             const editId = document.getElementById('edit-annonce-id').value;
 
+            const tarifsObj = {
+                college: document.getElementById('ann-tarif-college').value || '20',
+                lycee: document.getElementById('ann-tarif-lycee').value || '25',
+                sup: document.getElementById('ann-tarif-sup').value || '35'
+            };
+
             let nouvelleAnnonce = {
                 id: editId ? parseInt(editId) : Date.now(),
                 type: type,
                 auteur: user.nom,
                 email: user.email,
                 photo: user.photo || null,
-                tarifs: user.tarifs || { college: 20, lycee: 25, sup: 35 },
+                tarifs: tarifsObj,
                 desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
@@ -1340,17 +1414,14 @@
         function getRelationStatus(annonceId) {
             const user = getCurrentUser();
             let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
-            return relations[`${annonceId}_${user.nom}`] || 'none'; // 'none', 'pending', 'accepted', 'rejected'
+            return relations[`${annonceId}_${user.nom}`] || 'none';
         }
 
         function openRelationModal(annonceId, auteurName, tarifsObj) {
             document.getElementById('rel-annonce-id').value = annonceId;
             document.getElementById('rel-auteur-nom').value = auteurName;
-            
-            // Stocker temporairement les tarifs de l'annonce dans la modale
             window.activeModalTarifs = tarifsObj || { college: 20, lycee: 25, sup: 35 };
             updateRelationPricePreview();
-
             document.getElementById('modal-relation').style.display = 'flex';
         }
 
@@ -1380,7 +1451,6 @@
             relations[`${annonceId}_${user.nom}`] = 'pending';
             localStorage.setItem('klass_annonce_relations', JSON.stringify(relations));
 
-            // Stocker la demande en attente pour l'utilisateur 2 (prof)
             let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
             pendingRequests.push({
                 id: annonceId,
@@ -1423,7 +1493,6 @@
                 if (m.receiver === user.nom) contacts.add(m.sender);
             });
 
-            // Gérer aussi l'affichage des demandes en attente pour l'utilisateur 2
             let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
             const myRequests = pendingRequests.filter(r => r.profNom === user.nom);
 
@@ -1475,7 +1544,6 @@
             relations[`${annonceId}_${eleveNom}`] = isAccepted ? 'accepted' : 'rejected';
             localStorage.setItem('klass_annonce_relations', JSON.stringify(relations));
 
-            // Retirer de la liste des demandes en attente
             let pendingRequests = JSON.parse(localStorage.getItem('klass_pending_requests')) || [];
             pendingRequests = pendingRequests.filter(r => !(r.id === annonceId && r.eleveNom === eleveNom));
             localStorage.setItem('klass_pending_requests', JSON.stringify(pendingRequests));
@@ -1563,19 +1631,6 @@
             } else {
                 document.getElementById('profile-modal-email').innerText = targetEmail;
                 document.getElementById('profile-modal-tel').innerText = targetTel;
-            }
-
-            const tariffsBox = document.getElementById('profile-modal-tarifs-box');
-            const tariffsContent = document.getElementById('profile-modal-tarifs-content');
-            if (targetAcc.role === 'prof' && targetAcc.tarifs) {
-                tariffsBox.classList.remove('hidden');
-                tariffsContent.innerHTML = `
-                    <div>6ème-4ème : <strong>${targetAcc.tarifs.college || 20}€/h</strong></div>
-                    <div>3ème-Term : <strong>${targetAcc.tarifs.lycee || 25}€/h</strong></div>
-                    <div>Post-bac : <strong>${targetAcc.tarifs.sup || 35}€/h</strong></div>
-                `;
-            } else {
-                tariffsBox.classList.add('hidden');
             }
 
             const avatarContainer = document.getElementById('profile-modal-avatar-container');
@@ -1919,7 +1974,7 @@
             
             const badgeClass = getMatiereBadgeClass(a.type === 'prof' && a.matieres ? a.matieres[0] : a.matiere);
 
-            // Calcul de la moyenne des tarifs horaires saisis
+            // Calcul de la moyenne des tarifs horaires saisis sur cette annonce spécifique
             let avgPrice = 25;
             if (a.tarifs) {
                 const c = parseFloat(a.tarifs.college) || 20;
@@ -2041,7 +2096,8 @@
             const cityCoords = {
                 "grenoble": [45.1885, 5.7245], "paris": [48.8566, 2.3522], "lyon": [45.7640, 4.8357],
                 "marseille": [43.2965, 5.3698], "bordeaux": [44.8378, -0.5792], "toulouse": [43.6047, 1.4442],
-                "nantes": [47.2184, -1.5536], "lille": [50.6292, 3.0573], "strasbourg": [48.5734, 7.7521], "nice": [43.7102, 7.2620]
+                "nantes": [47.2184, -1.5536], "lille": [50.6292, 3.0573], "strasbourg": [48.5734, 7.7521], "nice": [43.7102, 7.2620],
+                "rennes": [48.1173, -1.6778], "montpellier": [43.6108, 3.8767], "reims": [49.2583, 4.0317]
             };
 
             annonces.forEach(a => {
@@ -2103,11 +2159,15 @@
 
             container.innerHTML = myAnnonces.length === 0 ? "<p style='color:var(--text-light);'>Aucune annonce publiée avec ce compte.</p>" : "";
             myAnnonces.forEach((a) => {
+                let avg = 25;
+                if(a.tarifs) {
+                    avg = Math.round((parseFloat(a.tarifs.college||20) + parseFloat(a.tarifs.lycee||25) + parseFloat(a.tarifs.sup||35))/3);
+                }
                 container.innerHTML += `
                     <div class="annonce-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
-                            <span class="price-tag">${a.type === 'prof' ? 'Environ 25 €/h' : 'Recherche'}</span>
+                            <span class="price-tag">${a.type === 'prof' ? 'Environ ' + avg + ' €/h' : 'Recherche'}</span>
                         </div>
                         <p>${a.desc}</p>
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
