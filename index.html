@@ -22,6 +22,8 @@
             --border: #E5E7EB;
             --radius: 16px;
             --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --tooltip-bg: #1F2937;
+            --tooltip-text: #FFFFFF;
         }
 
         body.dark-mode {
@@ -31,6 +33,8 @@
             --text-light: #94A3B8;
             --border: #334155;
             --primary-light: #312E81;
+            --tooltip-bg: #F8FAFC;
+            --tooltip-text: #0F172A;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.2s, color 0.2s; }
@@ -50,12 +54,13 @@
             background: var(--primary); color: white; border: none; width: 36px; height: 36px;
             border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        /* Infobulle "Déposer une annonce" */
+        /* Infobulle adaptative Dark Mode */
         .btn-add-top::after {
             content: attr(data-tooltip);
             position: absolute; left: 110%; top: 50%; transform: translateY(-50%);
-            background: var(--text-dark); color: white; padding: 4px 8px; border-radius: 6px;
-            font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100;
+            background: var(--tooltip-bg); color: var(--tooltip-text); padding: 5px 10px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .btn-add-top:hover::after { opacity: 1; }
 
@@ -99,6 +104,17 @@
         h1, h2 { color: var(--text-dark); font-weight: 700; margin-bottom: 1rem; }
         p.subtitle { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; }
 
+        /* Champs Date & Calendriers lisibles en Mode Sombre */
+        input[type="date"] {
+            color-scheme: light;
+        }
+        body.dark-mode input[type="date"] {
+            color-scheme: dark;
+            background-color: #1E293B;
+            color: #F8FAFC;
+            border-color: #475569;
+        }
+
         /* Filtres */
         .search-filters-bar {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;
@@ -116,7 +132,6 @@
             font-weight: 600; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn:hover { background-color: var(--primary-hover); }
-        .btn-teams { background-color: #464EB8; color: white; }
         .btn-secondary { background-color: #E5E7EB; color: var(--text-dark); }
         body.dark-mode .btn-secondary { background-color: #334155; color: #FFFFFF; }
         .btn-danger { background-color: #FEE2E2; color: var(--danger); }
@@ -222,7 +237,9 @@
             </li>
             <li id="menu-planning" onclick="switchTab('planning')"><a><i class="fa-solid fa-calendar-days"></i> <span>Planning</span></a></li>
             <li id="menu-annonces" onclick="switchTab('annonces')"><a><i class="fa-solid fa-bullhorn"></i> <span>Annonces</span></a></li>
-            <li id="menu-devoirs" onclick="switchTab('devoirs')"><a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span></a></li>
+            <li id="menu-devoirs" onclick="switchTab('devoirs')">
+                <a><i class="fa-solid fa-book-open"></i> <span>Devoirs</span><span id="devoirs-notif-dot" class="notification-dot hidden"></span></a>
+            </li>
             <li id="menu-messagerie" onclick="switchTab('messagerie')">
                 <a><i class="fa-solid fa-comments"></i> <span>Messages</span><span id="msg-notif-dot" class="notification-dot hidden"></span></a>
             </li>
@@ -386,6 +403,12 @@
                         <div>
                             <label>Titre / Cours</label>
                             <input type="text" id="event-title" required placeholder="Ex: Cours Maths">
+                        </div>
+                        <div>
+                            <label>Mentionner un contact</label>
+                            <select id="event-contact-select">
+                                <option value="">Aucun contact</option>
+                            </select>
                         </div>
                         <div>
                             <label>Date</label>
@@ -726,7 +749,6 @@
             updateSidebarAvatar();
             renderAccountsDropdown();
             renderAllAccountsManagement();
-            checkSuggestionNotification();
         });
 
         window.addEventListener('click', (e) => {
@@ -780,6 +802,7 @@
                 renderAccountsDropdown();
                 renderAllAccountsManagement();
                 renderGlobalFeed();
+                checkNotificationStatus();
                 activeChatUser = null;
                 document.getElementById('accounts-dropdown').classList.remove('show');
                 alert(`Connecté en tant que ${target.nom} !`);
@@ -950,34 +973,53 @@
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('menu-' + tabId).classList.add('active');
+
+            const currentUser = getCurrentUser().nom;
             
             if(tabId === 'home') renderGlobalFeed();
             if(tabId === 'suggestion') {
                 renderSuggestions();
                 document.getElementById('suggestion-notif-dot').classList.add('hidden');
-                localStorage.setItem('klass_has_new_suggestion', 'false');
+                let notifs = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
+                notifs[currentUser] = false;
+                localStorage.setItem('klass_notifs_suggestions', JSON.stringify(notifs));
             }
             if(tabId === 'compte') renderAllAccountsManagement();
             if(tabId === 'annonces') renderMyAnnonces();
-            if(tabId === 'planning') renderPlanning();
-            if(tabId === 'devoirs') renderDevoirs();
+            if(tabId === 'planning') {
+                populatePlanningContacts();
+                renderPlanning();
+            }
+            if(tabId === 'devoirs') {
+                renderDevoirs();
+                document.getElementById('devoirs-notif-dot').classList.add('hidden');
+                let notifs = JSON.parse(localStorage.getItem('klass_notifs_devoirs')) || {};
+                notifs[currentUser] = false;
+                localStorage.setItem('klass_notifs_devoirs', JSON.stringify(notifs));
+            }
             if(tabId === 'messagerie') {
                 renderMessagingSection();
                 document.getElementById('msg-notif-dot').classList.add('hidden');
-                localStorage.setItem('klass_has_unread_msg', 'false');
+                let notifs = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+                notifs[currentUser] = false;
+                localStorage.setItem('klass_notifs_messages', JSON.stringify(notifs));
             }
         }
 
         function checkNotificationStatus() {
-            if(localStorage.getItem('klass_has_unread_msg') === 'true') {
-                document.getElementById('msg-notif-dot').classList.remove('hidden');
-            }
-        }
+            const currentUser = getCurrentUser().nom;
+            
+            let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+            if(notifsMsg[currentUser]) document.getElementById('msg-notif-dot').classList.remove('hidden');
+            else document.getElementById('msg-notif-dot').classList.add('hidden');
 
-        function checkSuggestionNotification() {
-            if(localStorage.getItem('klass_has_new_suggestion') === 'true') {
-                document.getElementById('suggestion-notif-dot').classList.remove('hidden');
-            }
+            let notifsDev = JSON.parse(localStorage.getItem('klass_notifs_devoirs')) || {};
+            if(notifsDev[currentUser]) document.getElementById('devoirs-notif-dot').classList.remove('hidden');
+            else document.getElementById('devoirs-notif-dot').classList.add('hidden');
+
+            let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
+            if(notifsSugg[currentUser]) document.getElementById('suggestion-notif-dot').classList.remove('hidden');
+            else document.getElementById('suggestion-notif-dot').classList.add('hidden');
         }
 
         function updateLevelSliderDisplay() {
@@ -1043,7 +1085,7 @@
             } else {
                 document.getElementById('block-prof-ann').classList.add('hidden');
                 document.getElementById('block-eleve-ann').classList.remove('hidden');
-                if(tarifContainer) tarifContainer.classList.add('hidden'); // Élève : pas de choix du tarif
+                if(tarifContainer) tarifContainer.classList.add('hidden');
             }
         }
 
@@ -1118,7 +1160,7 @@
                 auteur: user.nom,
                 email: user.email,
                 photo: user.photo || null,
-                tarif: type === 'prof' ? (document.getElementById('ann-tarif').value || '25') : 'Gratuit / Demandeur',
+                tarif: type === 'prof' ? (document.getElementById('ann-tarif').value || '25') : 'Recherche',
                 desc: document.getElementById('ann-desc').value,
                 date: new Date().toLocaleDateString()
             };
@@ -1150,9 +1192,15 @@
                 annonces = annonces.map(a => a.id === parseInt(editId) ? nouvelleAnnonce : a);
             } else {
                 annonces.push(nouvelleAnnonce);
-                // Déclencher le point rouge suggestion
-                localStorage.setItem('klass_has_new_suggestion', 'true');
-                checkSuggestionNotification();
+                
+                // Activer point rouge suggestion pour les autres comptes/utilisateurs
+                let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
+                let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+                accounts.forEach(acc => {
+                    if (acc.nom !== user.nom) notifsSugg[acc.nom] = true;
+                });
+                localStorage.setItem('klass_notifs_suggestions', JSON.stringify(notifsSugg));
+                checkNotificationStatus();
             }
             localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
 
@@ -1180,7 +1228,6 @@
             document.getElementById('active-chat-box').classList.remove('hidden');
             document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurNom}`;
 
-            // Espace de discussion épuré avec mention discrète si aucun message
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
             const user = getCurrentUser();
             const hasHistory = messages.some(m => 
@@ -1189,7 +1236,6 @@
             );
 
             if (!hasHistory) {
-                // Créer un premier message invisible ou enregistrer directement la relation sans polluer le tchat si vide
                 messages.push({
                     id: Date.now(),
                     sender: user.nom,
@@ -1198,6 +1244,11 @@
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
                 localStorage.setItem('klass_private_messages', JSON.stringify(messages));
+
+                // Notification rouge pour le destinataire
+                let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+                notifsMsg[auteurNom] = true;
+                localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
             }
 
             document.getElementById('chat-input').value = "";
@@ -1260,6 +1311,12 @@
             });
 
             localStorage.setItem('klass_private_messages', JSON.stringify(messages));
+            
+            // Notification message
+            let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+            notifsMsg[activeChatUser] = true;
+            localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
+
             input.value = '';
             renderMessagingSection();
             renderChatBubbles(activeChatUser);
@@ -1336,7 +1393,7 @@
                     const item = document.createElement('div');
                     item.style.cssText = "background:var(--bg-body); padding:0.8rem; border-radius:8px; border:1px solid var(--border);";
                     item.innerHTML = `
-                        <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'} - ${a.tarif ? a.tarif + '€/h' : ''}</div>
+                        <div style="font-weight:700; font-size:0.9rem; color:var(--primary);">${a.type === 'prof' ? 'Professeur' : 'Élève'} - ${a.tarif ? (a.type === 'prof' ? a.tarif + '€/h' : 'Recherche') : ''}</div>
                         <p style="font-size:0.85rem; color:var(--text-dark); margin-top:2px;">${a.desc}</p>
                     `;
                     annoncesListContainer.appendChild(item);
@@ -1384,6 +1441,11 @@
             devoirsList.push(dev);
             localStorage.setItem('klass_devoirs', JSON.stringify(devoirsList));
             
+            // Notification devoir pour le destinataire
+            let notifsDev = JSON.parse(localStorage.getItem('klass_notifs_devoirs')) || {};
+            notifsDev[dest] = true;
+            localStorage.setItem('klass_notifs_devoirs', JSON.stringify(notifsDev));
+
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
             messages.push({
                 id: Date.now(),
@@ -1453,6 +1515,23 @@
             }
         }
 
+        function populatePlanningContacts() {
+            const select = document.getElementById('event-contact-select');
+            const user = getCurrentUser();
+            let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
+            
+            let contacts = new Set();
+            messages.forEach(m => {
+                if (m.sender === user.nom) contacts.add(m.receiver);
+                if (m.receiver === user.nom) contacts.add(m.sender);
+            });
+
+            select.innerHTML = '<option value="">Aucun contact</option>';
+            contacts.forEach(c => {
+                select.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+
         function changeWeek(direction) { currentWeekOffset += direction; renderPlanning(); }
 
         function generateTeamsLink(title) {
@@ -1461,7 +1540,9 @@
 
         function addEvent(e) {
             e.preventDefault();
+            const user = getCurrentUser();
             const title = document.getElementById('event-title').value;
+            const contactName = document.getElementById('event-contact-select').value;
             const date = document.getElementById('event-date').value;
             const start = parseInt(document.getElementById('event-time-start').value);
             const end = parseInt(document.getElementById('event-time-end').value);
@@ -1470,10 +1551,29 @@
             if(start >= end) return alert("L'heure de fin doit être supérieure à l'heure de début.");
 
             let events = JSON.parse(localStorage.getItem('klass_events')) || [];
-            events.push({ id: Date.now(), title, date, start, end, paiement });
+            events.push({ id: Date.now(), title, contactName, date, start, end, paiement, auteur: user.nom });
             localStorage.setItem('klass_events', JSON.stringify(events));
 
+            // Alerte sur la messagerie du contact mentionné
+            if (contactName) {
+                const teamsUrl = `https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(title)}`;
+                let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
+                messages.push({
+                    id: Date.now(),
+                    sender: user.nom,
+                    receiver: contactName,
+                    text: `📅 NOUVEAU COURS PLANIFIÉ : "${title}" le ${date} de ${start}h00 à ${end}h00. Lien Visio Teams : ${teamsUrl}`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                localStorage.setItem('klass_private_messages', JSON.stringify(messages));
+
+                let notifsMsg = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
+                notifsMsg[contactName] = true;
+                localStorage.setItem('klass_notifs_messages', JSON.stringify(notifsMsg));
+            }
+
             document.getElementById('event-title').value = '';
+            alert("Événement ajouté au planning !" + (contactName ? ` Une alerte a été envoyée à ${contactName}.` : ""));
             renderPlanning();
         }
 
@@ -1507,6 +1607,7 @@
             });
 
             const events = JSON.parse(localStorage.getItem('klass_events')) || [];
+            const user = getCurrentUser();
 
             for (let h = 8; h <= 20; h++) {
                 grid.appendChild(createEdtCell(`${h}h00`, 'edt-cell edt-time-cell'));
@@ -1515,11 +1616,11 @@
                     const cell = createEdtCell('', 'edt-cell');
                     const dateISO = dayDate.toISOString().split('T')[0];
 
-                    const dayEvents = events.filter(ev => ev.date === dateISO && ev.start <= h && ev.end > h);
+                    const dayEvents = events.filter(ev => (ev.auteur === user.nom || ev.contactName === user.nom) && ev.date === dateISO && ev.start <= h && ev.end > h);
                     dayEvents.forEach(ev => {
                         const evDiv = document.createElement('div');
                         evDiv.className = 'edt-event-item';
-                        evDiv.innerHTML = `${ev.title} <br><button onclick="generateTeamsLink('${ev.title}')" style="font-size:0.65rem; background:white; color:var(--primary); border:none; padding:2px 4px; border-radius:4px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
+                        evDiv.innerHTML = `${ev.title} ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}<br><button onclick="generateTeamsLink('${ev.title}')" style="font-size:0.65rem; background:white; color:var(--primary); border:none; padding:2px 4px; border-radius:4px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
                         cell.appendChild(evDiv);
                     });
 
@@ -1599,7 +1700,7 @@
                     <div class="annonce-top-bar">
                         <div>
                             <span class="badge-matiere ${badgeClass}">${mainMatiere}</span>
-                            <span class="price-tag">${a.tarif ? a.tarif + (a.type === 'prof' ? ' €/h' : '') : ''}</span>
+                            <span class="price-tag">${a.type === 'prof' ? (a.tarif ? a.tarif + ' €/h' : '') : 'Recherche'}</span>
                         </div>
                         ${avatarHtml}
                     </div>
@@ -1648,7 +1749,6 @@
             let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
             const user = getCurrentUser();
 
-            // Trouver les annonces publiées par l'utilisateur connecté (ses différents comptes ou le compte actif)
             const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
 
             if (myAnnonces.length === 0) {
@@ -1658,19 +1758,16 @@
 
             let suggestions = [];
             annonces.forEach(a => {
-                // Ne pas s'auto-suggérer ses propres annonces
                 if (a.email === user.email || a.auteur === user.nom) return;
 
                 myAnnonces.forEach(myAnn => {
                     if (myAnn.type === 'prof' && a.type === 'eleve') {
-                        // Prof cherche élève : vérifier correspondance matière et ville
                         const matchMatiere = myAnn.matieres && myAnn.matieres.includes(a.matiere);
                         const matchVille = !myAnn.villeCours || !a.villeCours || myAnn.villeCours.toLowerCase().includes(a.villeCours.toLowerCase()) || a.villeCours.toLowerCase().includes(myAnn.villeCours.toLowerCase());
                         if (matchMatiere || matchVille) {
                             if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
                         }
                     } else if (myAnn.type === 'eleve' && a.type === 'prof') {
-                        // Élève cherche prof : vérifier correspondance matière
                         const matchMatiere = a.matieres && a.matieres.includes(myAnn.matiere);
                         if (matchMatiere) {
                             if (!suggestions.some(s => s.id === a.id)) suggestions.push(a);
@@ -1703,7 +1800,7 @@
                     <div class="annonce-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>Annonce (${a.type === 'prof' ? 'Prof' : 'Élève'})</h3>
-                            <span class="price-tag">${a.tarif ? a.tarif + (a.type === 'prof' ? ' €/h' : '') : ''}</span>
+                            <span class="price-tag">${a.type === 'prof' ? (a.tarif ? a.tarif + ' €/h' : '') : 'Recherche'}</span>
                         </div>
                         <p>${a.desc}</p>
                         <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
