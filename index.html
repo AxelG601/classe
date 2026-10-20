@@ -112,11 +112,19 @@
         input[type="date"] { color-scheme: light; }
         body.dark-mode input[type="date"] { color-scheme: dark; background-color: #1E293B; color: #F8FAFC; border-color: #475569; }
 
-        /* Filtres */
+        /* Filtres & Mode Switcher */
         .search-filters-bar {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;
             background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);
         }
+        .view-switcher-bar {
+            display: flex; gap: 1rem; margin-bottom: 2rem;
+        }
+        .view-switcher-btn {
+            flex: 1; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-dark); font-weight: 700; cursor: pointer; text-align: center;
+        }
+        .view-switcher-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-dark); }
         input, select, textarea {
@@ -137,7 +145,7 @@
 
         /* Mini-carte interactive */
         #map-container {
-            width: 100%; height: 280px; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border); z-index: 10;
+            width: 100%; height: 400px; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border); z-index: 10;
         }
 
         /* Annonces */
@@ -181,7 +189,6 @@
         .edt-time-cell { font-weight: 600; color: var(--text-light); text-align: center; background: var(--bg-body); display: flex; align-items: center; justify-content: center; cursor: default; }
         .edt-event-item { background: var(--primary); color: white; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; margin-bottom: 2px; }
 
-        /* Horloge sélecteur d'heure graphique */
         .clock-picker-container { display: flex; gap: 1rem; align-items: center; background: var(--bg-body); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
         .clock-wheel { display: flex; flex-direction: column; align-items: center; flex: 1; }
 
@@ -263,16 +270,13 @@
 
         <!-- 1. ACCUEIL -->
         <div id="tab-home" class="tab-pane">
-            <h1>Fil d'actualité & Recherche Géolocalisée</h1>
-            <p class="subtitle">Visualisez directement les annonces des professeurs ou des élèves autour de chez vous.</p>
-
-            <!-- Mini-carte interactive Leaflet -->
-            <div id="map-container"></div>
+            <h1>Accueil & Annonces</h1>
+            <p class="subtitle">Parcourez le fil d'actualité ou explorez la carte interactive.</p>
 
             <div class="search-filters-bar">
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Matière</label>
-                    <select id="filter-matiere" onchange="renderGlobalFeed()">
+                    <select id="filter-matiere" onchange="renderActiveHomeView()">
                         <option value="">Toutes les matières</option>
                         <option value="Mathématiques">Mathématiques</option>
                         <option value="Physique-Chimie">Physique-Chimie</option>
@@ -284,7 +288,7 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Niveau</label>
-                    <select id="filter-niveau" onchange="renderGlobalFeed()">
+                    <select id="filter-niveau" onchange="renderActiveHomeView()">
                         <option value="">Tous les niveaux</option>
                         <option value="6ème">6ème</option>
                         <option value="5ème">5ème</option>
@@ -298,11 +302,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Ville / Quartier</label>
-                    <input type="text" id="filter-ville" placeholder="Ex: Lyon" oninput="renderGlobalFeed()">
+                    <input type="text" id="filter-ville" placeholder="Ex: Grenoble, Paris..." oninput="renderActiveHomeView()">
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Rayon</label>
-                    <select id="filter-rayon" onchange="renderGlobalFeed()">
+                    <select id="filter-rayon" onchange="renderActiveHomeView()">
                         <option value="toute">Toute la France</option>
                         <option value="1">1 km</option>
                         <option value="2">2 km</option>
@@ -314,7 +318,21 @@
                 </div>
             </div>
 
-            <div id="global-annonces-container" class="annonces-grid"></div>
+            <!-- Boutons de bascule (placés en dessous des filtres) -->
+            <div class="view-switcher-bar">
+                <button id="btn-view-feed" class="view-switcher-btn active" onclick="switchHomeView('feed')"><i class="fa-solid fa-list"></i> Fil d'actualité</button>
+                <button id="btn-view-map" class="view-switcher-btn" onclick="switchHomeView('map')"><i class="fa-solid fa-map-location-dot"></i> Recherche Géolocalisée</button>
+            </div>
+
+            <!-- Vue Fil d'actualité -->
+            <div id="home-view-feed">
+                <div id="global-annonces-container" class="annonces-grid"></div>
+            </div>
+
+            <!-- Vue Recherche Géolocalisée -->
+            <div id="home-view-map" class="hidden">
+                <div id="map-container"></div>
+            </div>
         </div>
 
         <!-- 2. SUGGESTION -->
@@ -436,13 +454,12 @@
                         <div>
                             <label>Règlement</label>
                             <select id="event-paiement">
-                                <option value="paye">Payé 💳</option>
                                 <option value="attente">En attente ⏳</option>
+                                <option value="paye">Payé 💳</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Sélecteur d'horloge graphique -->
                     <div class="form-group">
                         <label>Plage horaire (Horaires précis)</label>
                         <div class="clock-picker-container">
@@ -640,7 +657,7 @@
                     <div id="presentiel-extra-container">
                         <div class="form-group">
                             <label style="color:var(--primary);">Ville / Quartier d'enseignement *</label>
-                            <input type="text" id="new-ville-cours" placeholder="Ex: Lyon 6ème / Part-Dieu">
+                            <input type="text" id="new-ville-cours" placeholder="Ex: Grenoble / Cours Berriat">
                         </div>
 
                         <div class="form-group">
@@ -697,7 +714,7 @@
                     </div>
                     <div class="form-group">
                         <label style="color:var(--primary);">Ville / Quartier recherché *</label>
-                        <input type="text" id="ann-eleve-ville" placeholder="Ex: Paris 15ème">
+                        <input type="text" id="ann-eleve-ville" placeholder="Ex: Grenoble Hyper-centre">
                     </div>
                 </div>
 
@@ -770,18 +787,15 @@
                 </div>
             </div>
 
-            <!-- Section Tarifs multiples -->
             <div id="profile-modal-tarifs-box" class="form-group hidden" style="background:var(--primary-light); padding:1rem; border-radius:10px;">
                 <label style="color:var(--primary);">Tarifs horaires par niveau</label>
                 <div id="profile-modal-tarifs-content" style="font-size:0.9rem; font-weight:600; display:flex; gap:1.5rem; margin-top:4px;"></div>
             </div>
 
-            <!-- SECTION AVIS ET NOTES -->
             <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
                 <h3 style="font-size:1.1rem; margin-bottom:0.8rem;"><i class="fa-solid fa-star" style="color:var(--warning);"></i> Avis et Notes</h3>
                 <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
 
-                <!-- Formulaire optionnel d'ajout d'avis -->
                 <form id="form-add-review" onsubmit="submitReview(event)" style="background:var(--bg-body); padding:1rem; border-radius:10px; border:1px solid var(--border);">
                     <input type="hidden" id="review-target-email" value="">
                     <label style="font-size:0.85rem; font-weight:700;">Laisser une note et un commentaire (Optionnel)</label>
@@ -810,21 +824,38 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
+        // --- COUCHE D'ABSTRACTION CLOUD (Prêt pour Firebase / Supabase / MongoDB) ---
+        const CloudDatabase = {
+            async get(key) {
+                // Remplacer par un appel fetch ou client Supabase/Firebase si connecté
+                return JSON.parse(localStorage.getItem(key));
+            },
+            async set(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+                // Synchronisation Cloud potentielle ici : fetch('/api/sync', { method: 'POST', body: JSON.stringify({key, value}) })
+            },
+            async remove(key) {
+                localStorage.removeItem(key);
+            }
+        };
+
         const niveauxLabels = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale", "Post-bac"];
         let currentWeekOffset = 0;
         let activeChatUser = null;
         let interactiveMap = null;
         let mapMarkers = [];
+        let currentHomeView = 'feed'; // 'feed' ou 'map'
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             initTimeSelects();
-            initAccountsStorage();
+            await initAccountsStorage();
             loadUserData();
             checkNotificationStatus();
             updateSidebarAvatar();
             renderAccountsDropdown();
             renderAllAccountsManagement();
             initLeafletMap();
+            renderActiveHomeView();
         });
 
         window.addEventListener('click', (e) => {
@@ -850,17 +881,17 @@
             document.body.classList.add('dark-mode');
         }
 
-        function initAccountsStorage() {
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
-            let currentAcc = JSON.parse(localStorage.getItem('klass_user_compte'));
+        async function initAccountsStorage() {
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
+            let currentAcc = await CloudDatabase.get('klass_user_compte');
             
             if (currentAcc && !accounts.some(a => a.email === currentAcc.email)) {
                 accounts.push(currentAcc);
-                localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+                await CloudDatabase.set('klass_accounts_list', accounts);
             } else if (accounts.length === 0 && !currentAcc) {
                 const defaultUser = { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", role: "prof", photo: null, visibility: 'public' };
-                localStorage.setItem('klass_user_compte', JSON.stringify(defaultUser));
-                localStorage.setItem('klass_accounts_list', JSON.stringify([defaultUser]));
+                await CloudDatabase.set('klass_user_compte', defaultUser);
+                await CloudDatabase.set('klass_accounts_list', [defaultUser]);
             }
         }
 
@@ -868,16 +899,16 @@
             return JSON.parse(localStorage.getItem('klass_user_compte')) || { nom: "Utilisateur Visiteur", email: "visiteur@klass.fr", photo: null, visibility: 'public' };
         }
 
-        function switchAccount(email) {
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+        async function switchAccount(email) {
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             const target = accounts.find(a => a.email === email);
             if (target) {
-                localStorage.setItem('klass_user_compte', JSON.stringify(target));
+                await CloudDatabase.set('klass_user_compte', target);
                 loadUserData();
                 updateSidebarAvatar();
                 renderAccountsDropdown();
                 renderAllAccountsManagement();
-                renderGlobalFeed();
+                renderActiveHomeView();
                 checkNotificationStatus();
                 activeChatUser = null;
                 document.getElementById('accounts-dropdown').classList.remove('show');
@@ -885,9 +916,9 @@
             }
         }
 
-        function renderAccountsDropdown() {
+        async function renderAccountsDropdown() {
             const dropdown = document.getElementById('accounts-dropdown');
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             const user = getCurrentUser();
 
             if (accounts.length === 0) {
@@ -919,9 +950,9 @@
             });
         }
 
-        function renderAllAccountsManagement() {
+        async function renderAllAccountsManagement() {
             const container = document.getElementById('all-accounts-list-container');
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             const currentUser = getCurrentUser();
 
             container.innerHTML = '';
@@ -953,31 +984,31 @@
             document.getElementById('modal-delete-account').style.display = 'none';
         }
 
-        function confirmDeleteAccount() {
+        async function confirmDeleteAccount() {
             const targetEmail = document.getElementById('delete-account-email-target').value;
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             const currentUser = getCurrentUser();
 
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             annonces = annonces.filter(a => a.email !== targetEmail);
-            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
+            await CloudDatabase.set('klass_all_annonces', annonces);
 
             accounts = accounts.filter(a => a.email !== targetEmail);
-            localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+            await CloudDatabase.set('klass_accounts_list', accounts);
 
             closeDeleteAccountModal();
 
             if (currentUser.email === targetEmail) {
                 if (accounts.length > 0) {
-                    switchAccount(accounts[0].email);
+                    await switchAccount(accounts[0].email);
                 } else {
-                    localStorage.removeItem('klass_user_compte');
+                    await CloudDatabase.remove('klass_user_compte');
                     location.reload();
                 }
             } else {
                 renderAccountsDropdown();
                 renderAllAccountsManagement();
-                renderGlobalFeed();
+                renderActiveHomeView();
             }
             alert("Compte et annonces associés supprimés avec succès.");
         }
@@ -991,7 +1022,7 @@
             document.getElementById('modal-new-account').style.display = 'none';
         }
 
-        function submitNewAccount(e) {
+        async function submitNewAccount(e) {
             e.preventDefault();
             const newCompte = {
                 nom: document.getElementById('new-acc-nom').value,
@@ -1001,18 +1032,18 @@
                 visibility: 'public', tarifs: { college: "20", lycee: "25", sup: "35" }, niveauEtudes: "", desc: "", photo: null
             };
 
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             if (!accounts.some(a => a.email === newCompte.email)) {
                 accounts.push(newCompte);
-                localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
+                await CloudDatabase.set('klass_accounts_list', accounts);
             }
 
-            localStorage.setItem('klass_user_compte', JSON.stringify(newCompte));
+            await CloudDatabase.set('klass_user_compte', newCompte);
             loadUserData();
             updateSidebarAvatar();
             renderAccountsDropdown();
             renderAllAccountsManagement();
-            renderGlobalFeed();
+            renderActiveHomeView();
             activeChatUser = null;
 
             closeCreateAccountModal();
@@ -1059,8 +1090,7 @@
             const currentUser = getCurrentUser().nom;
             
             if(tabId === 'home') {
-                renderGlobalFeed();
-                setTimeout(() => { if (interactiveMap) interactiveMap.invalidateSize(); }, 200);
+                renderActiveHomeView();
             }
             if(tabId === 'suggestion') {
                 renderSuggestions();
@@ -1088,6 +1118,39 @@
                 let notifs = JSON.parse(localStorage.getItem('klass_notifs_messages')) || {};
                 notifs[currentUser] = false;
                 localStorage.setItem('klass_notifs_messages', JSON.stringify(notifs));
+            }
+        }
+
+        function switchHomeView(viewType) {
+            currentHomeView = viewType;
+            const btnFeed = document.getElementById('btn-view-feed');
+            const btnMap = document.getElementById('btn-view-map');
+            const viewFeed = document.getElementById('home-view-feed');
+            const viewMap = document.getElementById('home-view-map');
+
+            if (viewType === 'feed') {
+                btnFeed.classList.add('active');
+                btnMap.classList.remove('active');
+                viewFeed.classList.remove('hidden');
+                viewMap.classList.add('hidden');
+                renderGlobalFeed();
+            } else {
+                btnMap.classList.add('active');
+                btnFeed.classList.remove('active');
+                viewMap.classList.remove('hidden');
+                viewFeed.classList.add('hidden');
+                setTimeout(() => { 
+                    if (interactiveMap) interactiveMap.invalidateSize(); 
+                }, 200);
+                updateMapMarkers();
+            }
+        }
+
+        function renderActiveHomeView() {
+            if (currentHomeView === 'feed') {
+                renderGlobalFeed();
+            } else {
+                updateMapMarkers();
             }
         }
 
@@ -1184,7 +1247,7 @@
             else document.getElementById('prof-extra-fields').classList.remove('hidden');
         }
 
-        function saveCompte(e) {
+        async function saveCompte(e) {
             e.preventDefault();
             const fileInput = document.getElementById('acc-file');
             
@@ -1204,36 +1267,36 @@
             user.niveauEtudes = document.getElementById('acc-niveau-etudes').value;
             user.desc = document.getElementById('acc-desc').value;
 
-            function updateAccountInList(updatedUser) {
-                let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+            async function updateAccountInList(updatedUser) {
+                let accounts = await CloudDatabase.get('klass_accounts_list') || [];
                 const index = accounts.findIndex(a => a.email === updatedUser.email);
                 if (index !== -1) {
                     accounts[index] = updatedUser;
                 } else {
                     accounts.push(updatedUser);
                 }
-                localStorage.setItem('klass_accounts_list', JSON.stringify(accounts));
-                localStorage.setItem('klass_user_compte', JSON.stringify(updatedUser));
+                await CloudDatabase.set('klass_accounts_list', accounts);
+                await CloudDatabase.set('klass_user_compte', updatedUser);
                 updateSidebarAvatar();
                 renderAccountsDropdown();
                 renderAllAccountsManagement();
                 alert("Compte sauvegardé !");
-                renderGlobalFeed();
+                renderActiveHomeView();
             }
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     user.photo = e.target.result;
-                    updateAccountInList(user);
+                    await updateAccountInList(user);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                updateAccountInList(user);
+                await updateAccountInList(user);
             }
         }
 
-        function submitNewAnnonce(e) {
+        async function submitNewAnnonce(e) {
             e.preventDefault();
             const type = document.getElementById('new-type-annonce').value;
             const user = getCurrentUser();
@@ -1272,38 +1335,40 @@
                 nouvelleAnnonce.villeCours = document.getElementById('ann-eleve-ville').value;
             }
 
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             if (editId) {
                 annonces = annonces.map(a => a.id === parseInt(editId) ? nouvelleAnnonce : a);
             } else {
                 annonces.push(nouvelleAnnonce);
                 
                 let notifsSugg = JSON.parse(localStorage.getItem('klass_notifs_suggestions')) || {};
-                let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+                let accounts = await CloudDatabase.get('klass_accounts_list') || [];
                 accounts.forEach(acc => {
                     if (acc.nom !== user.nom) notifsSugg[acc.nom] = true;
                 });
                 localStorage.setItem('klass_notifs_suggestions', JSON.stringify(notifsSugg));
                 checkNotificationStatus();
             }
-            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
+            await CloudDatabase.set('klass_all_annonces', annonces);
 
             closeAnnonceModal();
             alert(editId ? "Annonce modifiée avec succès !" : "Votre annonce est en ligne !");
-            renderGlobalFeed();
-            updateMapMarkers();
+            renderActiveHomeView();
         }
 
-        function checkRelationExists(targetName) {
+        function checkRelationExistsForAnnonce(annonceId, auteurName) {
             const user = getCurrentUser();
-            let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
-            return messages.some(m => 
-                (m.sender === user.nom && m.receiver === targetName) ||
-                (m.sender === targetName && m.receiver === user.nom)
-            );
+            let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
+            // Clé unique par annonce et par utilisateur
+            return relations[`${annonceId}_${user.nom}`] === true || relations[`${annonceId}_${auteurName}`] === true;
         }
 
-        function initierMiseEnRelation(auteurNom) {
+        function initierMiseEnRelation(annonceId, auteurNom) {
+            const user = getCurrentUser();
+            let relations = JSON.parse(localStorage.getItem('klass_annonce_relations')) || {};
+            relations[`${annonceId}_${user.nom}`] = true;
+            localStorage.setItem('klass_annonce_relations', JSON.stringify(relations));
+
             switchTab('messagerie');
             activeChatUser = auteurNom;
             
@@ -1314,7 +1379,6 @@
             document.getElementById('active-chat-header').innerText = `Discussion avec ${auteurNom}`;
 
             let messages = JSON.parse(localStorage.getItem('klass_private_messages')) || [];
-            const user = getCurrentUser();
             const hasHistory = messages.some(m => 
                 (m.sender === user.nom && m.receiver === auteurNom) ||
                 (m.sender === auteurNom && m.receiver === user.nom)
@@ -1337,7 +1401,7 @@
 
             document.getElementById('chat-input').value = "";
             renderChatBubbles(auteurNom);
-            renderGlobalFeed();
+            renderActiveHomeView();
         }
 
         function renderMessagingSection() {
@@ -1431,9 +1495,9 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function openUserProfile(auteurName, auteurEmail) {
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
-            let accounts = JSON.parse(localStorage.getItem('klass_accounts_list')) || [];
+        async function openUserProfile(auteurName, auteurEmail) {
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
+            let accounts = await CloudDatabase.get('klass_accounts_list') || [];
             
             const targetAcc = accounts.find(a => a.nom === auteurName || a.email === auteurEmail) || {};
 
@@ -1458,7 +1522,6 @@
                 document.getElementById('profile-modal-tel').innerText = targetTel;
             }
 
-            // Affichage des tarifs multiples
             const tariffsBox = document.getElementById('profile-modal-tarifs-box');
             const tariffsContent = document.getElementById('profile-modal-tarifs-content');
             if (targetAcc.role === 'prof' && targetAcc.tarifs) {
@@ -1479,7 +1542,6 @@
                 avatarContainer.innerHTML = `<div class="profile-modal-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
             }
 
-            // Avis et notes
             document.getElementById('review-target-email').value = targetEmail;
             renderReviewsList(targetEmail);
 
@@ -1701,7 +1763,7 @@
             const startM = document.getElementById('event-start-min').value;
             const endH = parseInt(document.getElementById('event-end-hour').value);
             const endM = document.getElementById('event-end-min').value;
-            const paiement = document.getElementById('event-paiement').value;
+            const paiement = document.getElementById('event-paiement').value; // "en attente" par défaut
 
             const startTimeVal = startH + (parseInt(startM) / 60);
             const endTimeVal = endH + (parseInt(endM) / 60);
@@ -1742,6 +1804,18 @@
 
             document.getElementById('event-title').value = '';
             alert("Événement ajouté au planning !" + (contactName ? ` Une alerte a été envoyée à ${contactName}.` : ""));
+            renderPlanning();
+        }
+
+        function toggleEventPayment(eventId) {
+            let events = JSON.parse(localStorage.getItem('klass_events')) || [];
+            events = events.map(ev => {
+                if (ev.id === eventId) {
+                    ev.paiement = ev.paiement === 'paye' ? 'attente' : 'paye';
+                }
+                return ev;
+            });
+            localStorage.setItem('klass_events', JSON.stringify(events));
             renderPlanning();
         }
 
@@ -1787,9 +1861,14 @@
 
                     const dayEvents = events.filter(ev => (ev.auteur === user.nom || ev.contactName === user.nom) && ev.date === dateISO && ev.start <= h && ev.end > h);
                     dayEvents.forEach(ev => {
+                        const payStatus = ev.paiement === 'paye' ? 'Payé 💳' : 'En attente ⏳';
+                        const payClass = ev.paiement === 'paye' ? 'background: #10B981;' : 'background: #F59E0B;';
+
                         const evDiv = document.createElement('div');
                         evDiv.className = 'edt-event-item';
-                        evDiv.innerHTML = `${ev.title} (${ev.startFormatted}-${ev.endFormatted}) ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}<br><button onclick="event.stopPropagation(); generateTeamsLink('${ev.title}')" style="font-size:0.6rem; background:white; color:var(--primary); border:none; padding:1px 3px; border-radius:3px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
+                        evDiv.innerHTML = `${ev.title} (${ev.startFormatted}-${ev.endFormatted}) ${ev.contactName ? '<br><small>avec ' + ev.contactName + '</small>' : ''}
+                            <br><span onclick="event.stopPropagation(); toggleEventPayment(${ev.id})" style="display:inline-block; padding:1px 4px; border-radius:4px; font-size:0.6rem; color:white; ${payClass} cursor:pointer;" title="Cliquer pour changer le statut">${payStatus}</span>
+                            <br><button onclick="event.stopPropagation(); generateTeamsLink('${ev.title}')" style="font-size:0.6rem; background:white; color:var(--primary); border:none; padding:1px 3px; border-radius:3px; margin-top:2px; cursor:pointer;"><i class="fa-solid fa-video"></i> Teams</button>`;
                         cell.appendChild(evDiv);
                     });
 
@@ -1829,7 +1908,7 @@
         function renderAnnonceCardHTML(a) {
             const user = getCurrentUser();
             const isMyOwnAnnonce = (a.email === user.email || a.auteur === user.nom);
-            const isRelationEstablished = checkRelationExists(a.auteur);
+            const isRelationEstablished = checkRelationExistsForAnnonce(a.id, a.auteur);
 
             const avatarHtml = a.photo 
                 ? `<img src="${a.photo}" class="annonce-avatar" alt="Avatar" title="Voir le profil" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">` 
@@ -1860,13 +1939,13 @@
                 relationButtonHtml = `<button class="btn btn-secondary" style="margin-top:0.5rem; width:100%; opacity:0.6; cursor:not-allowed;" disabled>Votre annonce</button>`;
             } else if (isRelationEstablished) {
                 relationButtonHtml = `
-                    <button class="btn btn-success" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation('${a.auteur.replace(/'/g, "\\'")}')">
+                    <button class="btn btn-success" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation(${a.id}, '${a.auteur.replace(/'/g, "\\'")}')">
                         <i class="fa-solid fa-check"></i> Relation établie
                     </button>
                 `;
             } else {
                 relationButtonHtml = `
-                    <button class="btn" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation('${a.auteur.replace(/'/g, "\\'")}')">
+                    <button class="btn" style="margin-top:0.5rem; width:100%;" onclick="initierMiseEnRelation(${a.id}, '${a.auteur.replace(/'/g, "\\'")}')">
                         <i class="fa-solid fa-comments"></i> Mise en relation
                     </button>
                 `;
@@ -1897,9 +1976,9 @@
             `;
         }
 
-        function renderGlobalFeed() {
+        async function renderGlobalFeed() {
             const container = document.getElementById('global-annonces-container');
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
 
             const matFilter = document.getElementById('filter-matiere').value;
             const nivFilter = document.getElementById('filter-niveau').value;
@@ -1922,10 +2001,10 @@
             });
         }
 
-        // Initialisation de la mini-carte interactive Leaflet
+        // Initialisation de la mini-carte interactive Leaflet avec coordonnées précises corrigées
         function initLeafletMap() {
             if (interactiveMap) return;
-            interactiveMap = L.map('map-container').setView([46.603354, 1.888334], 6); // Centre de la France
+            interactiveMap = L.map('map-container').setView([46.603354, 1.888334], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
@@ -1934,46 +2013,59 @@
             updateMapMarkers();
         }
 
-        function updateMapMarkers() {
+        async function updateMapMarkers() {
             if (!interactiveMap) return;
             mapMarkers.forEach(m => interactiveMap.removeLayer(m));
             mapMarkers = [];
 
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
+
+            const matFilter = document.getElementById('filter-matiere').value;
+            const nivFilter = document.getElementById('filter-niveau').value;
+            const villeFilter = document.getElementById('filter-ville').value.toLowerCase().trim();
+
+            if (matFilter) annonces = annonces.filter(a => a.matiere === matFilter || (a.matieres && a.matieres.includes(matFilter)));
+            if (nivFilter) annonces = annonces.filter(a => a.niveau === nivFilter || (a.plage && a.plage.includes(nivFilter)));
+            if (villeFilter) {
+                annonces = annonces.filter(a => a.villeCours && a.villeCours.toLowerCase().includes(villeFilter));
+            }
             
-            // Coordonnées approximatives fictives ou par défaut pour illustrer la géolocalisation des villes courantes
+            // Coordonnées exactes corrigées pour les villes principales (Grenoble, Paris, Lyon, etc.)
             const cityCoords = {
+                "grenoble": [45.1885, 5.7245],
                 "paris": [48.8566, 2.3522],
                 "lyon": [45.7640, 4.8357],
                 "marseille": [43.2965, 5.3698],
                 "bordeaux": [44.8378, -0.5792],
                 "toulouse": [43.6047, 1.4442],
-                "nantes": [47.2184, -1.5536]
+                "nantes": [47.2184, -1.5536],
+                "lille": [50.6292, 3.0573],
+                "strasbourg": [48.5734, 7.7521],
+                "nice": [43.7102, 7.2620]
             };
 
             annonces.forEach(a => {
                 if (a.villeCours && a.villeCours !== 'Visio') {
                     const cityName = a.villeCours.toLowerCase().trim();
-                    let coords = [46.6, 2.8]; // Position par défaut
+                    let coords = [46.6, 2.8]; 
                     for (let key in cityCoords) {
                         if (cityName.includes(key)) {
                             coords = cityCoords[key];
                             break;
                         }
                     }
-                    // Ajouter une petite variation aléatoire pour éviter le superposition parfaite
-                    coords = [coords[0] + (Math.random() - 0.5) * 0.05, coords[1] + (Math.random() - 0.5) * 0.05];
+                    coords = [coords[0] + (Math.random() - 0.5) * 0.02, coords[1] + (Math.random() - 0.5) * 0.02];
 
                     const marker = L.marker(coords).addTo(interactiveMap);
-                    marker.bindPopup(`<b>${a.auteur}</b><br>${a.type === 'prof' ? 'Professeur' : 'Élève'}<br>${a.villeCours}`);
+                    marker.bindPopup(`<b>${a.auteur}</b><br>${a.type === 'prof' ? 'Professeur' : 'Élève'}<br><b>${a.villeCours}</b><br><button class="btn" style="padding:0.2rem 0.5rem; font-size:0.75rem; margin-top:4px;" onclick="openUserProfile('${a.auteur.replace(/'/g, "\\'")}', '${a.email}')">Voir le profil</button>`);
                     mapMarkers.push(marker);
                 }
             });
         }
 
-        function renderSuggestions() {
+        async function renderSuggestions() {
             const container = document.getElementById('suggestion-annonces-container');
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             const user = getCurrentUser();
 
             const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
@@ -2014,9 +2106,9 @@
             });
         }
 
-        function renderMyAnnonces() {
+        async function renderMyAnnonces() {
             const container = document.getElementById('my-annonces-container');
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             const user = getCurrentUser();
             
             const myAnnonces = annonces.filter(a => a.email === user.email || a.auteur === user.nom);
@@ -2039,15 +2131,15 @@
             });
         }
 
-        function deleteAnnonce(id) {
-            let annonces = JSON.parse(localStorage.getItem('klass_all_annonces')) || [];
+        async function deleteAnnonce(id) {
+            let annonces = await CloudDatabase.get('klass_all_annonces') || [];
             annonces = annonces.filter(a => a.id !== id);
-            localStorage.setItem('klass_all_annonces', JSON.stringify(annonces));
+            await CloudDatabase.set('klass_all_annonces', annonces);
             renderMyAnnonces();
             updateMapMarkers();
         }
 
-        renderGlobalFeed();
+        renderActiveHomeView();
     </script>
 </body>
 </html>
